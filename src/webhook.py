@@ -1,11 +1,10 @@
-import json
 from typing import List, Dict, Any
 from flask import current_app, jsonify
 from github import PullRequest
 from github.GithubException import GithubException
 from src.github_client import initialize_github_client
-from src.github_utils import create_commit_status
-from src.webhook_utils import (
+from src.utils.github import create_commit_status
+from src.utils.webhook import (
     extract_pr_info,
     extract_review_info
 )

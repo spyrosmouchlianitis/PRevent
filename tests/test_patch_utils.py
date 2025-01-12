@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from src.scan.patch_utils import remove_comments, process_diff, get_additions_with_line_numbers
+from src.utils.patch import remove_comments, process_diff, get_additions_with_line_numbers
 
 
 lang = "python"

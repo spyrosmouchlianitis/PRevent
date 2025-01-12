@@ -1,9 +1,8 @@
-import json
 from typing import Dict, Any
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import Flask, current_app, request, Response, jsonify
 from src.webhook import GitHubPRWebhook
-from src.webhook_utils import verify_webhook_signature, check_rate_limit
+from src.utils.webhook import verify_webhook_signature, check_rate_limit
 from src.secret_manager import get_secret
 from src.github_client import initialize_github_client
 from setup.tls.settings import CERT_PATH, KEY_PATH

@@ -1,13 +1,13 @@
 from flask import current_app
 from typing import List, Dict, Any, Optional
 from src.scan.languages import extensions
-from src.scan.patch_utils import process_diff
+from src.utils.patch import process_diff
 from src.scan.detectors.run_semgrep import detect_dynamic_execution_and_obfuscation
 from src.scan.detectors.obfuscation_extras.detect_encoded import detect_encoded
 from src.scan.detectors.obfuscation_extras.detect_executable import detect_executable
 from src.scan.detectors.obfuscation_extras.detect_space_hidden import detect_space_hiding
 from src.scan.detectors.obfuscation_extras.detect_homoglyph import detect_homoglyph
-from src.github_utils import get_changed_files, determine_scan_status, create_commit_status
+from src.utils.github import get_changed_files, determine_scan_status, create_commit_status
 from src.settings import APP_REPO, FP_STRICT
 
 
