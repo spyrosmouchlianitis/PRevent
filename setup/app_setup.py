@@ -1,12 +1,11 @@
 import os
 import sys
-import json
+import logging
 import secrets
 from getpass import getpass
 from contextlib import redirect_stderr
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from flask import current_app
 from src.secret_manager import get_secret, set_secret
 from src.settings import WEBHOOK_PORT
 from src.config import rewrite_setting
@@ -28,9 +27,9 @@ def is_secret_set(secret):
             get_secret(secret)
         return True
     except KeyError:
-        current_app.logger.error(f"Secret '{secret}' not found.")
+        logging.error(f"Secret '{secret}' not found.")
     except Exception as e:
-        current_app.logger.error(f"Error checking secret '{secret}': {e}")
+        logging.error(f"Error checking secret '{secret}': {e}")
     return False
 
 
@@ -48,7 +47,7 @@ def set_github_app(secret_manager):
     print("\n")
     print("Webhook URL:")
     print("    The URL where the app listens for PR events from GitHub.")
-    print(f"    Locally, the current port is {WEBHOOK_PORT} (configured in './settings.py').")
+    print(f"    Locally, the current port is {WEBHOOK_PORT} (set in './src/settings.py').")
     port = input(
         "\033[1m    To change the port, enter a new value. Otherwise, press Enter: \033[0m"
     ) or WEBHOOK_PORT
@@ -56,9 +55,8 @@ def set_github_app(secret_manager):
         rewrite_setting('WEBHOOK_PORT', port)
         print(f"\n    Successfully updated 'WEBHOOK_PORT' to {port} in 'settings.py'.")
     host = get_host()
-    print(f"    Estimated webhook URL: https://{host}:{port}/webhook")
-    print("    Dynamically verify you are using the correct URL")
-    print("\033[1m    Ensure the correct URL is set in GitHub.\033[0m")
+    print(f"\n    Local webhook URL: https://{host}:{port}/webhook")
+    print("\033[1m    Ensure the correct URL is set in GitHub, after verifying it's accessible.\033[0m")
     print("    Make sure to include the '/webhook' endpoint.")
     input("\nPress Enter when you've completed this step.")
 
@@ -70,7 +68,7 @@ def set_github_app(secret_manager):
         random_secret = secrets.token_hex(32)
         print(f"\nAuto-generated secret: {random_secret}")
         webhook_secret = getpass(
-            "\033[1mInsert your secret (hidden), "
+            "\033[1mInsert your secret both here (hidden) and in GitHub, "
             "or copy this secret into GitHub and press Enter: \033[0m"
         ) or random_secret
         if not webhook_secret:
@@ -111,8 +109,8 @@ def set_github_app(secret_manager):
             5. If you want to block on detection:
               \033[1mRepository Permissions: Administration -> Read and write\033[0m
     """)
-    print("\nNotice that to change the permissions later,")
-    print("you will have to both request them in the app and approve in your account.")
+    print("Notice that to change the permissions later,")
+    print("you will have to approve in your account settings after assigning them to the app.")
     input("\nPress Enter when you've completed this step.")
 
     # App events subscriptions
@@ -153,7 +151,7 @@ def set_github_app(secret_manager):
         print("(verify inputs for typos, white-spaces and correct format)")
         print("Click 'Generate a private key' in GitHub, save the file.")
         pk_path = input(
-            "\033[1mInsert the private key's file full path"
+            "\033[1mInsert the private key's file full path "
             "to save its content in your secret manager: \033[0m"
         ) or ""
         if not pk_path:
@@ -184,7 +182,7 @@ def set_github_app(secret_manager):
                 sys.exit(1)
         set_secret(_private_key, private_key)
         print(f"Successfully saved '{_private_key}' in your {secret_manager} secret manager.")
-        print("\n! DELETE THE PRIVATE KEY FILE !\n")
+        print("\n\033[1m! DELETE THE PRIVATE KEY FILE !\033[0m\n")
         print("In GitHub app setup, you can configure the IP allow list if relevant.")
 
     print("\n")
@@ -227,7 +225,7 @@ def set_github_app(secret_manager):
         reviewers = get_reviewers() or []
         set_secret(_security_reviewers, reviewers)
         print(
-            f"Successfully saved '{_security_reviewers}' as {reviewers}"
+            f"Successfully saved '{_security_reviewers}' as {reviewers} "
             f"in your {secret_manager} secret manager."
         )
 
@@ -319,10 +317,10 @@ def set_github_app(secret_manager):
     # Minimize FP
     print("\n")
     print("Few or no false positives are expected.")
-    print("\033[1mDo you want to prioritize avoiding false positives over maximum protection?\033[0m")
+    print("\033[1mDo you want to prioritize avoiding false-positives over maximum coverage?\033[0m")
     print(
-        "Enter 'y' to run only 'ERROR' severity detections (less frequent) "
-        "and exclude 'WARNING' severity."
+        "Enter 'y' to run only 'ERROR' severity detectors (less frequent) "
+        "and exclude 'WARNING' severity detectors."
     )
     print(
         "'ERROR' detections are typically related to dynamic execution, "

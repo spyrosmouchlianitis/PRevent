@@ -44,6 +44,8 @@ def main():
         print("Make sure you setup TLS on another level (container, endpoint, gateway, etc.)")
         rewrite_setting('APP_TLS', 'False')
 
+    print("\nSetup completed; the app is ready for use.")
+
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
+import toml
 import subprocess
 import importlib.metadata
 from getpass import getpass
@@ -114,32 +115,19 @@ def poetry_install_if_missing(package: str) -> None:
 
 
 def add_to_toml(package: str) -> None:
-    with open("pyproject.toml", "r+") as toml_file:
-        lines = toml_file.readlines()
-        toml_file.seek(0)
-        package_name, package_version = package.split("==")
-        in_dependencies = False
-        added = False
-        new_lines = []
+    package_name, package_version = package.split("@")
+    addition = {package_name: package_version}
 
-        for line in lines:
-            if line.strip() == "[tool.poetry.dependencies]":
-                in_dependencies = True
-                new_lines.append(line)
-            elif in_dependencies and line.strip().startswith("["):
-                if not added:
-                    new_lines.append(f'{package_name} = "{package_version}"\n')
-                    added = True
-                new_lines.append(line)
-                in_dependencies = False
-            else:
-                new_lines.append(line)
+    with open("pyproject.toml", "r") as toml_file:
+        data = toml.load(toml_file)
 
-        if in_dependencies and not added:
-            new_lines.append(f'{package_name} = "{package_version}"\n')
+    dependencies = data.get("tool", {}).get("poetry", {}).get("dependencies", {})
+    if package_name in dependencies:
+        return
 
-        toml_file.writelines(new_lines)
-        toml_file.truncate()
+    dependencies.update(addition)
+    with open("pyproject.toml", "w") as toml_file:
+        toml.dump(data, toml_file)
 
 
 # Install the secret manager's Python package, and add it to pyproject.toml
@@ -173,7 +161,7 @@ def choose_secrets_manager() -> str:
             raise ValueError
     except ValueError:
         print("Invalid choice. Please run the script again and select a valid option.")
-        choose_secrets_manager()
+        return choose_secrets_manager()
 
     sm_types = {
         1: "vault",

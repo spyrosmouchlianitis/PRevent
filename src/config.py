@@ -33,7 +33,7 @@ def get_app_root() -> str:
 
 
 def rewrite_setting(setting_name: str, new_value: str) -> None:
-    file_path = f'{get_app_root()}/settings.py'
+    file_path = f'{get_app_root()}/src/settings.py'
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")
 
@@ -54,6 +54,6 @@ def rewrite_setting(setting_name: str, new_value: str) -> None:
 
 
 def write_setting(setting_name: str, new_value: str) -> None:
-    file_path = f'{get_app_root()}/settings.py'
+    file_path = f'{get_app_root()}/src/settings.py'
     with open(file_path, 'a') as file:
         file.write(f"{setting_name} = {new_value}\n")

@@ -38,7 +38,7 @@ EXPOSE 8080
 ENV FLASK_ENV=production
 
 # Run setup.py from the ./setup directory
-RUN python /pr-event/setup/setup.py
+CMD ["python", "-m", "setup.setup"]
 
 # Change CMD to use Gunicorn through Poetry
 CMD ["poetry", "run", "gunicorn", "--bind", "0.0.0.0:8080", "src.app:app"]

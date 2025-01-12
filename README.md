@@ -10,7 +10,7 @@ This app addresses a common security gap in workflow-based malware scans, where 
 
 Currently, PR-event detects dynamic code execution and obfuscation, patterns found in nearly 100% of malware-in-code attacks reported to this day. It uses Apiiro's [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) for Semgrep, alongside additional Python-based detectors. Only rules and detectors with low false-positive rates are included. 
 
-To run only the rules with the best impact to FP ratio, set `FP_STRICT` to `True` in `settings.py`. This will run only detectors and rules with severity set to `ERROR`.
+To run only the rules with the best impact to FP ratio, set `FP_STRICT` to `True` in `src/settings.py`. This will run only detectors and rules with severity set to `ERROR`.
 
 ## Installation & Setup
 
@@ -28,7 +28,7 @@ PR-event can be deployed on any server to support GitHub repositories, including
    ```
 3. Go through the setup process:
    ```bash
-   python3 setup/setup_tool.py
+   python3 -m setup.setup
    ```
 4. Start the server:
    ```bash
