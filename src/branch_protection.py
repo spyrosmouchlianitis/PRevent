@@ -20,8 +20,8 @@ def is_branch_included(repo_name, branch_name) -> bool:
     Returns:
         bool: True if the branch is included, False if excluded or not explicitly included.
     """
-    include_branches = get_branches_lists('BRANCHES_INCLUDE')
-    exclude_branches = get_branches_lists('BRANCHES_EXCLUDE')
+    include_branches = get_secret('BRANCHES_INCLUDE')
+    exclude_branches = get_secret('BRANCHES_EXCLUDE')
 
     if repo_name in exclude_branches and branch_name in exclude_branches[repo_name]:
         return False
@@ -33,17 +33,6 @@ def is_branch_included(repo_name, branch_name) -> bool:
             return False
 
     return True
-
-
-def get_branches_lists(secret_name: str) -> dict:
-    try:
-        secret_data = get_secret(secret_name)
-        return json.loads(secret_data)
-    except (KeyError, ValueError, TypeError) as e:
-        current_app.logger.warning(
-            f"'{secret_name}' is either not set, or missing key 'data', or malformed: {e}"
-        )
-    return {}
 
 
 def apply_branch_protection_rule(
@@ -168,5 +157,5 @@ def update_protected_branches(
     protected_branches.setdefault(repo_name, [])
     if branch_name not in protected_branches[repo_name]:
         protected_branches[repo_name].append(branch_name)
-        set_secret('PROTECTED_BRANCHES', json.dumps(protected_branches))
+        set_secret('PROTECTED_BRANCHES', protected_branches)
     return protected_branches

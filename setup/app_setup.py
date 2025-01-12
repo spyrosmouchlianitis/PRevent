@@ -225,7 +225,7 @@ def set_github_app(secret_manager):
                     return []
 
         reviewers = get_reviewers() or []
-        set_secret(_security_reviewers, json.dumps(reviewers))
+        set_secret(_security_reviewers, reviewers)
         print(
             f"Successfully saved '{_security_reviewers}' as {reviewers}"
             f"in your {secret_manager} secret manager."
@@ -274,7 +274,7 @@ def set_github_app(secret_manager):
                 branches[repo.strip()] = [
                     b.strip() for b in branches[0].split(",") if b.strip()
                 ] if branches else []
-            return json.dumps(branches)
+            return branches
 
         print("You can list branches for both inclusion and exclusion.")
         include = input(
@@ -285,12 +285,12 @@ def set_github_app(secret_manager):
         ).strip().lower() or "y"
         include_branches = list_branches() if include == "y" else []
         exclude_branches = list_branches() if exclude == "y" else []
-        set_secret(_branches_include, json.dumps(include_branches))
+        set_secret(_branches_include, include_branches)
         print(
             f"Successfully saved '{_branches_include}' as {include_branches}"
             f"in your {secret_manager} secret manager."
         )
-        set_secret(_branches_exclude, json.dumps(exclude_branches))
+        set_secret(_branches_exclude, exclude_branches)
         print(
             f"Successfully saved '{_branches_exclude}' as {exclude_branches}"
             f"in your {secret_manager} secret manager.")

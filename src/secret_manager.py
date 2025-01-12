@@ -29,10 +29,11 @@ def get_secret(key: str) -> Any:
         raise NotImplementedError(
             f"get_secret not implemented for '{secret_manager}'"
         )
-    return secret_getters[secret_manager](key)
+    secret = secret_getters[secret_manager](key)
+    return json.loads(secret)
 
 
-def set_secret(key: str, value: str) -> None:
+def set_secret(key: str, value: Any) -> None:
     secret_setters = {
         "vault": vault_set_secret,
         "aws": aws_set_secret,
@@ -48,7 +49,7 @@ def set_secret(key: str, value: str) -> None:
         raise NotImplementedError(
             f"set_secret not implemented for '{secret_manager}'"
         )
-    secret_setters[secret_manager](key, value)
+    secret_setters[secret_manager](key, json.dumps(value))
 
 
 # HashiCorp Vault
@@ -95,18 +96,14 @@ def vault_get_secret(key: str) -> Any:
     try:
         client = init_vault_client()
         data = client.secrets.kv.v2.read_secret_version(path=key)
-        secret = data["data"]["data"]["data"]
-        try:
-            return json.loads(secret)
-        except (TypeError, json.JSONDecodeError):
-            return secret
+        return data["data"]["data"]["data"]
     except KeyError as e:
         log_and_raise_value_error(
             f"Unexpected key ({key}) or secret structure: {e}"
         )
 
 
-def vault_set_secret(key: str, value: str) -> None:
+def vault_set_secret(key: str, value: Any) -> None:
     client = init_vault_client()
     client.secrets.kv.v2.create_or_update_secret(
         path=key,
