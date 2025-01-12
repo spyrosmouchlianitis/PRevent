@@ -12,8 +12,12 @@ def handle_ruleset():
     if not os.path.exists(RULESET_DIR):
         subprocess.run(['git', 'clone', RULESET_REPO, RULESET_DIR], check=True)
     else:
-        # Sync latest updates
-        subprocess.run(['git', 'pull', 'origin', 'main'], cwd=RULESET_DIR, check=True)
+        # Fetch latest changes
+        subprocess.run(['git', 'fetch', 'origin'], cwd=RULESET_DIR, check=True)
+        # Quickly check if local is behind
+        result = subprocess.run(['git', 'rev-list', '--count', 'HEAD..origin/main'], cwd=RULESET_DIR, capture_output=True, text=True)
+        if int(result.stdout.strip()) > 0:
+            subprocess.run(['git', 'pull', 'origin', 'main'], cwd=RULESET_DIR, check=True)
 
 
 def get_file_extension(lang: str) -> str:
