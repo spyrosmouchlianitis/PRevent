@@ -16,8 +16,7 @@ def extract_pr_info(webhook_data: Dict[str, Any]) -> tuple:
         branch_name = webhook_data['pull_request']['base']['ref']
         pr_number = webhook_data['pull_request']['number']
         commit_sha = webhook_data['pull_request']['head']['sha']
-        action = webhook_data['action']
-        return org_name, repo_name, branch_name, pr_number, commit_sha, action
+        return org_name, repo_name, branch_name, pr_number, commit_sha
     except KeyError as e:
         current_app.logger.error(f"Missing expected key: {e}")
 

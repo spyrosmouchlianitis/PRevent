@@ -43,8 +43,7 @@ class GitHubPRWebhook:
                 repo_name,
                 branch_name,
                 pr_number,
-                commit_sha,
-                action
+                commit_sha
             ) = extract_pr_info(webhook_data)
 
             # Should this branch be scanned?
@@ -67,7 +66,7 @@ class GitHubPRWebhook:
             self._trigger_code_review(status, pr, repo_name, org_name)
 
             # Block merging upon detection (optional)
-            self._handle_block_mode(repo, branch, pr, action)
+            self._handle_block_mode(repo_name, branch_name)
 
             return jsonify({"message": "PR processed successfully"}), 200
 
@@ -97,11 +96,10 @@ class GitHubPRWebhook:
             if self.security_reviewers:
                 self._request_security_review(pr, repo_name, org_name)
 
-    def _handle_block_mode(self, repo, branch, pr, action):
+    def _handle_block_mode(self, repo_name, branch_name):
         """
         1. Apply branch protection upon the first monitored pull request of a protected branch.
         2. Track protected branches.
-        3. Reset check status when new commits are added to the pull request.
         """
 
         if self.security_reviewers and BLOCK_PR:
@@ -115,9 +113,6 @@ class GitHubPRWebhook:
             create_commit_status(repo, pr.head.sha, "success", "Pass by default (set by user)")
             """
 
-            repo_name = repo.full_name
-            branch_name = branch.name
-
             protection = get_existing_protection_conf(repo_name, branch_name)
             if not is_branch_status_check_protected(protection):
                 apply_branch_protection_rule(repo_name, branch_name, protection)
@@ -125,15 +120,6 @@ class GitHubPRWebhook:
                     self.protected_branches,
                     repo_name,
                     branch_name
-                )
-
-            # Rewrite the check status for updated pull requests
-            if action == 'synchronize':
-                create_commit_status(
-                    repo,
-                    pr.head.sha,
-                    "pending",
-                    "Status reset on new commits"
                 )
 
     def _request_security_review(
