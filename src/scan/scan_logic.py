@@ -90,7 +90,7 @@ def handle_scan(repo, pr, commit_sha):
     scan_results = run_scan(changed_files)
     current_app.logger.info(f"Scanned PR #{pr.number}")
     status, description, comment = determine_scan_status(scan_results, pr, repo)
-    target_url = comment.html_url if comment else APP_REPO
+    target_url = comment.html_url if hasattr(comment, 'html_url') else APP_REPO
     create_commit_status(repo, commit_sha, status, description, target_url)
 
 

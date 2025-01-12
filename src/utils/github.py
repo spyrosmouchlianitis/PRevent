@@ -51,16 +51,16 @@ def determine_scan_status(
     pr: PullRequest,
     repo: Repository
 ) -> tuple:
+    description = "Apiiro malware-in-code scan"
     if scan_results:
         status = "failure"
-        description = "Malware-in-code scan detected something. See new code comments."
         comment = comment_detections(scan_results, pr, repo)
         current_app.logger.info(f"PR #{pr.number} scan found: {json.dumps(scan_results)}")
         return status, description, comment
     else:
         status = "success"
-        description = "Malware-in-code scan passed."
-        return status, description
+        comment = "Scan completed successfully."
+        return status, description, comment
 
 
 def comment_detections(
@@ -84,7 +84,6 @@ def comment_detections(
                 f"**Detected:** {detection['detection']}",
                 f"**File:** {detection['filename']}",
                 f"**Line:** {str(detection['line_number'])}",
-                f"**Severity:** {detection['severity']}",
                 *[
                     f"**{key}:** {value}" for key, value in detection.items()
                     if key not in ['detection', 'severity', 'line_number', 'filename']
