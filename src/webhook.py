@@ -54,7 +54,6 @@ class GitHubPRWebhook:
 
             # Requires Repository permissions: Metadata -> Read
             repo = self.github_client.get_repo(repo_name)
-            branch = repo.get_branch(branch_name)
 
             # Requires Repository Permissions: Pull requests -> Read
             pr = repo.get_pull(pr_number)
@@ -63,7 +62,7 @@ class GitHubPRWebhook:
             status = handle_scan(repo, pr, commit_sha)
 
             # Trigger a code review (optional)
-            self._trigger_code_review(status, pr, repo_name, org_name)
+            self._request_code_review(status, pr, repo_name, org_name)
 
             # Block merging upon detection (optional)
             self._handle_block_mode(repo_name, branch_name)
@@ -80,7 +79,7 @@ class GitHubPRWebhook:
             current_app.logger.error(f"GitHub API error: {e}")
             return jsonify({"error": "GitHub API request failed"}), 502
 
-    def _trigger_code_review(
+    def _request_code_review(
         self,
         status: str,
         pr: PullRequest,
@@ -128,24 +127,26 @@ class GitHubPRWebhook:
         repo_name: str,
         org_name: str
     ):
-        try:
-            security_reviewers = resolve_reviewers(
-                self.security_reviewers,
-                org_name,
-                self.github_client
-            ),
+        security_reviewers = resolve_reviewers(
+            self.security_reviewers,
+            org_name,
+            self.github_client
+        )
 
-            # Requires Repository Permissions: Pull requests -> Read and write
-            pr.create_review_request(reviewers=security_reviewers)
-            current_app.logger.info(
-                f"Requested review for {repo_name}, PR #{pr.number}"
-            )
-
-        except GithubException as e:
-            current_app.logger.error(
-                f"GitHub API error on review request for {repo_name}, PR #{pr.number}: {e}"
-            )
-            raise
+        # Separate requests so if one request fails the rest still succeed.
+        for reviewer in security_reviewers:
+            single_reviewer_list = [reviewer]  # PyGithub doesn't accept strings despite hint
+            try:
+                # Requires Repository Permissions: Pull requests -> Read and write
+                pr.create_review_request(reviewers=single_reviewer_list)
+                current_app.logger.info(
+                    f"Requested review for {repo_name}, PR #{pr.number}"
+                )
+            except GithubException as e:
+                current_app.logger.error(
+                    f"GitHub API error on review request for {reviewer} "
+                    f"on {repo_name}, PR #{pr.number}: {e}"
+                )
 
     def on_pull_request_review(self, webhook_data: Dict[str, Any]) -> tuple:
         """

@@ -92,6 +92,7 @@ def handle_scan(repo, pr, commit_sha):
     status, description, comment = determine_scan_status(scan_results, pr, repo)
     target_url = comment.html_url if hasattr(comment, 'html_url') else APP_REPO
     create_commit_status(repo, commit_sha, status, description, target_url)
+    return status
 
 
 def get_line_from_code(code: str, line_number: int) -> str:
