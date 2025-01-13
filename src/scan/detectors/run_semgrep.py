@@ -25,7 +25,9 @@ def get_file_extension(lang: str) -> str:
 
 
 def create_temp_file(code_string: str, extension: str) -> str:
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix=f'.{extension}') as temp_file:
+    with tempfile.NamedTemporaryFile(
+        delete=False, mode='w', suffix=f'.{extension}'
+    ) as temp_file:
         temp_file.write(code_string)
         return temp_file.name
 

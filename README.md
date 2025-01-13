@@ -23,8 +23,15 @@ PR-event can be deployed on any server to support GitHub repositories, including
    cd pr-event
    ```
 2. Install dependencies (Semgrep installation takes a moment):
+
+   Using Poetry:
    ```bash
    poetry install
+   ```
+
+   Using pip:
+   ```bash
+   pip install -r requirements.txt
    ```
 3. Go through the setup process:
    ```bash
