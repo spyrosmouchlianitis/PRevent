@@ -9,7 +9,7 @@ def detect_space_hiding(patch: str, lang: str) -> List[Dict[str, Any]]:
             line_content = line.replace('  ', '')
             if len(line_content) > 50:
                 found.append({
-                    "detection": "Detected an unreasonable amount of spaces in line, probably for hiding",
+                    "detection": "An unreasonable amount of spaces in line, probably for hiding",
                     "match": line_content[:100],
                     "line_number": idx + 1
                 })

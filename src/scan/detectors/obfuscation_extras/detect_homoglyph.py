@@ -8,14 +8,15 @@ def detect_homoglyph(patch: str, lang: str) -> List[Dict[str, Any]]:
     for line_number, line in enumerate(lines, start=1):
         if any(c in line for c in impostors):
             found.append({
-                "detection": "Detected a hardcoded base64 encoded string.",
+                "detection": "A hardcoded base64 encoded string.",
                 "severity": "WARNING",
                 "line_number": line_number
             })
     return found
 
 
-# These characters may be interpreted as similar characters in some programming languages.
+# These characters may be interpreted as similar chars in some programming languages.
+# They can help avoid static strings detection.
 homoglyphs = {
     "a": "ａ𝐚𝑎𝒂𝒶𝓪𝔞𝕒𝖆𝖺𝗮𝘢𝙖𝚊",
     "b": "ｂ𝐛𝑏𝒃𝒷𝓫𝔟𝕓𝖇𝖻𝗯𝘣𝙗𝚋",

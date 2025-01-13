@@ -3,24 +3,27 @@ from unittest.mock import patch
 from src.utils.patch import remove_comments, process_diff, get_additions_with_line_numbers
 
 
-lang = "python"
+
+
 def test_process_diff_with_additions():
     diff = "some diff content"
     expected_additions = [(1, "added line")]
     
     with patch('src.scan.patch_utils.remove_comments', return_value=diff) as mock_remove_comments, \
-         patch('src.scan.patch_utils.get_additions_with_line_numbers', return_value=expected_additions) as mock_get_additions:
+        patch('src.scan.patch_utils.get_additions_with_line_numbers', return_value=expected_additions) as mock_get_additions:
+        lang = "python"
         result = process_diff(diff, lang)
         assert result == expected_additions
         mock_remove_comments.assert_called_once_with(diff, lang)
         mock_get_additions.assert_called_once_with(diff)
+
 
 def test_process_diff_with_no_additions():
     diff = "some diff content"
     expected_additions = []
     
     with patch('src.scan.patch_utils.remove_comments', return_value=diff) as mock_remove_comments, \
-         patch('src.scan.patch_utils.get_additions_with_line_numbers', return_value=expected_additions) as mock_get_additions:
+        patch('src.scan.patch_utils.get_additions_with_line_numbers', return_value=expected_additions) as mock_get_additions:
         result = process_diff(diff, lang)
         assert result == expected_additions
         mock_remove_comments.assert_called_once_with(diff, lang)

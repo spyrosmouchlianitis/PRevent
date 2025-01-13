@@ -31,7 +31,7 @@ def detect_b64(line: str, line_number: int) -> List[Dict[str, Any]]:
                 decoded = base64.b64decode(payload).decode('utf-8')
                 if decoded:
                     found.append({
-                        "detection": "Detected a hardcoded base64 encoded string.",
+                        "detection": "A hardcoded base64 encoded string.",
                         "severity": "WARNING",
                         "line_number": line_number,
                         "match": payload,
@@ -52,7 +52,7 @@ def detect_b32(line: str, line_number: int) -> List[Dict[str, Any]]:
                 decoded = base64.b32decode(payload).decode('utf-8')
                 if decoded:
                     found.append({
-                        "detection": "Detected a hardcoded base32 encoded string.",
+                        "detection": "A hardcoded base32 encoded string.",
                         "severity": "WARNING",
                         "line_number": line_number,
                         "match": payload,
@@ -75,7 +75,7 @@ def detect_hex(line: str, line_number: int) -> List[Dict[str, Any]]:
             decoded = bytes(payload, 'utf-8').decode('unicode_escape')
         if decoded:
             found.append({
-                "detection": "Detected a hardcoded hex encoded string.",
+                "detection": "A hardcoded hex encoded string.",
                 "severity": "WARNING",
                 "line_number": line_number,
                 "match": payload,
@@ -93,7 +93,7 @@ def detect_unicode(line: str, line_number: int) -> List[Dict[str, Any]]:
             decoded = bytes(payload, 'utf-8').decode('unicode_escape')
             if decoded:
                 found.append({
-                    "detection": "Detected a hardcoded unicode encoded string.",
+                    "detection": "A hardcoded unicode encoded string.",
                     "severity": "WARNING",
                     "line_number": line_number,
                     "match": payload,
@@ -117,7 +117,7 @@ def detect_fernet(patch: str) -> List[Dict[str, Any]]:
                 decoded = Fernet(key_bytes).decrypt(payload).decode('utf-8')
                 if decoded:
                     found.append({
-                        "detection": "Detected a hardcoded Fernet encoded string.",
+                        "detection": "A hardcoded Fernet encoded string.",
                         "severity": "WARNING",
                         "line_number": patch[:p_match.start()].count('\n') + 1,
                         "match": payload,
