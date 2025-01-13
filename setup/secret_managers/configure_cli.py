@@ -146,6 +146,12 @@ def manage_secret_manager_dependency(manager: str) -> None:
 
 
 def choose_secrets_manager() -> str:
+    print("During installation, you will configure your GitHub account with this app.")
+    print("You will need to provide app credentials for GitHub verification.")
+    print("You might also provide branch and account names for optional features.")
+    print("Use a secret manager to store credentials securely.")
+    print("This app can install a local manager for you (option 5).")
+    print("However, it's highly recommended to use a remote secret manager.\n")
     print("Select the secret sm you use:")
     print("1) HashiCorp Vault")
     print("2) AWS Secrets Manager")
