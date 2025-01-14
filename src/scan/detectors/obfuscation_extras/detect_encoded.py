@@ -23,7 +23,7 @@ def detect_encoded(patch: str, lang: str) -> List[Dict[str, Any]]:
 
 def detect_b64(line: str, line_number: int) -> List[Dict[str, Any]]:
     found = []
-    pattern = r'(?:(?:[\'\"\`])([A-Za-z0-9+/]{28,}={0,2})(?:[\'\"\`]))'
+    pattern = r'(?:(?:[\'\"\`])([A-Za-z0-9+/]{12,}={0,2})(?:[\'\"\`]))'
     for match in re.finditer(pattern, line):
         payload = match.group(1)
         if len(payload) % 4 == 0:
@@ -44,7 +44,7 @@ def detect_b64(line: str, line_number: int) -> List[Dict[str, Any]]:
 
 def detect_b32(line: str, line_number: int) -> List[Dict[str, Any]]:
     found = []
-    pattern = r'[^A-Za-z0-9]([A-Z2-7]{8,}(?:={4}|={6}|))[^A-Za-z0-9]'
+    pattern = r'(?:(?:[\'\"\`])([A-Z2-7]{8,}(?:={4}|={6}|))(?:[\'\"\`]))'
     for match in re.finditer(pattern, line):
         payload = match.group(1)
         if len(payload.split('=')[0]) % 8 == 0:
@@ -74,7 +74,6 @@ def detect_hex(line: str, line_number: int) -> List[Dict[str, Any]]:
             except:
                 # This never fails, and some hex payloads are not trivial
                 decoded = bytes(payload, 'utf-8').decode('unicode_escape')
-
             if (
                 (decoded.count('0x') >= 2 or decoded.count('\\x') >= 2) and len(decoded) >= 16
             ) or (
@@ -92,7 +91,7 @@ def detect_hex(line: str, line_number: int) -> List[Dict[str, Any]]:
 
 def detect_unicode(line: str, line_number: int) -> List[Dict[str, Any]]:
     found = []
-    pattern = r'(?:\\[uU][0-9A-Fa-f]{4})+'
+    pattern = r'((?:\\[uU][0-9A-Fa-f]{4})+)'
     for match in re.finditer(pattern, line):
         payload = match.group(1).replace('\\\\', '\\')
         if len(payload) >= 24:
@@ -124,7 +123,7 @@ def detect_fernet(patch: str) -> List[Dict[str, Any]]:
         for k_match in list(set(key_matches)):
             try:
                 key_bytes = k_match[2:-1].encode('ascii')
-                payload = p_match.group(1)
+                payload = p_match.group()
                 decoded = Fernet(key_bytes).decrypt(payload).decode('utf-8')
                 if decoded:
                     found.append({
