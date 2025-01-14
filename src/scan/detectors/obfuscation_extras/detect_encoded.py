@@ -29,7 +29,7 @@ def detect_b64(line: str, line_number: int) -> List[Dict[str, Any]]:
         if len(payload) % 4 == 0:
             try:
                 decoded = base64.b64decode(payload).decode('utf-8')
-                if decoded:
+                if decoded and len(decoded) > 3:
                     found.append({
                         "detection": "A hardcoded base64 encoded string.",
                         "severity": "WARNING",
@@ -50,7 +50,7 @@ def detect_b32(line: str, line_number: int) -> List[Dict[str, Any]]:
         if len(payload.split('=')[0]) % 8 == 0:
             try:
                 decoded = base64.b32decode(payload).decode('utf-8')
-                if decoded:
+                if decoded and '\\u' not in decoded and len(decoded) > 3:
                     found.append({
                         "detection": "A hardcoded base32 encoded string.",
                         "severity": "WARNING",
@@ -67,40 +67,51 @@ def detect_hex(line: str, line_number: int) -> List[Dict[str, Any]]:
     found = []
     pattern = r'((?:[0|\\][xX][0-9a-fA-F]{8,})+)'
     for match in re.finditer(pattern, line):
-        payload = match.group(1)
-        try:
-            decoded = bytes.fromhex(payload[2:]).decode('utf-8')
-        except:
-            # This never fails, and some hex payloads are not trivial
-            decoded = bytes(payload, 'utf-8').decode('unicode_escape')
-        if decoded:
-            found.append({
-                "detection": "A hardcoded hex encoded string.",
-                "severity": "WARNING",
-                "line_number": line_number,
-                "match": payload,
-                "decoded": decoded
-            })
-    return found
+        payload = match.group(1).replace('\\\\', '\\')
+        if len(payload) >= 16:
+            try:
+                decoded = bytes.fromhex(payload[2:]).decode('utf-8')
+            except:
+                # This never fails, and some hex payloads are not trivial
+                decoded = bytes(payload, 'utf-8').decode('unicode_escape')
 
-
-def detect_unicode(line: str, line_number: int) -> List[Dict[str, Any]]:
-    found = []
-    pattern = r'((?:\\[uU][0-9A-Fa-f]{4})+)'
-    for match in re.finditer(pattern, line):
-        payload = match.group(1)
-        try:
-            decoded = bytes(payload, 'utf-8').decode('unicode_escape')
-            if decoded:
+            if (
+                (decoded.count('0x') >= 2 or decoded.count('\\x') >= 2) and len(decoded) >= 16
+            ) or (
+                '0x' not in decoded and '\\x' not in decoded and len(decoded) > 3
+            ):
                 found.append({
-                    "detection": "A hardcoded unicode encoded string.",
+                    "detection": "A hardcoded hex encoded string.",
                     "severity": "WARNING",
                     "line_number": line_number,
                     "match": payload,
                     "decoded": decoded
                 })
-        except:  # Ignore FP
-            pass
+    return found
+
+
+def detect_unicode(line: str, line_number: int) -> List[Dict[str, Any]]:
+    found = []
+    pattern = r'(?:\\[uU][0-9A-Fa-f]{4})+'
+    for match in re.finditer(pattern, line):
+        payload = match.group(1).replace('\\\\', '\\')
+        if len(payload) >= 24:
+            try:
+                decoded = bytes(payload, 'utf-8').decode('unicode_escape')
+                if (
+                    decoded
+                    and (('\\u' not in decoded and len(decoded) > 3)
+                         or len(match) >= 24)
+                ):
+                    found.append({
+                        "detection": "A hardcoded unicode encoded string.",
+                        "severity": "WARNING",
+                        "line_number": line_number,
+                        "match": payload,
+                        "decoded": decoded
+                    })
+            except:  # Ignore FP
+                pass
     return found
 
 
