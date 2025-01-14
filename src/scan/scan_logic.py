@@ -85,13 +85,18 @@ def aggregate_detector_results(
 
 
 def handle_scan(repo, pr, commit_sha):
+    # "success" status if no files were changed
+    status = "success"
+
     # Get full files for proper code analysis. PR contains only diffs.
     changed_files = get_changed_files(repo, pr)
-    scan_results = run_scan(changed_files)
-    current_app.logger.info(f"Scanned PR #{pr.number}")
-    status, description, comment = determine_scan_status(scan_results, pr, repo)
-    target_url = comment.html_url if hasattr(comment, 'html_url') else APP_REPO
-    create_commit_status(repo, commit_sha, status, description, target_url)
+    if changed_files:
+        scan_results = run_scan(changed_files)
+        current_app.logger.info(f"Scanned PR #{pr.number}")
+        status, description, comment = determine_scan_status(scan_results, pr, repo)
+        target_url = comment.html_url if hasattr(comment, 'html_url') else APP_REPO
+        create_commit_status(repo, commit_sha, status, description, target_url)
+
     return status
 
 

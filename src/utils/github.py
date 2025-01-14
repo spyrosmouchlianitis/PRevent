@@ -16,7 +16,7 @@ def get_changed_files(
     changed_files = []
 
     for file in files:
-        if hasattr(file, 'patch') and '+0,0' not in file.patch:
+        if getattr(file, 'patch', None) and '+0,0' not in file.patch:
             try:
                 # Requires Repository Permissions: Contents -> Read
                 full_file_content = repo.get_contents(
