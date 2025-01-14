@@ -17,6 +17,8 @@ To run only the rules with the best impact to FP ratio, set `FP_STRICT` to `True
 PR-event can be deployed on any server to support GitHub repositories, including both public and private repositories (via GitHub Enterprise for private repositories). The setup process is easy to follow and supports multiple secret managers for storing GitHub credentials.
 
 ### Steps
+Build and deploy the app using the provided `Dockerfile`, or follow these steps:
+
 1. Clone this repository:
    ```bash
    git clone https://github.com/apiiro/pr-event.git
@@ -45,8 +47,6 @@ PR-event can be deployed on any server to support GitHub repositories, including
    ```bash
    python3 -m src.app 
    ```
-
-Alternatively, you can build and deploy the app using the provided `Dockerfile`.
 
 
 ## Contributing

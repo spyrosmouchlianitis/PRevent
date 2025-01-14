@@ -20,6 +20,7 @@ def webhook() -> tuple[Response, int]:
     app.logger.info(f"Received event: {event_type}")
 
     try:
+        # Ensure only GitHub's webhook deliveries are processed
         verify_webhook_signature(request)
         check_rate_limit(initialize_github_client())
 

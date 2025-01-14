@@ -140,7 +140,7 @@ class GitHubPRWebhook:
                 # Requires Repository Permissions: Pull requests -> Read and write
                 pr.create_review_request(reviewers=single_reviewer_list)
                 current_app.logger.info(
-                    f"Requested review for {repo_name}, PR #{pr.number}"
+                    f"Requested review from {reviewer} for {repo_name}, PR #{pr.number}"
                 )
             except GithubException as e:
                 current_app.logger.error(
