@@ -1,0 +1,10 @@
+rules:
+  - id: php-obfuscation-methods-masking
+    pattern-either:
+      - pattern-regex: (ord\(|chr\(|hexdec\(|bin2hex\(|hex2bin|pack\(|unpack\(|base64_encode\(|base64_decode\()(.*\1){2,}
+      - pattern-regex: (sprintf\(|implode\(|explode\(|str_pad\(|str_replace\(|preg_replace\(|strtr\(|substr\()(.*\1){2,}
+      - pattern-regex: (strval\(|random_bytes\(|mt_rand\(|openssl_encrypt\(|openssl_decrypt\()(.*\1){2,}
+    message: Obfuscation by concatenation of string manipulating methods.
+    severity: WARNING
+    languages:
+      - php

@@ -1,0 +1,10 @@
+rules:
+  - id: rust-obfuscation-methods-masking
+    pattern-either:
+      - pattern-regex: (to_string|encode|decode|base64)(.*\1){2,}
+      - pattern-regex: (format\(|join\(|replace|split|trim\(|concat\()(.*\1){2,}
+      - pattern-regex: (rand::random\(|rand::Rng::gen_range\()(\s*.*\1){2,}
+    message: Obfuscation by concatenation of string manipulating methods.
+    severity: WARNING
+    languages:
+      - rust

@@ -1,0 +1,7 @@
+rules:
+  - id: lua-obfuscation-reconstruction
+    pattern-regex: (\.\.|\.char\(|concat|\.format|gsub|ipairs|\.rep\(|toString)(.*\1){2,}
+    message: Obfuscation by concatenation of string manipulating methods.
+    severity: WARNING
+    languages:
+      - lua

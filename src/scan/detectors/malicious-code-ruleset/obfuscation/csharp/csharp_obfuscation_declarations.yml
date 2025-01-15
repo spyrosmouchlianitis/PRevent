@@ -1,0 +1,27 @@
+rules:
+  - id: csharp-obfuscation-declarations
+    patterns:
+      - pattern-either:
+          - patterns:
+              - pattern: $VAR = ...
+              - pattern-not: $X.$Y = ...
+          - pattern: class $VAR { ... }
+          - pattern: public $TYPE $VAR;
+          - pattern: public $TYPE $VAR(...)
+          - pattern: public $TYPE $VAR { ... }
+          - pattern: private $TYPE $VAR;
+          - pattern: private $TYPE $VAR(...)
+          - pattern: private $TYPE $VAR { ... }
+          - pattern: static $TYPE $VAR;
+          - pattern: static $TYPE $VAR(...)
+          - pattern: static $TYPE $VAR { ... }
+          - pattern: foreach (var $VAR in ...)
+          - pattern: foreach ($TYPE $VAR in ...)
+          - pattern: void $VAR(...) { ... }
+      - metavariable-pattern:
+          metavariable: $VAR
+          pattern-regex: ^\d|^.$|(.)\1{2,}|.{64,}|^_0x|([^a-zA-Z0-9_$@])
+    message: Obfuscated declarations names.
+    severity: ERROR
+    languages:
+      - csharp

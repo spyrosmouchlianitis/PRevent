@@ -1,0 +1,9 @@
+rules:
+  - id: scala-obfuscation-conditions
+    pattern-either:
+      - pattern-regex: (if|while|for)\s+\((true|false|null)\)\s
+      - pattern-regex: case\s+(true|false|null)\s+
+    message: Obfuscation by spurious conditions.
+    severity: WARNING
+    languages: 
+      - scala

@@ -1,0 +1,12 @@
+rules:
+  - id: lua-obfuscation-override
+    pattern-either:
+      - patterns:
+          - pattern: $IMPOSTOR = ...
+          - metavariable-pattern:
+              metavariable: $IMPOSTOR
+              pattern-regex: ^(assert|error|getmetatable|io\.|ipairs|load|math\.|next|os\.|pairs|pcall|print|require|select|setmetatable|string|table|tonumber|tostring|type|package)
+    message: Obfuscation by overriding builtin constructs.
+    severity: ERROR
+    languages: 
+      - lua

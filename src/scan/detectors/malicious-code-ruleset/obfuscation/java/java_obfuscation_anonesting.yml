@@ -1,0 +1,10 @@
+rules:
+  - id: java-obfuscation-anonymous-nesting
+    pattern: |
+      $X -> 
+        $Y -> 
+          $Z -> ...;
+    message: Common obfuscation by anonymous nesting.
+    severity: WARNING
+    languages: 
+      - java

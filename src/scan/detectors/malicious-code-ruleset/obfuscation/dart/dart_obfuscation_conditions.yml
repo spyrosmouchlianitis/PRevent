@@ -1,0 +1,8 @@
+
+rules:
+  - id: dart-obfuscation-conditions
+    pattern-regex: (if|while|for|switch)\s?\((true|false|null)\)\s
+    message: Obfuscation by spurious conditions.
+    severity: WARNING
+    languages: 
+      - dart

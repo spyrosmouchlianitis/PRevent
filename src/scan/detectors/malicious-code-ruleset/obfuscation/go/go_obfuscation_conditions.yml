@@ -1,0 +1,11 @@
+rules:
+  - id: go-obfuscation-conditions
+    pattern-either:
+      - pattern: if true { ... }
+      - pattern: if false { ... }
+      - pattern: for true { ... }
+      - pattern: for false { ... }
+    message:  Detect obfuscation by spurious conditions.
+    severity: WARNING
+    languages:
+      - go

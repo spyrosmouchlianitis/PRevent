@@ -1,0 +1,7 @@
+rules:
+  - id: java-obfuscation-conditions
+    pattern-regex: (if|while|for|switch)\s*\((true|false|null)\)
+    message: Obfuscation by spurious conditions.
+    severity: WARNING
+    languages: 
+      - java

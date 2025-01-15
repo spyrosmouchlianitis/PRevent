@@ -1,0 +1,7 @@
+rules:
+  - id: ruby-obfuscation-conditions
+    pattern-regex: (if|elsif|else|while|until|case)\s+(true|false|nil)\s
+    message: Obfuscation by spurious conditions.
+    severity: WARNING
+    languages: 
+      - ruby

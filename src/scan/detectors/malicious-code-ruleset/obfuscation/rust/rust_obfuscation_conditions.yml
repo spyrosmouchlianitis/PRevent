@@ -1,0 +1,7 @@
+rules:
+  - id: rust-obfuscation-conditions
+    pattern-regex: (if|while|loop|match)\s+(true|false)\s
+    message: Obfuscation by spurious conditions.
+    severity: WARNING
+    languages: 
+      - rust

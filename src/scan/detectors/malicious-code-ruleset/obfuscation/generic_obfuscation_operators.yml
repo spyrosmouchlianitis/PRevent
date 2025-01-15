@@ -1,0 +1,20 @@
+rules:
+  - id: generic-obfuscation-operators
+    patterns:
+      - pattern-regex: ([~<>\^&\*\+].*[^~<>\^&\*\+]){9,}
+    message: Obfuscation containing operators that are uncommon in sequences of 10 or more consecutive occurrences.
+    severity: WARNING
+    languages: 
+      - clojure
+      - csharp
+      - dart
+      - go
+      - java
+      - javascript
+      - typescript
+      - lua
+      - php
+      - python
+      - ruby
+      - rust
+      - scala

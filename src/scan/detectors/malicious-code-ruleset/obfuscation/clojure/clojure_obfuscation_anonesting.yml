@@ -1,0 +1,11 @@
+rules:
+  - id: clojure-obfuscation-generic
+    pattern: |
+        (fn [$X]
+          (fn [$Y]
+            (fn [$Z]
+                ...)))
+    message: Common obfuscation by anonymous nesting.
+    severity: WARNING
+    languages: 
+      - clojure

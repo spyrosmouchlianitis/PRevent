@@ -1,0 +1,27 @@
+rules:
+  - id: php-obfuscation-declarations
+    pattern-either:
+      - patterns:
+        - pattern-regex: ^[^(list)\[].*
+        - pattern-either:
+            - patterns:
+                - pattern: $VAR = (...)
+                - pattern-not: $X[...] = (...)
+                - pattern-not: $X::$Y = (...)
+            - pattern: function $VAR(...) { ... }
+            - pattern: $OBJ->$VAR = (...)
+            - pattern: class $VAR { ... }
+            - pattern: const $VAR = (...);
+            - pattern: $X::$VAR = (...)
+        - metavariable-pattern:
+            metavariable: $VAR
+            pattern-regex: ^\$\d|^\$.$|(.)\1{2,}|.{64,}|_0x|([^a-zA-Z0-9$_\->])
+      - patterns:
+        - pattern: define($DEF, ...)
+        - metavariable-pattern:
+            metavariable: $DEF
+            pattern-regex: (['"](\d|.|.*(.)\3{2,}.*|.{64,}|_0x.*|([^a-zA-Z0-9$_\->]))['"])
+    message: Obfuscated declarations names.
+    severity: ERROR
+    languages:
+      - php

@@ -1,0 +1,11 @@
+rules:
+  - id: java-obfuscation-methods-masking
+    pattern-either:
+      - pattern-regex: ((Base64|DatatypeConverter|Random|String|StringBuilder|StringBuffer)\.)(.*\2){2,}
+      - pattern-regex: (\.(append|charAt|concat|delete|format|indexOf|insert))(.*\2){2,}
+      - pattern-regex: (\.(join|lastIndexOf|replace|replaceAll|setCharAt|split|startsWith))(.*\2){2,}
+      - pattern-regex: (\.(substring|toString|valueOf))(.*\2){2,}
+    message: Obfuscation by concatenation of string manipulating methods.
+    severity: WARNING
+    languages:
+      - java

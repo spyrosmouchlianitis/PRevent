@@ -1,0 +1,10 @@
+rules:
+  - id: dart-obfuscation-methods-masking
+    pattern-either:
+      - pattern-regex: (substring|replaceAll|split|join|codeUnitAt|toRadixString|padLeft|padRight|trim)(.*\1){2,}
+      - pattern-regex: (base64Encode|base64Decode|Utf8Encoder\.convert|Utf8Decoder\.convert|StringBuffer\.write|Random)(.*\1){2,}
+      - pattern-regex: (startsWith|endsWith|codeUnitAt|StringBuffer\.toString)(.*\1){2,}
+    message: Obfuscation by concatenation of string manipulating methods.
+    severity: WARNING
+    languages:
+      - dart
