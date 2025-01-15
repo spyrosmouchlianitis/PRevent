@@ -1,7 +1,10 @@
 from flask import current_app
-from typing import List, Dict, Any, Optional
+from github import Repository, PullRequest
+from typing import List, Dict, Tuple, Optional
+from src.scan.detectors.utils import DetectionType
 from src.scan.languages import extensions
 from src.utils.patch import process_diff
+from src.scan.detectors.utils import DetectionType
 from src.scan.detectors.run_semgrep import detect_dynamic_execution_and_obfuscation
 from src.scan.detectors.obfuscation_extras.detect_encoded import detect_encoded
 from src.scan.detectors.obfuscation_extras.detect_executable import detect_executable
@@ -11,25 +14,21 @@ from src.utils.github import get_changed_files, determine_scan_status, create_co
 from src.settings import APP_REPO, FP_STRICT
 
 
-def run_scan(changed_files: List[Dict[str, str]]) -> List[Dict]:
-    results = []
-    detectors = [
-        detect_dynamic_execution_and_obfuscation,
-        detect_encoded,
-        detect_homoglyph,
-        detect_space_hiding
-    ]
-
+def run_scan(changed_files: List[Dict[str, str]]) -> DetectionType:
+    """
+    Scan changed files and return only the first detection to avoid spamming the PR.
+    Infected code indicates active compromise and should be addressed immediately,
+    not get listed and orchestrated like vulnerabilities.
+    """
     for file in changed_files:
-        additions_list, detections = process_file(file, detectors)
+        detection, additions_list = get_first_detection(file)
         if additions_list is None:
             continue
-        results.extend(filter_detections(file, detections, additions_list))
+        if detection := handle_detection(file, detection, additions_list):
+            return detection
 
-    return results
 
-
-def process_file(file: Dict[str, str], detectors: List) -> Optional[tuple]:
+def get_first_detection(file: Dict[str, str]) -> Optional[Tuple[DetectionType, List[Tuple[int, str]]]]:
     filename = file['filename']
     ext = filename.split('.')[-1] if '.' in filename else None
     lang = extensions.get(ext, '')
@@ -39,52 +38,40 @@ def process_file(file: Dict[str, str], detectors: List) -> Optional[tuple]:
     additions_list = process_diff(file['diff'], lang)
     if not additions_list:
         return None, None
-    
-    detections = aggregate_detector_results(file['full_content'], lang, detectors)
-    executables = detect_executable(filename, file['full_content'])
-    if executables:
-        detections.append(executables)
 
-    return additions_list, detections
+    extra_obfuscation_detectors = [
+        detect_space_hiding,
+        detect_encoded,
+        detect_homoglyph
+    ]
+
+    if (result := detect_dynamic_execution_and_obfuscation(file['full_content'], lang)):
+        return result, additions_list
+    elif (result := detect_executable(filename, file['full_content'])):
+        return result, additions_list
+    else:
+        for detector in extra_obfuscation_detectors:
+            if (result := detector(file['full_content'])):
+                return result, additions_list
 
 
-def filter_detections(
+def handle_detection(
     file: Dict[str, str],
-    detections: List[Dict],
+    detection: DetectionType,
     additions_list: List[tuple]
-) -> List[Dict]:
-    results = []
-    for result in detections:
-        if FP_STRICT and result['severity'] != 'ERROR':
-            continue
-        match = get_line_from_code(file['full_content'], result['line_number'])
-        if any(new_code[1] in match for new_code in additions_list):
-            results.append({"filename": file['filename'], **result})
-    return results
+) -> Dict:
+    if FP_STRICT and detection['severity'] != 'ERROR':
+        return {}
+    match = get_line_from_code(file['full_content'], detection['line_number'])
+    if any(new_code[1] in match for new_code in additions_list):
+        return {"filename": file['filename'], **detection}
 
 
-# TODO: Normalize output and remove this method
-def aggregate_detector_results(
-    file_content: str,
-    lang: str,
-    detectors: List
-) -> List[Dict[str, Any]]:
-    results = []
-    for detector in detectors:
-        output = detector(file_content, lang)
-        if output:
-            if isinstance(output, tuple):
-                for sublist in output:
-                    results.extend(sublist)
-            elif isinstance(output, list):
-                results.extend(output)
-            elif isinstance(output, dict):
-                results.append(output)
-
-    return results
-
-
-def handle_scan(repo, pr, commit_sha):
+def handle_scan(
+    repo: Repository,
+    pr: PullRequest,
+    commit_sha: str
+) -> str:
     # "success" status if no files were changed
     status = "success"
 

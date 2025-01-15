@@ -1,28 +1,24 @@
 import re
 import base64
-from typing import List, Dict, Any
 from cryptography.fernet import Fernet
+from src.scan.detectors.utils import DetectionType
 
 
-def detect_encoded(patch: str, lang: str) -> List[Dict[str, Any]]:
-    found = []
-    lines = patch.splitlines()
-    for line_number, line in enumerate(lines, start=1):
-        encoded = [
-            detection for results in [
-                detect_b64(line, line_number),
-                detect_b32(line, line_number),
-                detect_hex(line, line_number),
-                detect_unicode(line, line_number)
-            ] for detection in results
-        ]
-        found.extend(encoded)
-        found.extend(detect_fernet(patch))
-    return found
+def detect_encoded(patch: str) -> DetectionType:
+    for line_number, line in enumerate(patch.splitlines(), start=1):
+        for detector in [
+            detect_fernet,
+            detect_b64,
+            detect_b32,
+            detect_unicode,
+            detect_hex
+        ]:
+            if (result := detector(line, line_number)):
+                return result
+    return {}
 
 
-def detect_b64(line: str, line_number: int) -> List[Dict[str, Any]]:
-    found = []
+def detect_b64(line: str, line_number: int) -> DetectionType:
     pattern = r'(?:(?:[\'\"\`])([A-Za-z0-9+/]{12,}={0,2})(?:[\'\"\`]))'
     for match in re.finditer(pattern, line):
         payload = match.group(1)
@@ -30,20 +26,18 @@ def detect_b64(line: str, line_number: int) -> List[Dict[str, Any]]:
             try:
                 decoded = base64.b64decode(payload).decode('utf-8')
                 if decoded and len(decoded) > 3:
-                    found.append({
-                        "detection": "A hardcoded base64 encoded string.",
+                    return {
+                        "message": "A hardcoded base64 encoded string.",
                         "severity": "WARNING",
                         "line_number": line_number,
                         "match": payload,
                         "decoded": decoded
-                    })
+                    }
             except:  # Ignore FP
                 pass
-    return found
 
 
-def detect_b32(line: str, line_number: int) -> List[Dict[str, Any]]:
-    found = []
+def detect_b32(line: str, line_number: int) -> DetectionType:
     pattern = r'(?:(?:[\'\"\`])([A-Z2-7]{8,}(?:={4}|={6}|))(?:[\'\"\`]))'
     for match in re.finditer(pattern, line):
         payload = match.group(1)
@@ -51,20 +45,18 @@ def detect_b32(line: str, line_number: int) -> List[Dict[str, Any]]:
             try:
                 decoded = base64.b32decode(payload).decode('utf-8')
                 if decoded and '\\u' not in decoded and len(decoded) > 3:
-                    found.append({
-                        "detection": "A hardcoded base32 encoded string.",
+                    return {
+                        "message": "A hardcoded base32 encoded string.",
                         "severity": "WARNING",
                         "line_number": line_number,
                         "match": payload,
                         "decoded": decoded
-                    })
+                    }
             except:  # Ignore FP
                 pass
-    return found
 
 
-def detect_hex(line: str, line_number: int) -> List[Dict[str, Any]]:
-    found = []
+def detect_hex(line: str, line_number: int) -> DetectionType:
     pattern = r'((?:[0|\\][xX][0-9a-fA-F]{8,})+)'
     for match in re.finditer(pattern, line):
         payload = match.group(1).replace('\\\\', '\\')
@@ -72,25 +64,23 @@ def detect_hex(line: str, line_number: int) -> List[Dict[str, Any]]:
             try:
                 decoded = bytes.fromhex(payload[2:]).decode('utf-8')
             except:
-                # This never fails, and some hex payloads are not trivial
+                # This never fails, while handling non-trivial hex payloads
                 decoded = bytes(payload, 'utf-8').decode('unicode_escape')
             if (
                 (decoded.count('0x') >= 2 or decoded.count('\\x') >= 2) and len(decoded) >= 16
             ) or (
                 '0x' not in decoded and '\\x' not in decoded and len(decoded) > 3
             ):
-                found.append({
-                    "detection": "A hardcoded hex encoded string.",
+                return {
+                    "message": "A hardcoded hex encoded string.",
                     "severity": "WARNING",
                     "line_number": line_number,
                     "match": payload,
                     "decoded": decoded
-                })
-    return found
+                }
 
 
-def detect_unicode(line: str, line_number: int) -> List[Dict[str, Any]]:
-    found = []
+def detect_unicode(line: str, line_number: int) -> DetectionType:
     pattern = r'((?:\\[uU][0-9A-Fa-f]{4})+)'
     for match in re.finditer(pattern, line):
         payload = match.group(1).replace('\\\\', '\\')
@@ -102,20 +92,18 @@ def detect_unicode(line: str, line_number: int) -> List[Dict[str, Any]]:
                     and (('\\u' not in decoded and len(decoded) > 3)
                          or len(match) >= 24)
                 ):
-                    found.append({
-                        "detection": "A hardcoded unicode encoded string.",
+                    return {
+                        "message": "A hardcoded unicode encoded string.",
                         "severity": "WARNING",
                         "line_number": line_number,
                         "match": payload,
                         "decoded": decoded
-                    })
+                    }
             except:  # Ignore FP
                 pass
-    return found
 
 
-def detect_fernet(patch: str) -> List[Dict[str, Any]]:
-    found = []
+def detect_fernet(patch: str) -> DetectionType:
     pattern_payload = r'gAAAA[A-Za-z0-9_\-]+=+'
     for p_match in re.finditer(pattern_payload, patch):
         pattern_key = r"b'[A-Za-z0-9_-]{43}='"
@@ -126,13 +114,12 @@ def detect_fernet(patch: str) -> List[Dict[str, Any]]:
                 payload = p_match.group()
                 decoded = Fernet(key_bytes).decrypt(payload).decode('utf-8')
                 if decoded:
-                    found.append({
-                        "detection": "A hardcoded Fernet encoded string.",
+                    return {
+                        "message": "A hardcoded Fernet encoded string.",
                         "severity": "WARNING",
                         "line_number": patch[:p_match.start()].count('\n') + 1,
                         "match": payload,
                         "decoded": decoded
-                    })
+                    }
             except:  # Ignore FP
                 continue
-    return found

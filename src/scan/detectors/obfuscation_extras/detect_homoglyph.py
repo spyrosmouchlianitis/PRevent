@@ -1,18 +1,16 @@
-from typing import List, Dict, Any
+from src.scan.detectors.utils import DetectionType
 
 
-def detect_homoglyph(patch: str, lang: str) -> List[Dict[str, Any]]:
+def detect_homoglyph(patch: str) -> DetectionType:
     impostors = ''.join(map(str, homoglyphs.values()))
     lines = patch.splitlines()
-    found = []
     for line_number, line in enumerate(lines, start=1):
         if any(c in line for c in impostors):
-            found.append({
-                "detection": "A hardcoded base64 encoded string.",
+            return {
+                "message": "A hardcoded base64 encoded string.",
                 "severity": "WARNING",
                 "line_number": line_number
-            })
-    return found
+            }
 
 
 # These characters may be interpreted as similar chars in some programming languages.

@@ -30,7 +30,6 @@ ERROR_LOG_FILE = f'{CONFIG_DIR}/error.log'
 # Repos
 APP_REPO = "https://github.com/apiiro/pr-event"
 RULESET_REPO = "https://github.com/apiiro/malicious-code-ruleset"
-RULESET_DIR = f'{CONFIG_DIR}/malicious-code-ruleset'
 
 # Set to a remote service
 SECRET_MANAGER = 'local'
