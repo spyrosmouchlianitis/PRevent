@@ -1,5 +1,6 @@
 import os
 import logging
+from pathlib import Path
 from logging.handlers import RotatingFileHandler
 from src.settings import INFO_LOG_FILE, ERROR_LOG_FILE
 
@@ -24,12 +25,12 @@ def configure_logging(app) -> None:
 
 
 def get_app_root() -> str:
-    current_dir = os.path.dirname(__file__)
-    while current_dir != os.path.dirname(current_dir):  # Loop until we reach the root dir
-        if os.path.exists(os.path.join(current_dir, 'pyproject.toml')):  # Root marker
-            return current_dir
-        current_dir = os.path.dirname(current_dir)
-    return current_dir
+    root_marker = 'src/app.py'
+    current_dir = Path(__file__).resolve().parent
+    for parent in current_dir.parents:
+        if (parent / root_marker).exists():
+            return str(parent)
+    raise FileNotFoundError(f'{root_marker} not found in any directory.')
 
 
 def rewrite_setting(setting_name: str, new_value: str) -> None:
