@@ -1,10 +1,11 @@
+import sys
 from pygments import highlight
 from pygments.lexers import BashLexer
 from pygments.formatters import TerminalFormatter
 
 
 def bold_text(text: str) -> str:
-    return "\033x[1m" + text + "\033x[0m"
+    return "\033[1m" + text + "\033[0m"
 
 
 def print_instructions(manager):
@@ -13,7 +14,7 @@ def print_instructions(manager):
 
     if manager == 'vault':
         print(bold_text("\n##### HashiCorp Vault Setup #####\n"))
-        print(bold_text("Step 1: On the Vault server, create an AppRole and policy for pr-event:"))
+        print(bold_text("Step 1: On the Vault server, create an AppRole and a policy for pr-event:"))
         print(highlight("""
 vault auth enable approle
 
@@ -200,3 +201,16 @@ disable_mlock = true
         print(bold_text("4.2. Repeat for the remaining unseal keys until Vault is unsealed."))
         print(bold_text("\n5. Enable the key-value secrets engine:"))
         print(highlight("vault secrets tune -version=2 secret/\n\n", BashLexer(), TerminalFormatter()))
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python script.py <manager>")
+        print("vault, aws, azure, gcloud, local")
+        sys.exit(1)
+    print_instructions(sys.argv[1])
+
+
+if __name__ == "__main__":
+    main()
+

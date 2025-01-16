@@ -106,7 +106,7 @@ def set_github_app(secret_manager):
               \033[1mRepository Permissions: Commit statuses -> Read and write\033[0m
             4. If you want to trigger reviews: referencing and listing teams and :
               \033[1mOrganization Permissions: Members -> Read-only\033[0m
-            5. If you want to block on detection:
+            5. If you want to block on detection (manage branch protection):
               \033[1mRepository Permissions: Administration -> Read and write\033[0m
     """)
     print("Notice that to change the permissions later,")
@@ -335,4 +335,4 @@ def set_github_app(secret_manager):
 
     # Protected branches: a list of branches that were applied a branch protection rule
     if not is_secret_set(_protected_branches):
-        set_secret(_protected_branches, '{}')
+        set_secret(_protected_branches, {})

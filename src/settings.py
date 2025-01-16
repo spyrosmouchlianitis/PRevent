@@ -7,19 +7,19 @@ WEBHOOK_PORT = 8080
 # For the GitHub client
 JWT_EXPIRY_SECONDS = 120
 
-# Block PR until approval. Respected only if reviewers were defined.
-BLOCK_PR = True
-
-# For branch protection rules
-SCAN_CONTEXT = "apiiro-scan"
-
 # Don't comment WARNING severity detections (many), only ERROR (few).
 FP_STRICT = False
+
+# Block PR until approval. Respected only if reviewers were defined.
+BLOCK_PR = True
 
 # Set TLS on another level if not here
 APP_TLS = False
 
-# Dir for storing log file, and if relevant: TLS certificates, Vault address
+# For branch protection rules
+SCAN_CONTEXT = "apiiro-scan"
+
+# Dir for storing log file, and if relevant: Vault address, TLS certificates
 CONFIG_DIR = os.path.expanduser('~/.pr-event')
 os.makedirs(CONFIG_DIR, exist_ok=True)
 
@@ -32,4 +32,4 @@ APP_REPO = "https://github.com/apiiro/pr-event"
 RULESET_REPO = "https://github.com/apiiro/malicious-code-ruleset"
 
 # Set to a remote service
-SECRET_MANAGER = 'local'
+SECRET_MANAGER = 'vault'
