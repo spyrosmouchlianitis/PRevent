@@ -32,7 +32,7 @@ Deployment:
   - Local HashiCorp Vault (for development and testing)
 
 
-### Containerized Deployment 
+## Containerized Deployment 
 
 Build and deploy the app using the provided `Dockerfile`.
 
@@ -76,7 +76,7 @@ TODO: Write this part when containerized deployment orchestration is ready (DevO
 Lastly, optionally configure security reviewers, included branches, and excluded branches.
 
 
-### Manual Deployment
+## Manual Deployment
 
 1. Clone this repository:
    ```bash
