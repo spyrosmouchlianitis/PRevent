@@ -9,22 +9,23 @@ from src.settings import RULESET_REPO
 from src.config import get_app_root
 
 
-ruleset_dir = f'{get_app_root()}/src/scan/detectors/malicious-code-ruleset'
-
-
 class DetectionType(TypedDict, total=True):
     message: str
     severity: str
     line_number: int
 
 
-def handle_ruleset():
+def get_ruleset_dir():
 
     if not shutil.which('git'):
         current_app.logger.error("Git is not installed or not found in the PATH.")
         return
     
+    root_path = get_app_root()
+    path = 'src/scan/detectors'
     try:
+        ruleset_dir = f'{root_path}/{path}/malicious-code-ruleset'
+
         if not os.path.exists(ruleset_dir):
             subprocess.run(['git', 'clone', RULESET_REPO, ruleset_dir], check=True)
             current_app.logger.info(f"Cloned repository from {RULESET_REPO}.")
@@ -48,7 +49,8 @@ def handle_ruleset():
             f"No internet connection or error fetching ruleset from {RULESET_REPO} . "
             "Using local version."
         )
-        pass
+        offline_ruleset_dir = f'{root_path}/{path}/offline-ruleset-copy'
+        return offline_ruleset_dir
 
 
 def get_file_extension(lang: str) -> str:

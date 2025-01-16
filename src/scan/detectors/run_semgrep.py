@@ -6,16 +6,15 @@ from flask import current_app
 from typing import Dict, Any
 from src.scan.detectors.utils import DetectionType
 from src.scan.detectors.utils import (
-    handle_ruleset,
+    get_ruleset_dir,
     get_file_extension,
-    create_temp_file,
-    ruleset_dir
+    create_temp_file
 )
 
 
 def run_semgrep(temp_file_path: str) -> Dict[str, Any]:
     try:
-        handle_ruleset()
+        ruleset_dir = get_ruleset_dir()
         result = subprocess.run(
             ['semgrep', '--config', ruleset_dir, '--metrics', 'off', '--json', temp_file_path],
             capture_output=True,
