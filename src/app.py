@@ -16,13 +16,13 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
 
 @app.route('/webhook', methods=['POST'])
 def webhook() -> tuple[Response, int]:
-    event_type: str = request.headers.get('X-GitHub-Event', '')
-    app.logger.info(f"Received event: {event_type}")
-
     try:
         # Ensure only GitHub's webhook deliveries are processed
         verify_webhook_signature(request)
         check_rate_limit(initialize_github_client())
+
+        event_type: str = request.headers.get('X-GitHub-Event', '')
+        app.logger.info(f"Received event: {str(event_type)}")
 
         webhook_data: Dict[str, Any] = request.get_json() or {}
         webhook_listener = GitHubPRWebhook()
@@ -30,7 +30,7 @@ def webhook() -> tuple[Response, int]:
         return handle_event(event_type, webhook_listener, webhook_data)
 
     except Exception as e:
-        current_app.logger.error(f"Error processing event {event_type}: {e}")
+        current_app.logger.error(f"Error processing request: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
 

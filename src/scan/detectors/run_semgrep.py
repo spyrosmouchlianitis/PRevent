@@ -28,7 +28,7 @@ def run_semgrep(temp_file_path: str) -> Dict[str, Any]:
         raise RuntimeError(f"Failed to parse Semgrep output: {str(e)}")
 
 
-def process_finding(finding: DetectionType) -> DetectionType:
+def process_finding(finding: Dict) -> DetectionType:
     try:
         detection: DetectionType = {
             "message": finding["extra"]["message"],

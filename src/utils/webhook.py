@@ -1,3 +1,4 @@
+import re
 import hmac
 import hashlib
 import time
@@ -9,6 +10,25 @@ from typing import Dict, Any
 from src.secret_manager import get_secret
 
 
+def validate_string(string: str) -> None:
+    if not re.fullmatch(r'^[\w$/_\-\[\].]{1,50}$', string):
+        raise ValueError(f"Invalid parameter value: {string}")
+
+
+def validate_pr_number(number: int) -> None:
+    try:
+        int(number)
+        if number > 100000:
+            raise ValueError("PR number must be smaller than 100,000.")
+    except ValueError:
+        raise ValueError(f"Invalid PR number value: {number}")
+
+
+def validate_sha(sha: str) -> str:
+    if not re.match(r'^[a-fA-F0-9]{40}$', sha):
+        raise ValueError(f"Invalid parameter value: {sha}")
+
+
 def extract_pr_info(webhook_data: Dict[str, Any]) -> tuple:
     try:
         org_name = webhook_data['repository']['owner']['login']
@@ -16,9 +36,24 @@ def extract_pr_info(webhook_data: Dict[str, Any]) -> tuple:
         branch_name = webhook_data['pull_request']['base']['ref']
         pr_number = webhook_data['pull_request']['number']
         commit_sha = webhook_data['pull_request']['head']['sha']
+
+        validate_string(org_name)
+        validate_string(repo_name)
+        validate_string(branch_name)
+        validate_pr_number(pr_number)
+        validate_sha(commit_sha)
+
         return org_name, repo_name, branch_name, pr_number, commit_sha
+
     except KeyError as e:
         current_app.logger.error(f"Missing expected key: {e}")
+        raise ValueError(f"Missing expected key: {e}")
+
+
+def validate_review_state(state: str) -> None:
+    valid_states = {'approved', 'changes_requested', 'commented', 'dismissed', 'pending'}
+    if state.lower() not in valid_states:
+        raise ValueError(f"Invalid review state: {state}")
 
 
 def extract_review_info(webhook_data: Dict[str, Any]) -> tuple:
@@ -28,7 +63,15 @@ def extract_review_info(webhook_data: Dict[str, Any]) -> tuple:
         pr_number = webhook_data['pull_request']['number']
         review_state = webhook_data['review']['state']
         reviewer = webhook_data['review']['user']['login']
+
+        validate_string(repo_name)
+        validate_string(branch_name)
+        validate_pr_number(pr_number)
+        validate_review_state(review_state)
+        validate_string(reviewer)
+
         return repo_name, branch_name, pr_number, review_state, reviewer
+
     except KeyError as e:
         current_app.logger.error(f"Missing expected key: {e}")
         raise ValueError("Invalid webhook_data format")

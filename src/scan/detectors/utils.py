@@ -43,6 +43,8 @@ def get_ruleset_dir():
             if result.stdout and int(result.stdout.strip()) > 0:
                 subprocess.run(['git', 'pull', 'origin', 'main'], cwd=ruleset_dir, check=True)
                 current_app.logger.info(f"Pulled latest changes from the {RULESET_REPO}.")
+
+        return ruleset_dir
     
     except subprocess.CalledProcessError:
         current_app.logger.error(
