@@ -47,6 +47,7 @@ def detect_dynamic_execution_and_obfuscation(
     code_string: str,
     lang: str
 ) -> DetectionType:
+    findings = [{}]
     extension = get_file_extension(lang)
     if extension:
         temp_file_path = create_temp_file(code_string, extension)

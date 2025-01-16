@@ -63,6 +63,7 @@ def create_temp_file(code_string: str, extension: str) -> str:
             delete=False, mode='w', suffix=f'.{extension}'
         ) as temp_file:
             temp_file.write(code_string)
+            temp_file.close()
             return temp_file.name
         
     except (OSError, IOError) as e:
