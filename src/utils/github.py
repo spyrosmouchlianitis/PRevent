@@ -13,27 +13,28 @@ def get_changed_files(
 ) -> List[Dict[str, str]]:
 
     # Requires Repository Permissions: Pull requests -> Read
-    files = pr.get_files()
+    changes = pr.get_files()
     changed_files = []
 
-    for file in files:
-        if getattr(file, 'patch', None) and '+0,0' not in file.patch:
+    for file_changes in changes:
+        if getattr(file_changes, 'patch', None) and '+0,0' not in file_changes.patch:
             try:
+                # Get full files because diff isn't enough to generate AST
                 # Requires Repository Permissions: Contents -> Read
                 full_file_content = repo.get_contents(
-                    file.filename,
+                    file_changes.filename,
                     ref=pr.head.sha
                 ).decoded_content.decode('utf-8')
 
                 changed_files.append({
-                    "filename": file.filename,
-                    "diff": file.patch,
+                    "filename": file_changes.filename,
+                    "diff": file_changes.patch,
                     "full_content": full_file_content
                 })
 
             except KeyError as e:
                 current_app.logger.error(
-                    f"Missing key in {repo.name}/{file.filename}, {file}: {e}"
+                    f"Missing key in {repo.name}/{file_changes.filename}, {file_changes}: {e}"
                 )
             except GithubException as e:
                 current_app.logger.error(
@@ -41,7 +42,7 @@ def get_changed_files(
                 )
             except UnicodeDecodeError as e:
                 current_app.logger.error(
-                    f"Error decoding file content for {repo.name}/{file.filename}: {e}"
+                    f"Error decoding file content for {repo.name}/{file_changes.filename}: {e}"
                 )
 
     return changed_files

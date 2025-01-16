@@ -15,7 +15,7 @@ ruleset_dir = f'{get_app_root()}/src/scan/detectors/malicious-code-ruleset'
 class DetectionType(TypedDict, total=True):
     message: str
     severity: str
-    line_number: str
+    line_number: int
 
 
 def handle_ruleset():
@@ -39,7 +39,7 @@ def handle_ruleset():
                 capture_output=True,
                 text=True
             )
-            if int(result.stdout.strip()) > 0:
+            if result.stdout and int(result.stdout.strip()) > 0:
                 subprocess.run(['git', 'pull', 'origin', 'main'], cwd=ruleset_dir, check=True)
                 current_app.logger.info(f"Pulled latest changes from the {RULESET_REPO}.")
     
