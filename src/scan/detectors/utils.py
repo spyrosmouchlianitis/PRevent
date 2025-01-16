@@ -16,36 +16,23 @@ class DetectionType(TypedDict, total=True):
 
 
 def get_ruleset_dir():
-
-    if not shutil.which('git'):
-        current_app.logger.error("Git is not installed or not found in the PATH.")
+    if not is_git_installed():
         return
-    
+
     root_path = get_app_root()
     path = 'src/scan/detectors'
-    try:
-        ruleset_dir = f'{root_path}/{path}/malicious-code-ruleset'
+    ruleset_dir = f'{root_path}/{path}/malicious-code-ruleset'
 
+    try:
         if not os.path.exists(ruleset_dir):
-            subprocess.run(['git', 'clone', RULESET_REPO, ruleset_dir], check=True)
-            current_app.logger.info(f"Cloned repository from {RULESET_REPO}.")
+            clone_repo(RULESET_REPO, ruleset_dir)
         else:
-            # Fetch latest changes
-            subprocess.run(['git', 'fetch', 'origin'], cwd=ruleset_dir, check=True)
-            
-            # Quickly check if local is behind
-            result = subprocess.run(
-                ['git', 'rev-list', '--count', 'HEAD..origin/main'],
-                cwd=ruleset_dir,
-                capture_output=True,
-                text=True
-            )
-            if result.stdout and int(result.stdout.strip()) > 0:
-                subprocess.run(['git', 'pull', 'origin', 'main'], cwd=ruleset_dir, check=True)
-                current_app.logger.info(f"Pulled latest changes from the {RULESET_REPO}.")
+            fetch_repo(ruleset_dir)
+            if has_new_commits(ruleset_dir):
+                pull_repo(ruleset_dir, RULESET_REPO)
 
         return ruleset_dir
-    
+
     except subprocess.CalledProcessError:
         current_app.logger.error(
             f"No internet connection or error fetching ruleset from {RULESET_REPO} . "
@@ -53,6 +40,37 @@ def get_ruleset_dir():
         )
         offline_ruleset_dir = f'{root_path}/{path}/offline-ruleset-copy'
         return offline_ruleset_dir
+
+
+def is_git_installed() -> bool:
+    if shutil.which('git'):
+        return True
+    current_app.logger.error("Git is not installed or not found in the PATH.")
+    return False
+
+
+def clone_repo(repo: str, destination_path: str) -> None:
+    subprocess.run(['git', 'clone', repo, destination_path], check=True)
+    current_app.logger.info(f"Cloned repository from {repo}.")
+
+
+def fetch_repo(repo_path: str) -> None:
+    subprocess.run(['git', 'fetch', 'origin'], cwd=repo_path, check=True)
+
+
+def has_new_commits(repo_path: str) -> bool:
+    result = subprocess.run(
+        ['git', 'rev-list', '--count', 'HEAD..origin/main'],
+        cwd=repo_path,
+        capture_output=True,
+        text=True
+    )
+    return result.stdout and int(result.stdout.strip()) > 0
+
+
+def pull_repo(repo_path: str, repo_url: str) -> None:
+    subprocess.run(['git', 'pull', 'origin', 'main'], cwd=repo_path, check=True)
+    current_app.logger.info(f"Pulled latest changes from the {repo_url}.")
 
 
 def get_file_extension(lang: str) -> str:
