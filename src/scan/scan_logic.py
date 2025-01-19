@@ -1,6 +1,7 @@
+import json
 from flask import current_app
 from github import Repository, PullRequest
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Optional
 from src.scan.detectors.utils import DetectionType
 from src.scan.languages import extensions
 from src.utils.patch import process_diff
@@ -33,63 +34,80 @@ def handle_scan(
     return status
 
 
-def run_scan(changed_files: List[Dict[str, str]]) -> DetectionType:
+def run_scan(changed_files: List[Dict[str, str]]) -> Optional[DetectionType]:
     """
     Scan changed files and return only the first detection to avoid spamming the PR.
     Infected code indicates active compromise and should be addressed immediately,
     not get listed and orchestrated like vulnerabilities.
     """
     for file in changed_files:
-        detection, additions_list = get_first_detection(file)
+        if not all(key in file for key in ['filename', 'diff', 'full_content']):
+            raise ValueError(f"File must contain 'filename', 'diff' and 'full_content': {json.dumps(file)}")
+
+        lang = get_lang(file['filename'])
+        if not lang:
+            return None
+
+        additions_list = process_diff(file['diff'], lang)
+        if not additions_list:
+            return None
+
+        detection: DetectionType = get_first_detection(file, lang)
         if additions_list is None:
             continue
-        if detection := handle_detection(file, detection, additions_list):
-            return detection
+
+        if handled_detection := enrich_detection(file, detection, additions_list):
+            return handled_detection
+
+
+def get_lang(filename: str) -> str:
+    ext = filename.split('.')[-1] if '.' in filename else None
+    return extensions.get(ext, '')
 
 
 def get_first_detection(
-        file: Dict[str, str]
-) -> Tuple[Optional[DetectionType], Optional[List[Tuple[int, str]]]]:
-    filename = file['filename']
-    ext = filename.split('.')[-1] if '.' in filename else None
-    lang = extensions.get(ext, '')
-    if not lang:
-        return None, None
-    
-    additions_list = process_diff(file['diff'], lang)
-    if not additions_list:
-        return None, None
+        file: Dict[str, str],
+        lang: str
+) -> Optional[Dict]:
 
     extra_obfuscation_detectors = [
-        detect_space_hiding,
-        detect_encoded,
-        detect_homoglyph
+        (detect_space_hiding, "ERROR"),
+        (detect_encoded, "WARNING"),
+        (detect_homoglyph, "WARNING")
     ]
 
     if result := detect_dynamic_execution_and_obfuscation(file['full_content'], lang):
-        return result, additions_list
-    elif result := detect_executable(filename, file['full_content']):
-        return result, additions_list
+        return result
+
+    elif result := detect_executable(file['filename'], file['full_content']):
+        return result
+
     else:
         for detector in extra_obfuscation_detectors:
-            if result := detector(file['full_content']):
-                return result, additions_list
+            if not FP_STRICT or (FP_STRICT and detector[1] == "ERROR"):
+                if result := detector[0](file['full_content']):
+                    return {
+                        "severity": detector[1],
+                        **result
+                    }
+    return None
 
 
-def handle_detection(
+def enrich_detection(
     file: Dict[str, str],
     detection: DetectionType,
     additions_list: List[tuple]
-) -> Dict:
-    # TODO: Instead of filtering them out of the results, don't run them.
-    if FP_STRICT and detection['severity'] != 'ERROR':
-        return {}
+) -> Optional[DetectionType]:
 
     # Whole updated file is scanned, report only detections in additions (minimize FP noise).
     match = get_line_from_code(file['full_content'], detection['line_number'])
     if any(new_code[1] in match for new_code in additions_list):
-        return {"filename": file['filename'], **detection}
-    return {}
+        return {
+            "filename": file['filename'],
+            **detection,
+            "match": match
+        }
+    return None
 
 
 def get_line_from_code(code: str, line_number: int) -> str:

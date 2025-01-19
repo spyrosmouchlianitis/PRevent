@@ -1,7 +1,6 @@
 import json
 from flask import current_app
-from github import Repository, PullRequest, PullRequestComment
-from github.GithubException import GithubException
+from github import Repository, PullRequest, PullRequestComment, GithubException
 from typing import Dict, List
 from src.scan.detectors.utils import DetectionType
 from src.settings import SCAN_CONTEXT, APP_REPO

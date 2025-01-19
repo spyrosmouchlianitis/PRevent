@@ -3,16 +3,20 @@ import shutil
 import subprocess
 import tempfile
 from flask import current_app
-from typing import TypedDict
+from typing import TypedDict, Optional
 from src.scan.languages import major
 from src.settings import RULESET_REPO
 from src.config import get_app_root
 
 
-class DetectionType(TypedDict, total=True):
+# Keep it minimal to avoid repeating line matching and filenames handling
+class DetectionType(TypedDict, total=False):
     message: str
     severity: str
     line_number: int
+    decoded: Optional[str]   # For encodings detectors
+    match: Optional[str]     # Add in handler (derived from line_number)
+    filename: Optional[str]  # Add in handler
 
 
 def get_ruleset_dir():

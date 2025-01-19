@@ -13,7 +13,7 @@ def process_diff(diff: str, lang: str) -> List[Tuple[int, str]]:
 
 def get_additions_with_line_numbers(diff: str) -> List[Tuple[int, str]]:
     """
-    Extracts added lines and their line numbers from a unified diff string.
+    Extract added lines and their line numbers from a unified diff string.
 
     Args:
         diff (str): The unified diff string to process.
