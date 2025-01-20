@@ -27,7 +27,7 @@ def detect_b64(patch: str) -> Optional[dict]:
                 if decoded and len(decoded) > 3:
                     return {
                         "message": "A hardcoded base64 encoded string. Either malicious or a bad practice. "
-                                   "(Set 'FP_STRICT' to False to disable)",
+                                   "(Set \"FP_STRICT = False\" to disable)",
                         "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
                     }
@@ -46,7 +46,7 @@ def detect_b32(patch: str) -> Optional[dict]:
                 if decoded and '\\u' not in decoded and len(decoded) > 3:
                     return {
                         "message": "A hardcoded base32 encoded string. Either malicious or a bad practice. "
-                                   "(Set 'FP_STRICT' to False to disable)",
+                                   "(Set \"FP_STRICT = False\" to disable)",
                         "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
                     }
@@ -78,7 +78,7 @@ def detect_hex(patch: str) -> Optional[dict]:
             ):
                 return {
                     "message": "A hardcoded hex encoded string. Either malicious or a bad practice. "
-                               "(Set 'FP_STRICT' to False to disable)",
+                               "(Set \"FP_STRICT = False\" to disable)",
                     "line_number": get_match_line_number(match, patch),
                     "decoded": decoded
                 }
@@ -99,7 +99,7 @@ def detect_unicode(patch: str) -> Optional[dict]:
                 ):
                     return {
                         "message": "A hardcoded unicode encoded string. Either malicious or a bad practice. "
-                                   "(Set 'FP_STRICT' to False to disable)",
+                                   "(Set \"FP_STRICT = False\" to disable)",
                         "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
                     }

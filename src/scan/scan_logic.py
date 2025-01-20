@@ -1,7 +1,9 @@
 import json
+import os
+import concurrent.futures
 from flask import current_app
 from github import Repository, PullRequest
-from typing import Optional
+from typing import Optional, Callable
 from src.scan.detectors.utils import DetectionType
 from src.scan.languages import extensions
 from src.utils.patch import process_diff
@@ -67,27 +69,51 @@ def get_first_detection(
     file: dict[str, str],
     extension: str
 ) -> Optional[dict]:
+    full_content = file['full_content']
 
+    detection_tasks = [
+        (detect_dynamic_execution_and_obfuscation, (full_content, extension)),
+        (detect_executable, (file['filename'], full_content)),
+        *get_extra_detection_tasks(full_content)
+    ]
+
+    return run_detection_tasks(detection_tasks)
+
+
+def get_extra_detection_tasks(
+    full_content: str
+) -> list[tuple[Callable, tuple]]:
     extra_obfuscation_detectors = [
         (detect_space_hiding, "ERROR"),
         (detect_encoded, "WARNING"),
         (detect_homoglyph, "WARNING")
     ]
 
-    if result := detect_dynamic_execution_and_obfuscation(file['full_content'], extension):
-        return result
+    tasks = []
 
-    elif result := detect_executable(file['filename'], file['full_content']):
-        return result
+    # Add extra obfuscation detectors
+    for detector, severity in extra_obfuscation_detectors:
+        if FP_STRICT and severity != "ERROR":
+            continue
+        tasks.append((detector, (full_content,)))  # Pass as tuple for executor
 
-    else:
-        for detector in extra_obfuscation_detectors:
-            if not FP_STRICT or (FP_STRICT and detector[1] == "ERROR"):
-                if result := detector[0](file['full_content']):
-                    return {
-                        "severity": detector[1],
-                        **result
-                    }
+    return tasks
+
+
+def run_detection_tasks(tasks: list[tuple[Callable, tuple]]) -> Optional[dict]:
+    # CPU-bound string processing. Semgrep is I/O bound, but runs as a single-command blackbox.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+        futures = [
+            executor.submit(task[0], *task[1])  # Unpack tuple for each task
+            for task in tasks
+        ]
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                result = future.result()
+                if result:
+                    return result
+            except concurrent.futures.TimeoutError as e:
+                current_app.logger.error(f"Timeout during detection task: {e}")
     return None
 
 

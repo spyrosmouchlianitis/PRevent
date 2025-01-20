@@ -37,6 +37,7 @@ def run_semgrep(temp_file_path: str) -> Optional[dict[str, Any]]:
             'semgrep',
             '--config', ruleset_dir,
             '--metrics', 'off',
+            '--quiet',
             '--json',
             temp_file_path
         ]
