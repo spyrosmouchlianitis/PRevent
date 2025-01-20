@@ -1,6 +1,4 @@
-import json
 import requests
-from typing import Dict, List
 from flask import current_app
 from src.secret_manager import get_secret, set_secret
 from src.github_client import token_headers
@@ -46,7 +44,7 @@ def apply_branch_protection_rule(
     Args:
         - "required_status_checks" (required): Contains `strict` and `checks`.
             - "strict" (required): Requires all past checks to pass.
-            - "checks" (required): List of checks that must pass.
+            - "checks" (required): list of checks that must pass.
                 - "contexts" (required): Check identifiers. Used when `app_id` is not provided.
                 - "app_id" (optional): Associates a context with a specific GitHub app.
         - "enforce_admins" (required): Enforced globally. Set to `True` unless other checks exist.
@@ -132,23 +130,23 @@ def is_branch_status_check_protected(protection: dict) -> bool:
 
 
 def update_protected_branches(
-    protected_branches: Dict[str, List[str]],
+    protected_branches: dict[str, list[str]],
     repo_name: str,
     branch_name: str
-) -> Dict[str, List[str]]:
+) -> dict[str, list[str]]:
     """
     Update the list of protected branches for a given repository.
     This allows tracking branches, avoiding setting a protection rule over and over.
     Update both state and secret.
 
     Args:
-        protected_branches (Dict[str, List[str]]):
+        protected_branches (dict[str, list[str]]):
             Current protected branches (values) by repository (key).
         repo_name: ...
         branch_name: ...
 
     Returns:
-        Dict[str, List[str]]: Updated mapping of protected repositories and branches.
+        dict[str, list[str]]: Updated mapping of protected repositories and branches.
 
     Side Effects:
         Updates the 'PROTECTED_BRANCHES' secret with the new protected branch list.

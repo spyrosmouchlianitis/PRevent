@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import platform
 import hashlib
-from typing import List
 
 base_dir = '/tmp'
 
@@ -49,7 +48,7 @@ def update_shell_profile(bin_dir: str) -> None:
                     file.write(f"\n{line_to_add}\n")
 
 
-def cleanup(files: List[str]) -> None:
+def cleanup(files: list[str]) -> None:
     for file in files:
         try:
             os.remove(file)

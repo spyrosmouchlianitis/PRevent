@@ -1,17 +1,16 @@
 import re
 from sys import getsizeof
-from typing import List, Tuple
 
 
-def process_diff(diff: str, lang: str) -> List[Tuple[int, str]]:
+def process_diff(diff: str, lang: str) -> list[tuple[int, str]]:
     diff = remove_comments(diff, lang)
-    additions = get_additions_with_line_numbers(diff)
+    additions = get_additions_with_line_numbers(diff)  # Line numbers derived from hunk headers
     if not additions or getsizeof(diff) / (1024.0 ** 2) > 1:  # 1MB max diff size
         return []  # Return empty for non-applicable patches. Consider alerting on huge files.
     return additions
 
 
-def get_additions_with_line_numbers(diff: str) -> List[Tuple[int, str]]:
+def get_additions_with_line_numbers(diff: str) -> list[tuple[int, str]]:
     """
     Extract added lines and their line numbers from a unified diff string.
 
@@ -19,7 +18,7 @@ def get_additions_with_line_numbers(diff: str) -> List[Tuple[int, str]]:
         diff (str): The unified diff string to process.
 
     Returns:
-        List[Tuple[int, str]]: A list of tuples, where each tuple contains:
+        list[tuple[int, str]]: A list of tuples, where each tuple contains:
             - The line number (int) of the added line.
             - The content (str) of the added line.
 

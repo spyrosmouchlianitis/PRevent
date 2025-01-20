@@ -2,7 +2,7 @@ from typing import Optional
 from src.scan.detectors.utils import DetectionType
 
 
-def detect_executable(filename: str, patch: str) -> Optional(DetectionType):
+def detect_executable(filename: str, patch: str) -> Optional[DetectionType]:
 
     ext = filename.split('.')[-1].lower()
 

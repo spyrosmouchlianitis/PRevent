@@ -6,7 +6,7 @@ from datetime import datetime
 from flask import current_app, request
 from werkzeug.exceptions import Unauthorized
 from github import Github
-from typing import Dict, Any
+from typing import Any
 from src.secret_manager import get_secret
 
 
@@ -24,12 +24,12 @@ def validate_pr_number(number: int) -> None:
         raise ValueError(f"Invalid PR number value: {number}")
 
 
-def validate_sha(sha: str) -> str:
+def validate_sha(sha: str) -> None:
     if not re.match(r'^[a-fA-F0-9]{40}$', sha):
         raise ValueError(f"Invalid parameter value: {sha}")
 
 
-def extract_pr_info(webhook_data: Dict[str, Any]) -> tuple:
+def extract_pr_info(webhook_data: dict[str, Any]) -> tuple:
     try:
         org_name = webhook_data['repository']['owner']['login']
         repo_name = webhook_data['repository']['full_name']
@@ -56,7 +56,7 @@ def validate_review_state(state: str) -> None:
         raise ValueError(f"Invalid review state: {state}")
 
 
-def extract_review_info(webhook_data: Dict[str, Any]) -> tuple:
+def extract_review_info(webhook_data: dict[str, Any]) -> tuple:
     try:
         repo_name = webhook_data['repository']['full_name']
         branch_name = webhook_data['pull_request']['head']['ref']

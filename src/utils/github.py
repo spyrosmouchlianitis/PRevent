@@ -1,7 +1,6 @@
 import json
 from flask import current_app
 from github import Repository, PullRequest, PullRequestComment, GithubException
-from typing import Dict, List
 from src.scan.detectors.utils import DetectionType
 from src.settings import SCAN_CONTEXT, APP_REPO
 
@@ -9,7 +8,7 @@ from src.settings import SCAN_CONTEXT, APP_REPO
 def get_changed_files(
     repo: Repository,
     pr: PullRequest
-) -> List[Dict[str, str]]:
+) -> list[dict[str, str]]:
 
     # Requires Repository Permissions: Pull requests -> Read
     changes = pr.get_files()

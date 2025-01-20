@@ -1,7 +1,7 @@
-from typing import Optional, Dict
+from typing import Optional
 
 
-def detect_homoglyph(patch: str) -> Optional[Dict]:
+def detect_homoglyph(patch: str) -> Optional[dict]:
     impostors = ''.join(map(str, homoglyphs.values()))
     lines = patch.splitlines()
     for line_number, line in enumerate(lines, start=1):

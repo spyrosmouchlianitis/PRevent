@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import Flask, current_app, request, Response, jsonify
 from src.webhook import GitHubPRWebhook
@@ -24,7 +24,7 @@ def webhook() -> tuple[Response, int]:
         event_type: str = request.headers.get('X-GitHub-Event', '')
         app.logger.info(f"Received event: {str(event_type)}")
 
-        webhook_data: Dict[str, Any] = request.get_json() or {}
+        webhook_data: dict[str, Any] = request.get_json() or {}
         webhook_listener = GitHubPRWebhook()
 
         return handle_event(event_type, webhook_listener, webhook_data)
@@ -37,7 +37,7 @@ def webhook() -> tuple[Response, int]:
 def handle_event(
     event_type: str,
     webhook_listener: GitHubPRWebhook,
-    webhook_data: Dict[str, Any]
+    webhook_data: dict[str, Any]
 ) -> tuple[Response, int]:
     if event_type == 'pull_request':
         webhook_listener.on_pull_request(webhook_data)

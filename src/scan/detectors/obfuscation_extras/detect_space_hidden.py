@@ -1,7 +1,7 @@
-from typing import Optional, Dict
+from typing import Optional
 
 
-def detect_space_hiding(patch: str) -> Optional[Dict]:
+def detect_space_hiding(patch: str) -> Optional[dict]:
     lines = patch.split('\n')
     for idx, line in enumerate(lines):
         if len(line) > 200 and ' ' * 200 in line:

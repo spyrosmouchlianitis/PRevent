@@ -26,10 +26,8 @@ def is_secret_set(secret):
         with open(os.devnull, 'w') as hide, redirect_stderr(hide):
             get_secret(secret)
         return True
-    except KeyError:
-        logging.error(f"Secret '{secret}' not found.")
-    except Exception as e:
-        logging.error(f"Error checking secret '{secret}': {e}")
+    except (ValueError, Exception):
+        pass
     return False
 
 
@@ -79,6 +77,7 @@ def set_github_app(secret_manager):
             set_webhook_secret()
         set_secret(_webhook_secret, webhook_secret)
         print(f"Successfully saved '{_webhook_secret}' to your {secret_manager} secret manager.")
+        input("\nPress Enter when you've completed this step.")
 
     print("\n")
     print("Webhook Secret:")
@@ -91,7 +90,6 @@ def set_github_app(secret_manager):
     else:
         print("    Verifies the authenticity of incoming payloads by checking their signature.")
         set_webhook_secret()
-    input("\nPress Enter when you've completed this step.")
 
     # App permissions
     print("\n")
@@ -133,6 +131,7 @@ def set_github_app(secret_manager):
         else:
             print("A valid App ID is required to proceed.")
             set_app_id()
+        input("\nPress Enter when you've completed this step.")
 
     print("\n")
     if is_secret_set(_app_id):
@@ -143,8 +142,6 @@ def set_github_app(secret_manager):
             set_app_id()
     else:
         set_app_id()
-
-    input("\nPress Enter when you've completed this step.")
 
     # App's private key
     def set_private_key() -> None:
@@ -184,6 +181,7 @@ def set_github_app(secret_manager):
         print(f"Successfully saved '{_private_key}' in your {secret_manager} secret manager.")
         print("\n\033[1m! DELETE THE PRIVATE KEY FILE !\033[0m\n")
         print("In GitHub app setup, you can configure the IP allow list if relevant.")
+        input("\nPress Enter when you've completed this step.")
 
     print("\n")
     if is_secret_set(_private_key):
@@ -194,8 +192,6 @@ def set_github_app(secret_manager):
             set_private_key()
     else:
         set_private_key()
-
-    input("\nPress Enter when you've completed this step.")
 
     # Security reviewers
     def set_security_reviewers() -> None:
@@ -237,9 +233,9 @@ def set_github_app(secret_manager):
         if reset == "y":
             set_security_reviewers()
     else:
-        print("\033[1mDo you want to trigger code reviews upon detection? [Y/n]: \033[0m")
+        print("\033[1mDo you want to trigger code reviews upon detection?\033[0m")
         review = input(
-            "This is relevant regardless of detections blocking merging or not.\n"
+            "This is relevant regardless of detections blocking merging or not. [Y/n]: "
         ).strip().lower() or "y"
         if review == "y":
             set_security_reviewers()
@@ -249,7 +245,7 @@ def set_github_app(secret_manager):
     # Block PR or not
     print("\n")
     print("\033[1mDo you want to block PR merging until a reviewer's approval is granted?\033[0m")
-    print("Notice: for free plans, GitHub support only public repos (branch protection rules).")
+    print("Note: GitHub enabled private repos branch-protection only for Enterprise accounts.")
     block = input("[Y/n]: ").strip().lower() or "y"
     if block == "y":
         rewrite_setting('BLOCK_PR', 'True')
@@ -259,7 +255,7 @@ def set_github_app(secret_manager):
 
     # Branches scope
     def set_branches_scope() -> None:
-        def list_branches():
+        def list_branches() -> list:
             print("Format: repo_name:branch1,branch2 (leave empty for all).")
             print("Press Enter once to finish.")
             print("(verify inputs for typos and correct format)")
@@ -275,23 +271,29 @@ def set_github_app(secret_manager):
             return branches
 
         print("You can list branches for both inclusion and exclusion.")
+
         include = input(
             "\033[1mDo you want to list branches for inclusion? [Y/n]: \033[0m"
         ).strip().lower() or "y"
+        include_branches = list_branches() if include == "y" else []
+
         exclude = input(
             "\033[1mDo you want to list branches for exclusion? [Y/n]: \033[0m"
         ).strip().lower() or "y"
-        include_branches = list_branches() if include == "y" else []
         exclude_branches = list_branches() if exclude == "y" else []
+
         set_secret(_branches_include, include_branches)
         print(
-            f"Successfully saved '{_branches_include}' as {include_branches}"
+            f"Successfully saved '{_branches_include}' as {include_branches} "
             f"in your {secret_manager} secret manager."
         )
+
         set_secret(_branches_exclude, exclude_branches)
         print(
-            f"Successfully saved '{_branches_exclude}' as {exclude_branches}"
+            f"Successfully saved '{_branches_exclude}' as {exclude_branches} "
             f"in your {secret_manager} secret manager.")
+
+        input("\nPress Enter when you've completed this step.")
 
     print("\n")
     if is_secret_set(_branches_include) or is_secret_set(_branches_exclude):
@@ -309,15 +311,13 @@ def set_github_app(secret_manager):
         if all_branches != "y":
             set_branches_scope()
         else:
-            set_secret(_branches_include, '[]')
-            set_secret(_branches_exclude, '[]')
-
-    input("\nPress Enter when you've completed this step.")
+            set_secret(_branches_include, [])
+            set_secret(_branches_exclude, [])
 
     # Minimize FP
     print("\n")
     print("Few or no false positives are expected.")
-    print("\033[1mDo you want to prioritize avoiding false-positives over maximum coverage?\033[0m")
+    print("\033[1mDo you want to deprecate 'WARNING' severity detections (less coverage, less false-positives)?\033[0m")
     print(
         "Enter 'y' to run only 'ERROR' severity detectors (less frequent) "
         "and exclude 'WARNING' severity detectors."

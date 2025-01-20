@@ -1,7 +1,7 @@
 import json
 from flask import current_app
 from github import Repository, PullRequest
-from typing import List, Dict, Optional
+from typing import Optional
 from src.scan.detectors.utils import DetectionType
 from src.scan.languages import extensions
 from src.utils.patch import process_diff
@@ -34,7 +34,7 @@ def handle_scan(
     return status
 
 
-def run_scan(changed_files: List[Dict[str, str]]) -> Optional[DetectionType]:
+def run_scan(changed_files: list[dict[str, str]]) -> Optional[DetectionType]:
     """
     Scan changed files and return only the first detection to avoid spamming the PR.
     Infected code indicates active compromise and should be addressed immediately,
@@ -44,31 +44,31 @@ def run_scan(changed_files: List[Dict[str, str]]) -> Optional[DetectionType]:
         if not all(key in file for key in ['filename', 'diff', 'full_content']):
             raise ValueError(f"File must contain 'filename', 'diff' and 'full_content': {json.dumps(file)}")
 
-        lang = get_lang(file['filename'])
-        if not lang:
+        extension, language = get_lang(file['filename'])
+        if not language:
             return None
 
-        additions_list = process_diff(file['diff'], lang)
+        additions_list = process_diff(file['diff'], language)
         if not additions_list:
             return None
 
-        detection: DetectionType = get_first_detection(file, lang)
+        detection: DetectionType = get_first_detection(file, extension)
         if additions_list is None:
             continue
 
-        if handled_detection := enrich_detection(file, detection, additions_list):
-            return handled_detection
+        if full_detection_data := enrich_detection(file, detection, additions_list):
+            return full_detection_data
 
 
-def get_lang(filename: str) -> str:
+def get_lang(filename: str) -> tuple[str, str]:
     ext = filename.split('.')[-1] if '.' in filename else None
-    return extensions.get(ext, '')
+    return ext, extensions.get(ext, '')
 
 
 def get_first_detection(
-        file: Dict[str, str],
-        lang: str
-) -> Optional[Dict]:
+    file: dict[str, str],
+    extension: str
+) -> Optional[dict]:
 
     extra_obfuscation_detectors = [
         (detect_space_hiding, "ERROR"),
@@ -76,7 +76,7 @@ def get_first_detection(
         (detect_homoglyph, "WARNING")
     ]
 
-    if result := detect_dynamic_execution_and_obfuscation(file['full_content'], lang):
+    if result := detect_dynamic_execution_and_obfuscation(file['full_content'], extension):
         return result
 
     elif result := detect_executable(file['filename'], file['full_content']):
@@ -94,12 +94,12 @@ def get_first_detection(
 
 
 def enrich_detection(
-    file: Dict[str, str],
+    file: dict[str, str],
     detection: DetectionType,
-    additions_list: List[tuple]
+    additions_list: list[tuple]
 ) -> Optional[DetectionType]:
 
-    # Whole updated file is scanned, report only detections in additions (minimize FP noise).
+    # Whole updated file is scanned, report only detections in additions.
     match = get_line_from_code(file['full_content'], detection['line_number'])
     if any(new_code[1] in match for new_code in additions_list):
         return {

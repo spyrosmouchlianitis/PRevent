@@ -1,10 +1,10 @@
 import re
 import base64
-from typing import Optional, Dict
+from typing import Optional
 from cryptography import fernet
 
 
-def detect_encoded(patch: str) -> Optional[Dict]:
+def detect_encoded(patch: str) -> Optional[dict]:
     for line_number, line in enumerate(patch.splitlines(), start=1):
         for detector in [
             detect_fernet,
@@ -20,7 +20,7 @@ def detect_encoded(patch: str) -> Optional[Dict]:
     return None
 
 
-def detect_b64(line: str) -> Optional[Dict]:
+def detect_b64(line: str) -> Optional[dict]:
     pattern = r'(?:(?:[\'\"\`])([A-Za-z0-9+/]{12,}={0,2})(?:[\'\"\`]))'
     for match in re.finditer(pattern, line):
         payload = match.group(1)
@@ -38,7 +38,7 @@ def detect_b64(line: str) -> Optional[Dict]:
     return None
 
 
-def detect_b32(line: str) -> Optional[Dict]:
+def detect_b32(line: str) -> Optional[dict]:
     pattern = r'(?:(?:[\'\"\`])([A-Z2-7]{8,}(?:={4}|={6}|))(?:[\'\"\`]))'
     for match in re.finditer(pattern, line):
         payload = match.group(1)
@@ -56,7 +56,7 @@ def detect_b32(line: str) -> Optional[Dict]:
     return None
 
 
-def detect_hex(line: str) -> Optional[Dict]:
+def detect_hex(line: str) -> Optional[dict]:
     pattern = r'((?:[0|\\][xX][0-9a-fA-F]{8,})+)'
     for match in re.finditer(pattern, line):
         payload = match.group(1).replace('\\\\', '\\')
@@ -85,7 +85,7 @@ def detect_hex(line: str) -> Optional[Dict]:
     return None
 
 
-def detect_unicode(line: str) -> Optional[Dict]:
+def detect_unicode(line: str) -> Optional[dict]:
     pattern = r'((?:\\[uU][0-9A-Fa-f]{4})+)'
     for match in re.finditer(pattern, line):
         payload = match.group(1).replace('\\\\', '\\')
@@ -107,7 +107,7 @@ def detect_unicode(line: str) -> Optional[Dict]:
     return None
 
 
-def detect_fernet(patch: str) -> Optional[Dict]:
+def detect_fernet(patch: str) -> Optional[dict]:
     pattern_payload = r'gAAAA[A-Za-z0-9_\-]+=+'
     for p_match in re.finditer(pattern_payload, patch):
         pattern_key = r"b'[A-Za-z0-9_-]{43}='"
@@ -120,7 +120,6 @@ def detect_fernet(patch: str) -> Optional[Dict]:
                 if decoded:
                     return {
                         "message": "A hardcoded Fernet encoded string.",
-                        "severity": "WARNING",
                         "line_number": patch[:p_match.start()].count('\n') + 1,
                         "decoded": decoded
                     }

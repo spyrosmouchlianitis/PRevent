@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import Any
 from flask import current_app, jsonify
 from github import PullRequest
 from github.GithubException import GithubException
@@ -24,10 +24,10 @@ from src.settings import BLOCK_PR
 class GitHubPRWebhook:
     def __init__(self):
         self.github_client = initialize_github_client()
-        self.security_reviewers: List[str] = get_secret('SECURITY_REVIEWERS')
-        self.protected_branches: Dict[str, List[str]] = get_secret('PROTECTED_BRANCHES')
+        self.security_reviewers: list[str] = get_secret('SECURITY_REVIEWERS')
+        self.protected_branches: dict[str, list[str]] = get_secret('PROTECTED_BRANCHES')
 
-    def on_pull_request(self, webhook_data: Dict[str, Any]) -> tuple:
+    def on_pull_request(self, webhook_data: dict[str, Any]) -> tuple:
         """
         Process a pull request event:
         1. Check if the branch is protected.
@@ -148,7 +148,7 @@ class GitHubPRWebhook:
                     f"on {repo_name}, PR #{pr.number}: {e}"
                 )
 
-    def on_pull_request_review(self, webhook_data: Dict[str, Any]) -> tuple:
+    def on_pull_request_review(self, webhook_data: dict[str, Any]) -> tuple:
         """
         Change check status to "success" upon a pull request review approval event.
         If blocking mode (branch protection) was applied, this will release the block.

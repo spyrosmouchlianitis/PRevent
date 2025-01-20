@@ -157,7 +157,7 @@ def choose_secrets_manager() -> str:
     print("2) AWS Secrets Manager")
     print("3) Azure Key Vault Secrets")
     print("4) Google Cloud Secret Manager")
-    print("5) Easy local storage with HashiCorp Vault (not recommended)")
+    print("5) Easy local storage with HashiCorp Vault (insecure)")
 
     choice = input("Enter the number corresponding to your choice: ")
 
