@@ -30,23 +30,34 @@ def detect_dynamic_execution_and_obfuscation(
     return None
 
 
-def run_semgrep(temp_file_path: str) -> dict[str, Any]:
+def run_semgrep(temp_file_path: str) -> Optional[dict[str, Any]]:
     try:
         ruleset_dir = get_ruleset_dir()
-
         command = [
-            'semgrep', '--config', ruleset_dir, '--metrics', 'off', '--json', temp_file_path
+            'semgrep',
+            '--config', ruleset_dir,
+            '--metrics', 'off',
+            '--json',
+            temp_file_path
         ]
         if FP_STRICT:
             command.extend(['--severity', 'error'])
 
-        result = subprocess.run(
+        process = subprocess.Popen(
             command,
-            capture_output=True,
-            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True
         )
-        return json.loads(result.stdout)
+
+        for line in process.stdout:  # Monitor Semgrep output in real-time
+            if line.strip():
+                result = json.loads(line)
+                process.terminate()  # Stop the scan after the first result
+                return result
+
+        process.wait()  # Clean termination
+        return None
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Semgrep failed: {e}")

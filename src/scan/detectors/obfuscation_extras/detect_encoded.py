@@ -5,24 +5,21 @@ from cryptography import fernet
 
 
 def detect_encoded(patch: str) -> Optional[dict]:
-    for line_number, line in enumerate(patch.splitlines(), start=1):
-        for detector in [
-            detect_fernet,
-            detect_b64,
-            detect_b32,
-            detect_unicode,
-            detect_hex
-        ]:
-            if result := detector(line):
-                if not hasattr(result, "line_number"):
-                    result["line_number"] = line_number
-                return result
+    for detector in [
+        detect_fernet,
+        detect_b64,
+        detect_b32,
+        detect_unicode,
+        detect_hex
+    ]:
+        if result := detector(patch):
+            return result
     return None
 
 
-def detect_b64(line: str) -> Optional[dict]:
+def detect_b64(patch: str) -> Optional[dict]:
     pattern = re.compile(r'[\'\"`]([A-Za-z0-9+/]{12,}={0,2})[\'\"`]')
-    for match in pattern.finditer(line):
+    for match in pattern.finditer(patch):
         payload = match.group(1)
         if len(payload) % 4 == 0:
             try:
@@ -30,7 +27,8 @@ def detect_b64(line: str) -> Optional[dict]:
                 if decoded and len(decoded) > 3:
                     return {
                         "message": "A hardcoded base64 encoded string. Either malicious or a bad practice. "
-                                   "Set 'FP_STRICT' to False to disable.",
+                                   "(Set 'FP_STRICT' to False to disable)",
+                        "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
                     }
             except (ValueError, UnicodeDecodeError):
@@ -38,9 +36,9 @@ def detect_b64(line: str) -> Optional[dict]:
     return None
 
 
-def detect_b32(line: str) -> Optional[dict]:
+def detect_b32(patch: str) -> Optional[dict]:
     pattern = re.compile(r'[\'\"`]([A-Z2-7]{8,}(?:={4}|={6}|))[\'\"`]')  # Last pipe represents "nothing"
-    for match in pattern.finditer(line):
+    for match in pattern.finditer(patch):
         payload = match.group(1)
         if len(payload.split('=')[0]) % 8 == 0:
             try:
@@ -48,7 +46,8 @@ def detect_b32(line: str) -> Optional[dict]:
                 if decoded and '\\u' not in decoded and len(decoded) > 3:
                     return {
                         "message": "A hardcoded base32 encoded string. Either malicious or a bad practice. "
-                                   "Set 'FP_STRICT' to False to disable.",
+                                   "(Set 'FP_STRICT' to False to disable)",
+                        "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
                     }
             except (ValueError, UnicodeDecodeError):
@@ -56,9 +55,9 @@ def detect_b32(line: str) -> Optional[dict]:
     return None
 
 
-def detect_hex(line: str) -> Optional[dict]:
+def detect_hex(patch: str) -> Optional[dict]:
     pattern = re.compile(r'((?:[0\\][xX][0-9a-fA-F]{8,})+)')
-    for match in pattern.finditer(line):
+    for match in pattern.finditer(patch):
         payload = match.group(1).replace('\\\\', '\\')
         if len(payload) >= 16:
 
@@ -79,15 +78,16 @@ def detect_hex(line: str) -> Optional[dict]:
             ):
                 return {
                     "message": "A hardcoded hex encoded string. Either malicious or a bad practice. "
-                               "Set 'FP_STRICT' to False to disable.",
+                               "(Set 'FP_STRICT' to False to disable)",
+                    "line_number": get_match_line_number(match, patch),
                     "decoded": decoded
                 }
     return None
 
 
-def detect_unicode(line: str) -> Optional[dict]:
+def detect_unicode(patch: str) -> Optional[dict]:
     pattern = re.compile(r'((?:\\[uU][0-9A-Fa-f]{4})+)')
-    for match in pattern.finditer(line):
+    for match in pattern.finditer(patch):
         payload = match.group(1).replace('\\\\', '\\')
         if len(payload) >= 24:
             try:
@@ -99,7 +99,8 @@ def detect_unicode(line: str) -> Optional[dict]:
                 ):
                     return {
                         "message": "A hardcoded unicode encoded string. Either malicious or a bad practice. "
-                                   "Set 'FP_STRICT' to False to disable.",
+                                   "(Set 'FP_STRICT' to False to disable)",
+                        "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
                     }
             except (UnicodeDecodeError, TypeError):
@@ -126,3 +127,8 @@ def detect_fernet(patch: str) -> Optional[dict]:
             except fernet.InvalidToken:
                 continue  # Ignore FP
     return None
+
+
+def get_match_line_number(match: re.Match, patch: str) -> int:
+    index = match.start()
+    return patch.count('\n', 0, index) + 1

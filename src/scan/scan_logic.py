@@ -50,11 +50,9 @@ def run_scan(changed_files: list[dict[str, str]]) -> Optional[DetectionType]:
 
         additions_list = process_diff(file['diff'], language)
         if not additions_list:
-            return None
+            continue
 
         detection: DetectionType = get_first_detection(file, extension)
-        if additions_list is None:
-            continue
 
         if full_detection_data := enrich_detection(file, detection, additions_list):
             return full_detection_data
@@ -99,18 +97,21 @@ def enrich_detection(
     additions_list: list[tuple]
 ) -> Optional[DetectionType]:
 
+    # Derived from the detector's nature, a match key may or may not be present.
+    # Also helps with Semgerp placing the match field behind an auth wall.
+    match = detection.get('match') or get_loc(file['full_content'], detection['line_number'])
+    
     # Whole updated file is scanned, report only detections in additions.
-    match = get_line_from_code(file['full_content'], detection['line_number'])
     if any(new_code[1] in match for new_code in additions_list):
         return {
             "filename": file['filename'],
             **detection,
-            "match": match
+            "match": match.replace('  ', '')
         }
     return None
 
 
-def get_line_from_code(code: str, line_number: int) -> str:
+def get_loc(code: str, line_number: int) -> str:
     lines = code.split('\n')
     if not (0 < line_number <= len(lines)):
         raise IndexError("Line number out of range")
