@@ -4,7 +4,6 @@ import subprocess
 import tempfile
 from flask import current_app
 from typing import TypedDict, Optional
-from src.scan.languages import major
 from src.settings import RULESET_REPO
 from src.config import get_app_root
 
@@ -75,10 +74,6 @@ def has_new_commits(repo_path: str) -> bool:
 def pull_repo(repo_path: str, repo_url: str) -> None:
     subprocess.run(['git', 'pull', 'origin', 'main'], cwd=repo_path, check=True)
     current_app.logger.info(f"Pulled latest changes from the {repo_url}.")
-
-
-def get_file_extension(lang: str) -> str:
-    return next((key for key, val in major.items() if val == lang), '')
 
 
 def create_temp_file(code_string: str, extension: str) -> str:
