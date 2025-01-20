@@ -21,8 +21,8 @@ def detect_encoded(patch: str) -> Optional[dict]:
 
 
 def detect_b64(line: str) -> Optional[dict]:
-    pattern = r'(?:(?:[\'\"\`])([A-Za-z0-9+/]{12,}={0,2})(?:[\'\"\`]))'
-    for match in re.finditer(pattern, line):
+    pattern = re.compile(r'[\'\"`]([A-Za-z0-9+/]{12,}={0,2})[\'\"`]')
+    for match in pattern.finditer(line):
         payload = match.group(1)
         if len(payload) % 4 == 0:
             try:
@@ -39,8 +39,8 @@ def detect_b64(line: str) -> Optional[dict]:
 
 
 def detect_b32(line: str) -> Optional[dict]:
-    pattern = r'(?:(?:[\'\"\`])([A-Z2-7]{8,}(?:={4}|={6}|))(?:[\'\"\`]))'
-    for match in re.finditer(pattern, line):
+    pattern = re.compile(r'[\'\"`]([A-Z2-7]{8,}(?:={4}|={6}|))[\'\"`]')  # Last pipe represents "nothing"
+    for match in pattern.finditer(line):
         payload = match.group(1)
         if len(payload.split('=')[0]) % 8 == 0:
             try:
@@ -57,8 +57,8 @@ def detect_b32(line: str) -> Optional[dict]:
 
 
 def detect_hex(line: str) -> Optional[dict]:
-    pattern = r'((?:[0|\\][xX][0-9a-fA-F]{8,})+)'
-    for match in re.finditer(pattern, line):
+    pattern = re.compile(r'((?:[0\\][xX][0-9a-fA-F]{8,})+)')
+    for match in pattern.finditer(line):
         payload = match.group(1).replace('\\\\', '\\')
         if len(payload) >= 16:
 
@@ -86,8 +86,8 @@ def detect_hex(line: str) -> Optional[dict]:
 
 
 def detect_unicode(line: str) -> Optional[dict]:
-    pattern = r'((?:\\[uU][0-9A-Fa-f]{4})+)'
-    for match in re.finditer(pattern, line):
+    pattern = re.compile(r'((?:\\[uU][0-9A-Fa-f]{4})+)')
+    for match in pattern.finditer(line):
         payload = match.group(1).replace('\\\\', '\\')
         if len(payload) >= 24:
             try:
@@ -108,10 +108,10 @@ def detect_unicode(line: str) -> Optional[dict]:
 
 
 def detect_fernet(patch: str) -> Optional[dict]:
-    pattern_payload = r'gAAAA[A-Za-z0-9_\-]+=+'
-    for p_match in re.finditer(pattern_payload, patch):
-        pattern_key = r"b'[A-Za-z0-9_-]{43}='"
-        key_matches = re.findall(pattern_key, patch)
+    pattern_payload = re.compile(r'gAAAA[A-Za-z0-9_\-]+=+')
+    for p_match in pattern_payload.finditer(patch):
+        pattern_key = re.compile(r"b'[A-Za-z0-9_-]{43}='")
+        key_matches = pattern_key.findall(patch)
         for k_match in list(set(key_matches)):
             try:
                 key_bytes = k_match[2:-1].encode('ascii')

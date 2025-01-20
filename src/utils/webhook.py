@@ -11,7 +11,8 @@ from src.secret_manager import get_secret
 
 
 def validate_string(string: str) -> None:
-    if not re.fullmatch(r'^[\w$/_\-\[\].]{1,50}$', string):
+    pattern = re.compile(r'^[\w$/_\-\[\].]{1,50}$')
+    if not pattern.fullmatch(string):
         raise ValueError(f"Invalid parameter value: {string}")
 
 
@@ -25,7 +26,8 @@ def validate_pr_number(number: int) -> None:
 
 
 def validate_sha(sha: str) -> None:
-    if not re.match(r'^[a-fA-F0-9]{40}$', sha):
+    pattern = re.compile(r'^[a-fA-F0-9]{40}$')
+    if not pattern.fullmatch(sha):
         raise ValueError(f"Invalid parameter value: {sha}")
 
 
