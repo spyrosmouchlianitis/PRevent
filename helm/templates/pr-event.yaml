@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pr-event
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: pr-event
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pr-event
+  template:
+    metadata:
+      labels:
+        app: pr-event
+    spec:
+      containers:
+        - name: pr-event
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.pod.containerPort }}
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu | quote }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu | quote }}
+              memory: {{ .Values.resources.limits.memory }}
+              #env: todo add
+              # todo add relevant fields per different secreteManagerType
+{{- if .Values.service.clusterIP.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pr-event
+spec:
+  type: ClusterIP
+  selector:
+    app: pr-event
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+{{- end }}
+{{- if .Values.service.NodePort.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pr-event-nodeport
+  {{- if .Values.service.NodePort.annotations }}
+  annotations:
+{{ .Values.service.NodePort.annotations | toYaml | indent 4 }}
+  {{- end }}
+spec:
+  type: NodePort
+  selector:
+    app: pr-event
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8086
+{{- end }}

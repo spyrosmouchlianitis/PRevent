@@ -1,0 +1,4 @@
+apiVersion: v2
+name: pr-event
+version: 1.0.0
+description: Apiiro malicious code scanner

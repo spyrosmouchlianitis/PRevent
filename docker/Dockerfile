@@ -20,7 +20,7 @@ RUN curl -sSL https://install.python-poetry.org | python3 - \
 WORKDIR /pr-event
 
 # Copy only the necessary files to install dependencies first
-COPY pyproject.toml poetry.lock /pr-event/
+COPY ../pyproject.toml /pr-event/
 
 # Install project dependencies with Poetry
 RUN poetry install --no-interaction --no-dev
