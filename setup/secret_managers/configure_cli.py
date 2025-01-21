@@ -72,8 +72,8 @@ def configure_gcloud():
         subprocess.run(["gcloud", "auth", "login"], check=True)
         print("Google Cloud Secret Manager access configured successfully.")
         project_id = input(
-            "Insert the project ID you've created: ['pr-event-app-project']: "
-        ) or 'pr-event-app-project'
+            "Insert the project ID you've created: ['PRevent-app-project']: "
+        ) or 'PRevent-app-project'
         if project_id:
             write_setting('GCLOUD_PROJECT_ID', f"'{project_id}'")
             print(f"Successfully saved 'GCLOUD_PROJECT_ID as {project_id} in 'settings.py'.")

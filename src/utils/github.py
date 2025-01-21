@@ -121,7 +121,7 @@ def create_commit_status(
     commit_sha: str,
     status: str,
     description: str,
-    target_url: str = 'https://github.com/apiiro/pr-event'
+    target_url: str = 'https://github.com/apiiro/PRevent'
 ):
     try:
         commit = repo.get_commit(commit_sha)

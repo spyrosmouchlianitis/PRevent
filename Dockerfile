@@ -16,11 +16,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -sSL https://install.python-poetry.org | python3 - \
     && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Set the working directory to /pr-event inside the container
-WORKDIR /pr-event
+# Set the working directory to /PRevent inside the container
+WORKDIR /PRevent
 
 # Copy only the necessary files to install dependencies first
-COPY pyproject.toml poetry.lock /pr-event/
+COPY pyproject.toml poetry.lock /PRevent/
 
 # Install project dependencies with Poetry
 RUN poetry install --no-interaction --no-dev
@@ -29,7 +29,7 @@ RUN poetry install --no-interaction --no-dev
 FROM python:3.11-slim AS runtime
 
 # Copy all necessary files from the build stage
-COPY --from=build /pr-event .
+COPY --from=build /PRevent .
 
 # Expose the port the app will run on
 EXPOSE 8080
