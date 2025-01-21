@@ -33,7 +33,7 @@ def ensure_cert_and_key() -> None:
         if is_org == "y":
             print(f"openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\")
             print(f"-keyout {KEY_PATH} -out {CERT_PATH} \\")
-            print(f"-subj \"/C=US/ST=None/L=None/O=PR-event/CN=localhost\"")
+            print(f"-subj \"/C=US/ST=None/L=None/O=PRevent/CN=localhost\"")
     
     print("\n")
     print("Save the certificates in the following paths:")

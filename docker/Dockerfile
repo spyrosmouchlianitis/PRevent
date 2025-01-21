@@ -12,7 +12,7 @@ RUN apt-get update && \
     curl -sSL https://install.python-poetry.org | python3 - && \
     ln -s /root/.local/bin/poetry /usr/local/bin/poetry #todo is this required?
 
-# Copying the source code of pr-event to image
+# Copying the source code of prevent to image
 COPY ../setup ../src ../pyproject.toml /
 
 # Install project dependencies with Poetry
@@ -23,5 +23,5 @@ EXPOSE 8080
 # Run setup.py from the ./setup directory
 RUN python -m setup.setup
 
-# Run the pr-event application
+# Run the prevent application
 CMD ["poetry", "run", "gunicorn", "--bind", "0.0.0.0:8080", "src.app:app"]

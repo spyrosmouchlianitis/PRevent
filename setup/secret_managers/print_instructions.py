@@ -14,17 +14,17 @@ def print_instructions(manager):
 
     if manager == 'vault':
         print(bold_text("\n##### HashiCorp Vault Setup #####\n"))
-        print(bold_text("Step 1: On the Vault server, create an AppRole and a policy for pr-event:"))
+        print(bold_text("Step 1: On the Vault server, create an AppRole and a policy for prevent:"))
         print(highlight("""
 vault auth enable approle
 
 vault policy write app-policy - <<EOF
-path "secret/data/pr-event/*" {
+path "secret/data/prevent/*" {
     capabilities = ["create", "read", "update", "delete"]
 }
 EOF
 
-vault write auth/approle/role/app-role token_policies="pr-event-app-policy"
+vault write auth/approle/role/app-role token_policies="prevent-app-policy"
         """, BashLexer(), TerminalFormatter()))
         print(bold_text(
             "\nStep 2: On the Vault server, generate AppRole credentials (role_id, secret_id):\n"
@@ -42,9 +42,9 @@ vault write -f auth/approle/role/app-role/secret-id
     elif manager == 'aws':
         print(bold_text("\n##### AWS Secrets Manager Setup #####\n"))
         print(bold_text(
-            "Step 1: Create an IAM Role for the specific application (e.g. pr-event-app-role):"))
+            "Step 1: Create an IAM Role for the specific application (e.g. prevent-app-role):"))
         print(highlight("""
-aws iam create-role --role-name pr-event-app-role --assume-role-policy-document '{
+aws iam create-role --role-name prevent-app-role --assume-role-policy-document '{
     "Version": "2012-10-17",
     "Statement": [
         {
@@ -58,7 +58,7 @@ aws iam create-role --role-name pr-event-app-role --assume-role-policy-document 
         print(bold_text(
             "Step 2: Attach a policy granting least-privilege secrets access for the role:"))
         print(highlight("""
-aws iam put-role-policy --role-name pr-event-app-role \
+aws iam put-role-policy --role-name prevent-app-role \
 --policy-name prEventAppSecretsPolicy --policy-document '{
     "Version": "2012-10-17",
     "Statement": [
@@ -70,7 +70,7 @@ aws iam put-role-policy --role-name pr-event-app-role \
                 "secretsmanager:PutSecretValue",
                 "secretsmanager:DeleteSecret"
             ],
-            "Resource": "arn:aws:secretsmanager:region:account-id:secret:pr-event-secret-*"
+            "Resource": "arn:aws:secretsmanager:region:account-id:secret:prevent-secret-*"
         }
     ]
 }'
@@ -78,7 +78,7 @@ aws iam put-role-policy --role-name pr-event-app-role \
         print(bold_text("Step 3: Assume the role to retrieve temporary security credentials:"))
         print(highlight("""
 aws sts assume-role \ 
---role-arn arn:aws:iam::account-id:role/pr-event-app-role \ 
+--role-arn arn:aws:iam::account-id:role/prevent-app-role \ 
 --role-session-name "prEventAppSession"
         """, BashLexer(), TerminalFormatter()))
         print(bold_text(
@@ -97,10 +97,10 @@ aws sts assume-role \
         print(bold_text("\n##### Azure Key Vault Setup #####\n"))
         print(bold_text(
             "Step 1: Create a managed identity specifically for the application "
-            "(e.g. pr-event-app-identity):"
+            "(e.g. prevent-app-identity):"
         ))
         print(highlight(
-            "az identity create --name pr-event-app-identity --resource-group pr-event-rg",
+            "az identity create --name prevent-app-identity --resource-group prevent-rg",
             BashLexer(), TerminalFormatter()
         ))
         print(bold_text(
@@ -108,17 +108,17 @@ aws sts assume-role \
             "for secrets in Azure Key Vault:"
         ))
         print(highlight("""
-az keyvault set-policy --name pr-event-keyvault \\
---object-id $(az identity show --name pr-event-app-identity \ 
---resource-group pr-event-rg --query 'principalId' -o tsv) \\
---secret-permissions get list set delete --resource-id /secrets/pr-event-secret-*
+az keyvault set-policy --name prevent-keyvault \\
+--object-id $(az identity show --name prevent-app-identity \ 
+--resource-group prevent-rg --query 'principalId' -o tsv) \\
+--secret-permissions get list set delete --resource-id /secrets/prevent-secret-*
         """, BashLexer(), TerminalFormatter()))
         print(bold_text(
             "Step 3: Ensure network security by applying Key Vault firewall rules "
             "to allow access only from trusted sources:"
         ))
         print(highlight(
-            "az keyvault network-rule add --name pr-event-keyvault --ip-address <trusted-ip>",
+            "az keyvault network-rule add --name prevent-keyvault --ip-address <trusted-ip>",
             BashLexer(), TerminalFormatter()
         ))
         print(bold_text(
@@ -133,28 +133,28 @@ az keyvault set-policy --name pr-event-keyvault \\
         print(bold_text("\n##### Google Cloud Secret Manager Setup #####\n"))
         print(bold_text(
             "Step 1: Create and set a Google Cloud project for your application"
-            "(e.g. pr-event-app-project):\n"
+            "(e.g. prevent-app-project):\n"
         ))
         print(highlight("""
-gcloud projects create pr-event-app-project
+gcloud projects create prevent-app-project
 
-gcloud config set project pr-event-app-project
+gcloud config set project prevent-app-project
         """, BashLexer(), TerminalFormatter()))
         print(bold_text(
-            "Step 2: Create a service account for the application (e.g. pr-event-app-sa)"
+            "Step 2: Create a service account for the application (e.g. prevent-app-sa)"
             "and grant secret access:\n"
         ))
         print(highlight("""
-gcloud iam service-accounts create pr-event-app-sa --display-name "Service Account for pr-event app"
+gcloud iam service-accounts create prevent-app-sa --display-name "Service Account for prevent app"
 
-gcloud projects add-iam-policy-binding pr-event-app-project \
---member "serviceAccount:pr-event-app-sa@pr-event-app-project.iam.gserviceaccount.com" \ 
+gcloud projects add-iam-policy-binding prevent-app-project \
+--member "serviceAccount:prevent-app-sa@prevent-app-project.iam.gserviceaccount.com" \ 
 --role "roles/secretmanager.secretAccessor"
         """, BashLexer(), TerminalFormatter()))
         print(bold_text("Step 3: Generate and download the service account key."))
         print(highlight("""
-gcloud iam service-accounts keys create pr-event-app-sa-key.json \
---iam-account pr-event-app-sa@pr-event-app-project.iam.gserviceaccount.com
+gcloud iam service-accounts keys create prevent-app-sa-key.json \
+--iam-account prevent-app-sa@prevent-app-project.iam.gserviceaccount.com
         """, BashLexer(), TerminalFormatter()))
         print(bold_text(
             "Step 4: Return here to \"gcloud auth login\" and fill in the resulted credentials, "

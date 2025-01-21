@@ -67,15 +67,15 @@ else
 fi
 
 # Create policy if not exists
-if ! vault policy read pr-event-app-policy > /dev/null 2>&1; then
-    echo "Creating policy pr-event-app-policy."
-    vault policy write pr-event-app-policy - <<EOF
-path "secret/data/pr-event/*" {
+if ! vault policy read prevent-app-policy > /dev/null 2>&1; then
+    echo "Creating policy prevent-app-policy."
+    vault policy write prevent-app-policy - <<EOF
+path "secret/data/prevent/*" {
     capabilities = ["create", "read", "update", "delete"]
 }
 EOF
 else
-    echo "Policy pr-event-app-policy already exists."
+    echo "Policy prevent-app-policy already exists."
 fi
 
 # Enable AppRole if not already enabled
@@ -85,16 +85,16 @@ if ! vault auth list | grep -q 'approle'; then
 fi
 
 # Create or update AppRole
-if ! vault read auth/approle/role/pr-event-app-role > /dev/null 2>&1; then
-    echo "Creating AppRole pr-event-app-role."
-    vault write auth/approle/role/pr-event-app-role token_policies="pr-event-app-policy" || { echo "Failed to create AppRole."; exit 1; }
+if ! vault read auth/approle/role/prevent-app-role > /dev/null 2>&1; then
+    echo "Creating AppRole prevent-app-role."
+    vault write auth/approle/role/prevent-app-role token_policies="prevent-app-policy" || { echo "Failed to create AppRole."; exit 1; }
 else
-    echo "AppRole pr-event-app-role already exists."
+    echo "AppRole prevent-app-role already exists."
 fi
 
 # Generate credentials
-ROLE_ID=$(vault read -field=role_id auth/approle/role/pr-event-app-role/role-id) || { echo "Failed to generate role_id"; exit 1; }
-SECRET_ID=$(vault write -f -field=secret_id auth/approle/role/pr-event-app-role/secret-id) || { echo "Failed to generate secret_id"; exit 1; }
+ROLE_ID=$(vault read -field=role_id auth/approle/role/prevent-app-role/role-id) || { echo "Failed to generate role_id"; exit 1; }
+SECRET_ID=$(vault write -f -field=secret_id auth/approle/role/prevent-app-role/secret-id) || { echo "Failed to generate secret_id"; exit 1; }
 
 echo "AppRole credentials: role_id=$ROLE_ID, secret_id=$SECRET_ID"
 

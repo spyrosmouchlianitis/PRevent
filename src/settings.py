@@ -20,7 +20,7 @@ APP_TLS = False
 SCAN_CONTEXT = "apiiro-scan"
 
 # Dir for storing log file, and if relevant: Vault address, TLS certificates
-CONFIG_DIR = os.path.expanduser('~/.pr-event')
+CONFIG_DIR = os.path.expanduser('~/.prevent')
 os.makedirs(CONFIG_DIR, exist_ok=True)
 
 # Logging
@@ -28,7 +28,7 @@ INFO_LOG_FILE = f'{CONFIG_DIR}/info.log'
 ERROR_LOG_FILE = f'{CONFIG_DIR}/error.log'
 
 # Repos
-APP_REPO = "https://github.com/apiiro/pr-event"
+APP_REPO = "https://github.com/apiiro/prevent"
 RULESET_REPO = "https://github.com/apiiro/malicious-code-ruleset"
 
 # Set to a remote service

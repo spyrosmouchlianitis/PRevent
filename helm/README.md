@@ -1,2 +1,2 @@
-# PR-event Helm Chart
+# PRevent Helm Chart
 

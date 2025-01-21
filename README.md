@@ -1,16 +1,16 @@
-# PR-event
+# PRevent
 
 
 ## Overview
 
 A self-hosted GitHub app that listens for pull request events, scans diffs for malicious code, and posts detections directly on the pull request.
 
-Typically, security scans are run by workflow files. Files can be modified, and when dealing with source modification attacks, should be avoided. A GitHub app approach addresses this gap, ensuring the scan is not bypassed. The app's logic can be leveraged to run any scan. All you need is to add a scanner method to the [scan logic](https://github.com/apiiro/pr-event/blob/main/src/scan/scan_logic.py).
+Typically, security scans are run by workflow files. Files can be modified, and when dealing with source modification attacks, should be avoided. A GitHub app approach addresses this gap, ensuring the scan is not bypassed. The app's logic can be leveraged to run any scan. All you need is to add a scanner method to the [scan logic](https://github.com/apiiro/prevent/blob/main/src/scan/scan_logic.py).
 
 
 ## Malware Detection
 
-Currently, PR-event detects dynamic code execution and obfuscation, patterns found in nearly 100% of malicious code attacks reported to this day, while being rare in benign code, making the scan very effective. It uses Apiiro's [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) for Semgrep, alongside additional Python-based detectors. Only rules and detectors with low false-positive rates are included. 
+Currently, PRevent detects dynamic code execution and obfuscation, patterns found in nearly 100% of malicious code attacks reported to this day, while being rare in benign code, making the scan very effective. It uses Apiiro's [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) for Semgrep, alongside additional Python-based detectors. Only rules and detectors with low false-positive rates are included. 
 
 
 ## Extra Capabilities
@@ -44,11 +44,11 @@ python3 setup/secret_managers/print_instructions.py {vault|aws|azure|gcloud|loca
 Then, create a GitHub app in GitHub:
 1. Go to https://github.com/settings/apps to create a new GitHub App.
 2. Set metadata:  
-   - Name: pr-event  
+   - Name: prevent  
    - Description: Detects malicious code in pull requests.  
-   - URL: https://github.com/apiiro/PR-event.git
+   - URL: https://github.com/apiiro/PRevent.git
 3. Set the webhook URL: the address where the app will listen. Endpoint: `/webhook`. Examples:  
-   - https://pr-event.u.com/webhook  
+   - https://prevent.u.com/webhook  
    - https://10.0.0.7/webhook
 4. Set required permissions:
 
@@ -80,8 +80,8 @@ Lastly, optionally configure security reviewers, included branches, and excluded
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/apiiro/pr-event.git
-   cd pr-event
+   git clone https://github.com/apiiro/prevent.git
+   cd prevent
    ```
 2. Install dependencies (Semgrep installation takes a moment):
 
@@ -152,4 +152,4 @@ This repository is licensed under the [MIT License](LICENSE).
 ---
 
 For more information:
-https://apiiro.com/blog/pr-event-malicious-code
+https://apiiro.com/blog/prevent-malicious-code

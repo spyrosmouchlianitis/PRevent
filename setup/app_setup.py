@@ -1,6 +1,5 @@
 import os
 import sys
-import logging
 import secrets
 from getpass import getpass
 from contextlib import redirect_stderr
@@ -36,9 +35,9 @@ def set_github_app(secret_manager):
     print("\n")
     print("Visit https://github.com/settings/apps to create a new GitHub App.")
     print("\033[1mSet the following fields: \033[0m")
-    print("    GitHub App name: PR-event")
+    print("    GitHub App name: PRevent")
     print("    Write: Detects malicious code in pull requests.")
-    print("    Homepage URL: https://github.com/apiiro/PR-event.git")
+    print("    Homepage URL: https://github.com/apiiro/PRevent.git")
     input("\nPress Enter when you've completed this step.")
 
     # Webhook URL
