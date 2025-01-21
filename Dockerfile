@@ -1,44 +1,33 @@
-# A lightweight official Python base image for build stage
-FROM python:3.11-slim AS build
+FROM python:3.11-alpine
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=off \
-    POETRY_VERSION=1.8.0
+    POETRY_VERSION=1.8.0 \
+    FLASK_ENV=production \
+    PYTHONPATH=/prevent
 
-# Install system dependencies required for your app and pip package installation
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libpq-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Installing required linux packages + poetry
+RUN apk update && \
+    apk add gcc libpq-dev curl && \
+    rm -rf /var/cache/apk/* && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    # Default Alpine PATH doesn't include /root/.local/bin/
+    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Install Poetry for dependency management
-RUN curl -sSL https://install.python-poetry.org | python3 - \
-    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+WORKDIR /prevent
 
-# Set the working directory to /PRevent inside the container
-WORKDIR /PRevent
-
-# Copy only the necessary files to install dependencies first
-COPY pyproject.toml poetry.lock /PRevent/
+# Copying the source code of prevent to image
+COPY ./src /prevent/src
+COPY ./setup /prevent/setup
+COPY ./pyproject.toml /prevent/pyproject.toml
 
 # Install project dependencies with Poetry
 RUN poetry install --no-interaction --no-dev
 
-# A smaller, cleaner runtime image
-FROM python:3.11-slim AS runtime
-
-# Copy all necessary files from the build stage
-COPY --from=build /PRevent .
-
-# Expose the port the app will run on
 EXPOSE 8080
 
-# Set the environment to production
-ENV FLASK_ENV=production
-
 # Run setup.py from the ./setup directory
-CMD ["python", "-m", "setup.setup"]
+RUN python -m setup.setup_container
 
-# Change CMD to use Gunicorn through Poetry
+# Run the prevent application
 CMD ["poetry", "run", "gunicorn", "--bind", "0.0.0.0:8080", "src.app:app"]
