@@ -21,12 +21,15 @@ def is_branch_included(repo_name, branch_name) -> bool:
     include_branches = get_secret('BRANCHES_INCLUDE')
     exclude_branches = get_secret('BRANCHES_EXCLUDE')
 
-    if repo_name in exclude_branches and branch_name in exclude_branches[repo_name]:
-        return False
+    if repo_name in exclude_branches:
+        if exclude_branches[repo_name] == 'all' or branch_name in exclude_branches[repo_name]:
+            return False
     
     if include_branches:
         if repo_name not in include_branches:
             return False
+        elif include_branches[repo_name] == 'all':
+            return True
         elif branch_name not in include_branches[repo_name]:
             return False
 

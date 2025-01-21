@@ -198,7 +198,7 @@ def set_github_app(secret_manager):
             try:
                 print("Enter reviewer account or teams.")
                 print("For teams, list as 'team:team_id' to include all members.")
-                print("Format: account1, account2, team:devsecops, etc.")
+                print("Format: account1, account2, team:appsec, etc.")
                 print("(verify inputs for typos and correct format)")
                 security_reviewers = []
                 while True:
