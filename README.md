@@ -79,7 +79,7 @@ Permissions required to operate your dedicated role (make sure to not assign any
 3. Set the webhook URL: the address where the app will listen. Endpoint: `/webhook`. Examples:  
    - https://prevent.u.com/webhook  
    - https://10.0.0.7/webhook
-4. Under the webhook URL field, set the secret field in order to process only requests originating from GitHub. You can run `python -c 'import secrets; print(secrets.token_hex(32))'` to generate one. Then, store it in your secrets manager as `WEBHOOK_SECRET`.
+4. Under the webhook URL field, set the secret field in order to process only requests originating from GitHub. You can run `python -c 'import secrets; print(secrets.token_hex(32))'` to generate one. Then, store it in your secrets manager as **WEBHOOK_SECRET**.
 5. Set required permissions:
 
 | Parent     | Permission      | Action          | Reason                                                |
@@ -99,18 +99,27 @@ Permissions required to operate your dedicated role (make sure to not assign any
    1. `Pull request`
    2. `Pull request review`
 
-8. Click "Create GitHub App". Copy the App ID and store it in your secret manager as `GITHUB_APP_INTEGRATION_ID`.
-9. Generate a private key, store it in your secret manager as `GITHUB_APP_PRIVATE_KEY`, and make sure to delete the file.
+8. Click "Create GitHub App". Copy the App ID and store it in your secret manager as **GITHUB_APP_INTEGRATION_ID**.
+9. Generate a private key, store it in your secret manager as **GITHUB_APP_PRIVATE_KEY**, and make sure to delete the file.
 
 
 ## 3. Deployment
 
 ### Optional Parameters
 
-1. `PR_BLOCK`: To block merging until either a reviewer approves the pull request or the scan passes, set it to `True` in your secret manager.
-2. `SECURITY_REVIEWERS`: To trigger code reviews upon detections, configure it in your secret manager with a Python list of reviewer accounts or teams (e.g., `['account1', 'account2', 'team:appsec']`). Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand.
-3. `INCLUDE_BRANCHES` or `EXCLUDE_BRANCHES`: To include or exclude specific repos and branches for monitoring, set either in your secret manager with a Python dictionary. Use `{'repo1': 'all'}` to include or exclude all repo's branches, or specify a list of branches (e.g., `{'repo1': ['main', 'branch2'], 'repo2': 'all'}`). Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand. By default, all repositories and branches are monitored.
-4. `FP_STRICT`: To minimize false positives by running only `ERROR` severity rules and detectors (primarily a small subset of obfuscation detection), set it to `True` in your secret manager.
+* **PR_BLOCK**: 
+To block merging until either a reviewer approves the pull request or the scan passes, set it to `True` in your secret manager.
+
+* **SECURITY_REVIEWERS**: 
+To trigger code reviews upon detections, configure it in your secret manager with a Python list of reviewer accounts or teams (e.g., `['account1', 'account2', 'team:appsec']`). Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand.
+
+* **INCLUDE_BRANCHES** or **EXCLUDE_BRANCHES**:
+To include or exclude specific repos and branches for monitoring, set either in your secret manager with a Python dictionary. 
+Use `{'repo1': 'all'}` to include or exclude all repo's branches, or specify a list of branches (e.g., `{'repo1': ['main', 'branch2'], 'repo2': 'all'}`). 
+Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand. By default, all repositories and branches are monitored.
+
+* **FP_STRICT**:
+To minimize false positives by running only `ERROR` severity rules and detectors (primarily a small subset of obfuscation detection), set it to `True` in your secret manager.
 
 
 ### Containerized Deployment
