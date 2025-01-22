@@ -1,14 +1,13 @@
-import os
 import sys
 import secrets
 from getpass import getpass
-from contextlib import redirect_stderr
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from src.secret_manager import get_secret, set_secret
+from src.secret_manager import set_secret
 from src.settings import WEBHOOK_PORT
 from src.config import rewrite_setting
-from setup.utils import get_host
+from setup.utils import get_host, is_secret_set
+
 
 # Secrets:
 _webhook_secret = 'WEBHOOK_SECRET'
@@ -18,16 +17,6 @@ _security_reviewers = 'SECURITY_REVIEWERS'
 _branches_include = 'BRANCHES_INCLUDE'
 _branches_exclude = 'BRANCHES_EXCLUDE'
 _protected_branches = 'PROTECTED_BRANCHES'
-
-
-def is_secret_set(secret):
-    try:
-        with open(os.devnull, 'w') as hide, redirect_stderr(hide):
-            get_secret(secret)
-        return True
-    except (ValueError, Exception):
-        pass
-    return False
 
 
 def set_github_app(secret_manager):

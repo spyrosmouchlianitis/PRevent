@@ -1,6 +1,19 @@
 import socket
 import ipaddress
+import os
 import subprocess
+from contextlib import redirect_stderr
+from src.secret_manager import get_secret
+
+
+def is_secret_set(secret) -> bool:
+    try:
+        with open(os.devnull, 'w') as hide, redirect_stderr(hide):
+            get_secret(secret)
+        return True
+    except (ValueError, Exception):
+        pass
+    return False
 
 
 def get_public_domain() -> str:
