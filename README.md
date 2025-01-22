@@ -3,12 +3,12 @@
 
 ## Overview
 
-A self-hosted GitHub app that listens for pull request events, scans diffs for malicious code, and posts detections directly on the pull request.
+A self-hosted GitHub app that listens for pull request events, scans them for malicious code, and comments detections directly on the pull request.
 
-Typically, security scans are run by workflow files. Files can be modified, and when dealing with source modification attacks, should be avoided. A GitHub app approach addresses this gap, ensuring the scan is not bypassed. The app's logic can be leveraged to run any scan. All you need is to add a scanner method to the [scan logic](https://github.com/apiiro/prevent/blob/main/src/scan/scan_logic.py).
+Typically, security scans are run by workflow files. However, files can be modified, and when dealing with source modification attacks, should be avoided. A GitHub app approach addresses this gap, ensuring the scan is not bypassed. The app's logic can be leveraged to run any scan. All you need is to add a scanner method to the [scan logic](https://github.com/apiiro/prevent/blob/main/src/scan/scan_logic.py).
 
 
-## Malware Detection
+## Malicious Code Detection
 
 Currently, PRevent detects dynamic code execution and obfuscation, patterns found in nearly 100% of malicious code attacks reported to this day, while being rare in benign code, making the scan very effective. It uses Apiiro's [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) for Semgrep, alongside additional Python-based detectors. Only rules and detectors with low false-positive rates are included. 
 
@@ -16,15 +16,15 @@ Currently, PRevent detects dynamic code execution and obfuscation, patterns foun
 ## Extra Capabilities
 
 Optional features:
-- Granular selection of repositories and branches to include or exclude from the scan.
+- Select repositories and branches to include or exclude from the scan (default: all).
 - Trigger code reviews from designated reviewers.
 - Block merging until a reviewer's approval is granted or the scan passes.
 - Run only the rules and detectors with the lowest false-positive rates.
 
 Deployment:
-- Supports containerization with a Dockerfile, Helm chart, and [TODO: complete description].
-- Manual installation is fully automated via an interactive setup script.
-- Multiple secret managers supported for managing the GitHub key (required for any GitHub app):
+- Supports containerization.
+- Non-containerized deployment is fully automated with an interactive setup script.
+- To manage GitHub key (required for any GitHub app), multiple secret managers are supported:
   - HashiCorp Vault
   - AWS Secrets Manager
   - Azure Key Vault
@@ -32,35 +32,87 @@ Deployment:
   - Local HashiCorp Vault (for development and testing)
 
 
+## Supported languages
+
+- Bash
+- Clojure
+- C#
+- Dart
+- Go
+- Java
+- JavaScript
+- TypeScript
+- Lua
+- PHP
+- Python
+- Ruby
+- Rust
+- Scala
+
+
 # Setup
 
 Deploying PRevent involves three parts, typically completed in 5 minutes to an hour, depending on your setup and familiarity:  
 1. Configure an existing secret manager or create a new one.
 2. Create a GitHub app within your GitHub organization or account.
-3. Deploy the application to a server (supports both containerized and raw).
+3. Deploy the application to a server.
 
+
+## Non-Containerized Setup
+
+Parts 1 and 2 are handled during the interactive setup process in step 3:
+
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/apiiro/prevent.git
+   cd prevent
+   ```
+2. Install dependencies by either:  
+   ```bash
+   poetry install  
+  
+   pip install -r requirements.txt  
+   ```
+3. Go through the setup process:
+   ```bash
+   python3 -m setup.setup
+   ```
+4. Start the server:
+   ```bash
+   gunicorn --bind 0.0.0.0:8080 src.app:app 
+   ```
+
+
+# Containerized Setup
 
 ## 1. Secret Manager
 
-The app communicates with GitHub using authenticated requests, requiring a private key and app ID. To minimize security risks, a secret manager should be used with minimal permissions. Optionally, other sensitive details (accounts, teams, repositories, branches) may be stored, while the rest of the configuration is minimal. To ensure centralization and simplicity, all parameters (3 required, 6 optional - see full list in a later section) are stored in the secret manager.
+The application communicates with GitHub via authenticated requests, which require three sensitive parameters:
+- **Private Key** (`GITHUB_APP_PRIVATE_KEY`)
+- **App ID** (`GITHUB_APP_INTEGRATION_ID`)
+- **Webhook Secret** (`WEBHOOK_SECRET`)
 
-Supported secret managers:
+To minimize security risks, these parameters should be stored in a secret manager with minimal permissions. Optionally, you may store additional sensitive details such as:
+- **Repositories and branches** (`BRANCHES_INCLUDE`, `BRANCHES_EXCLUDE`)
+- **Accounts and teams** (`SECURITY_REVIEWERS`)
 
-* HashiCorp Vault
-* AWS Secrets Manager
-* Azure Key Vault
-* Google Cloud Secret Manager
-* Local HashiCorp Vault (for development/testing)
+The application handles all parameters exclusively through the secret manager (see supported managers below). In containerized deployments, this applies also for insensitive parameters (all are optional), for centralization and simplicity. Upon initialization, these parameters are written to `src/settings.py` to avoid repeated fetching during runtime. These include:
+- **Block PRs** (`BLOCK_PR`)
+- **False Positive Strictness** (`FP_STRICT`)
+- **JWT Expiry** (`JWT_EXPIRY_SECONDS`)
+- **Webhook Port** (`WEBHOOK_PORT`)
+
 
 ### Secret Manager Setup Instructions
 
-Use a dedicated section in your secret manager for this app, separated from the rest. Use a dedicated role with minimal permissions, to access only the dedicated section. If you are not sure how, try the following instructions:
+First, set **SECRET_MANAGER** in your secret manager to either: vault, aws, azure, gcloud, or local.
+
+Dedicate a section in your secret manager for this app, separated from the rest. Create an app role with minimal permissions, to access the dedicated section only. If you are not sure how, try the following instructions:
 ```bash
 python3 setup/secret_managers/print_instructions.py SECRET_MANAGER
 ```
-Replace SECRET_MANAGER with: vault, aws, azure, gcloud, or local.
 
-Permissions required to operate your dedicated role (make sure to not assign anything else):
+Permissions required to operate the role:
 
 | Permission | Vault                  | AWS                           | Azure                     | GCloud                    |
 |------------|------------------------|-------------------------------|---------------------------|---------------------------|
@@ -79,7 +131,7 @@ Permissions required to operate your dedicated role (make sure to not assign any
 3. Set the webhook URL: the address where the app will listen. Endpoint: `/webhook`. Examples:  
    - https://prevent.u.com/webhook  
    - https://10.0.0.7/webhook
-4. Under the webhook URL field, set the secret field in order to process only requests originating from GitHub. You can run `python -c 'import secrets; print(secrets.token_hex(32))'` to generate one. Then, store it in your secrets manager as `WEBHOOK_SECRET`.
+4. Under the webhook URL field, set the secret field in order to process only requests originating from GitHub. You can run `python -c 'import secrets; print(secrets.token_hex(32))'` to generate one. Then, store it in your secrets manager as **WEBHOOK_SECRET**.
 5. Set required permissions:
 
 | Parent     | Permission      | Action          | Reason                                                |
@@ -96,24 +148,33 @@ Permissions required to operate your dedicated role (make sure to not assign any
 | Repository    | Administration | Read and write  | Manage branch protection |
 
 7. Subscribe to the following events:
-   1. `Pull request`
-   2. `Pull request review`
+   * `Pull request`
+   * `Pull request review`
 
-8. Click "Create GitHub App". Copy the App ID and store it in your secret manager as `GITHUB_APP_INTEGRATION_ID`.
-9. Generate a private key, store it in your secret manager as `GITHUB_APP_PRIVATE_KEY`, and make sure to delete the file.
+8. Click "Create GitHub App". Copy the App ID and store it in your secret manager as **GITHUB_APP_INTEGRATION_ID**.
+9.  Generate a private key, store it in your secret manager as **GITHUB_APP_PRIVATE_KEY**, and make sure to delete the file.
 
 
 ## 3. Deployment
 
 ### Optional Parameters
 
-1. `PR_BLOCK`: To block merging until either a reviewer approves the pull request or the scan passes, set it to `True` in your secret manager.
-2. `SECURITY_REVIEWERS`: To trigger code reviews upon detections, configure it in your secret manager with a Python list of reviewer accounts or teams (e.g., `['account1', 'account2', 'team:appsec']`). Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand.
-3. `INCLUDE_BRANCHES` or `EXCLUDE_BRANCHES`: To include or exclude specific repos and branches for monitoring, set either in your secret manager with a Python dictionary. Use `{'repo1': 'all'}` to include or exclude all repo's branches, or specify a list of branches (e.g., `{'repo1': ['main', 'branch2'], 'repo2': 'all'}`). Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand. By default, all repositories and branches are monitored.
-4. `FP_STRICT`: To minimize false positives by running only `ERROR` severity rules and detectors (primarily a small subset of obfuscation detection), set it to `True` in your secret manager.
+- **PR_BLOCK**: 
+To block merging until either a reviewer approves the pull request or the scan passes, set it to `True` in your secret manager.
+
+- **SECURITY_REVIEWERS**: 
+To trigger code reviews upon detections, configure it in your secret manager with a Python list of reviewer accounts or teams (e.g., `['account1', 'account2', 'team:appsec']`). Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand.
+
+- **INCLUDE_BRANCHES** or **EXCLUDE_BRANCHES**:
+To include or exclude specific repos and branches for monitoring, set either in your secret manager with a Python dictionary. 
+Use `{'repo1': 'all'}` to include or exclude all repo's branches, or specify a list of branches (e.g., `{'repo1': ['main', 'branch2'], 'repo2': 'all'}`). 
+Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforehand. By default, all repositories and branches are monitored.
+
+- **FP_STRICT**:
+To minimize false positives by running only `ERROR` severity rules and detectors (primarily a small subset of obfuscation detection), set it to `True` in your secret manager.
 
 
-### Containerized Deployment
+### Deployment
 
 TODO: Add a CLEAR explanation on how to securely pass these to the container. Also, clarify and expand on anything else in this section that deserves it.
 
@@ -150,69 +211,21 @@ docker run --rm -it --entrypoint /bin/sh us-docker.pkg.dev/user/public-images/pr
 ```
 
 
-### Manual Deployment
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/apiiro/prevent.git
-   cd prevent
-   ```
-2. Install dependencies (Semgrep installation takes a moment):
-
-   Using Poetry:
-   ```bash
-   poetry install
-   ```
-
-   Using pip:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Go through the setup process:
-   ```bash
-   python3 -m setup.setup
-   ```
-4. Start the server:
-   ```bash
-   gunicorn --bind 0.0.0.0:8080 src.app:app 
-   ```
-5. For dev and testing:
-   ```bash
-   python3 -m src.app 
-   ```
-
-
 ## Configuration Parameters Summary
 
-| Parameter          | Name                      | Purpose                                             | source | Default |
-|--------------------|---------------------------|-----------------------------------------------------|--------|---------|
-| private key        | GITHUB_APP_PRIVATE_KEY    | Authenticates the app with GitHub                   | GitHub | -       |
-| app ID             | GITHUB_APP_INTEGRATION_ID | Authenticates the app with GitHub                   | GitHub | -       |
-| webhook secret     | WEBHOOK_SECRET            | Validates events are sent by GitHub                 | GitHub | -       |
-| included branches  | BRANCHES_INCLUDE          | Branches to scan (all by default)                   | user   | {}      |
-| exclude branches   | BRANCHES_EXCLUDE          | Branches to not scan                                | user   | {}      |
-| security reviewers | SECURITY_REVIEWERS        | GitHub accounts and teams to review detections      | user   | []      |
-| block merging      | BLOCK_PR                  | Block merging in pull requests with detections      | user   | False   |
-| minimize FP        | FP_STRICT                 | Run only `ERROR` severity rules, exclude `WARNING`  | user   | False   |
-| JWT expiry time    | JWT_EXPIRY_SECONDS        | Limit the app's GitHub auth token TTL               | user   | 120     |
-
-
-## Supported languages
-
-Bash
-Clojure
-C#
-Dart
-Go
-Java
-JavaScript
-TypeScript
-Lua
-PHP
-Python
-Ruby
-Rust
-Scala
+| Parameter          | Name                      | Purpose                                            | Source | Required | Type                   | Default | Example              |
+|--------------------|---------------------------|----------------------------------------------------|--------|----------|------------------------|---------|----------------------|
+| secret manager     | SECRET_MANAGER            | SM to use (cli client, Python package, calls)      | user   | yes      | str                    | vault   | aws                  |
+| private key        | GITHUB_APP_PRIVATE_KEY    | Authenticates the app with GitHub                  | GitHub | yes      | str                    | -       | -----BEGIN RSA...    |
+| app ID             | GITHUB_APP_INTEGRATION_ID | Authenticates the app with GitHub                  | GitHub | yes      | str                    | -       | 1234567              |
+| webhook secret     | WEBHOOK_SECRET            | Validates requests source (>32 random characters)  | GitHub | yes      | str                    | -       | 039e362cd52...       |
+| included branches  | BRANCHES_INCLUDE          | Repos and branches to scan (all by default)        | user   | no       | dict[str, list \| str] | {}      | {'r1': ['b1', 'b2']} |
+| exclude branches   | BRANCHES_EXCLUDE          | Repos and branches to not scan                     | user   | no       | dict[str, list \| str] | {}      | {'r': 'all'}         |
+| security reviewers | SECURITY_REVIEWERS        | GitHub accounts and teams to review detections     | user   | no       | list                   | []      | ['jdoe', 'team:sec'] |
+| block merging      | BLOCK_PR                  | Block merging in pull requests with detections     | user   | no       | bool                   | False   | True                 |
+| minimize FP        | FP_STRICT                 | Run only `ERROR` severity rules, exclude `WARNING` | user   | no       | bool                   | False   | True                 |
+| webhook port       | WEBHOOK_PORT              | The port on which the app listens                  | user   | no       | int                    | 8080    | 8443                 |
+| JWT expiry time    | JWT_EXPIRY_SECONDS        | Limit the app's GitHub auth token TTL              | user   | no       | int                    | 120     | 60                   |
 
 
 ## Contributing
