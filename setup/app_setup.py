@@ -1,6 +1,5 @@
 import os
 import sys
-import logging
 import secrets
 from getpass import getpass
 from contextlib import redirect_stderr
