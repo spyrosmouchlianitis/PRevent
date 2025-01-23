@@ -96,11 +96,11 @@ To minimize security risks, these parameters should be stored in a secret manage
 - **Repositories and branches** (`BRANCHES_INCLUDE`, `BRANCHES_EXCLUDE`)
 - **Accounts and teams** (`SECURITY_REVIEWERS`)
 
-The application handles all parameters exclusively through the secret manager (see supported managers below). In containerized deployments, this applies also for insensitive parameters (all are optional), for centralization and simplicity. Upon initialization, these parameters are written to `src/settings.py` to avoid repeated fetching during runtime. These include:
+The application handles all parameters exclusively through the secret manager (see supported managers below). In containerized deployments, this applies also for insensitive parameters, all are optional, for centralization and simplicity. Upon initialization, these parameters are written to `src/settings.py` to avoid repeated fetching during runtime. These include:
 - **Block PRs** (`BLOCK_PR`)
 - **False Positive Strictness** (`FP_STRICT`)
 - **JWT Expiry** (`JWT_EXPIRY_SECONDS`)
-- **Webhook Port** (`WEBHOOK_PORT`)
+- **Webhook Port** (`WEBHOOK_PORT`) - has to be manually updated in the Dockerfile
 
 
 ### Secret Manager Setup Instructions
@@ -157,6 +157,11 @@ Permissions required to operate the role:
 
 ## 3. Deployment
 
+1. Set any desired optional parameters from below in your secret manager.
+2. Follow the [Docker README](docker/README.md) to build, configure and register your container image.
+3. Follow the [Helm README](helm/README.md) to package and deploy your container to your Kubernetes cluster according to best practices.
+
+
 ### Optional Parameters
 
 - **BLOCK_PR**: 
@@ -172,43 +177,6 @@ Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforeha
 
 - **FP_STRICT**:
 To minimize false positives by running only `ERROR` severity rules and detectors (primarily a small subset of obfuscation detection), set it to `True` in your secret manager.
-
-
-### Deployment
-
-TODO: Add a CLEAR explanation on how to securely pass these to the container. Also, clarify and expand on anything else in this section that deserves it.
-
-Credentials required to operate your dedicated app role: 
-
-| Vault        | AWS                          | Azure                      | GCloud                              |
-|--------------|------------------------------|----------------------------|-------------------------------------|
-| VAULT_ADDR   | AWS_ACCESS_KEY_ID            | AZURE_CLIENT_ID            | GOOGLE_APPLICATION_CREDENTIALS_JSON | 
-| VAULT_TOKEN  | AWS_SECRET_ACCESS_KEY        | AZURE_CLIENT_SECRET        | GOOGLE_CLOUD_PROJECT                |
-|              | AWS_SESSION_TOKEN (optional) | AZURE_TENANT_ID (optional) | GOOGLE_CLOUD_REGION (optional)      |
-|              |                              |                            | GOOGLE_API_KEY (optional)           |
-
-1. Build the app using the provided `Dockerfile`:
-```bash
-docker buildx build -t prevent .
-```
-2. Push the image to your container registry (e.g. GCR):
-```bash
-PREVENT_TAG=1.0
-docker buildx build \
-  --platform linux/arm64/v8,linux/amd64 \
-  --push --pull \
-  -t us-docker.pkg.dev/user/public-images/prevent:$PREVENT_TAG \
-  .
-```
-3. Run the container:
-```bash
-PREVENT_TAG=1.0
-docker run --rm -it us-docker.pkg.dev/user/public-images/prevent:$PREVENT_TAG
-```
-4. Access the container:
-``` bash
-docker run --rm -it --entrypoint /bin/sh us-docker.pkg.dev/user/public-images/prevent:$PREVENT_TAG
-```
 
 
 ## Configuration Parameters Summary

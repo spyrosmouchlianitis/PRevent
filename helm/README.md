@@ -1,8 +1,18 @@
 # PRevent Helm Chart
 
+Credentials required to operate your secret manager's dedicated app-role: 
+
+| Vault        | AWS                          | Azure                      | GCloud                              |
+|--------------|------------------------------|----------------------------|-------------------------------------|
+| VAULT_ADDR   | AWS_ACCESS_KEY_ID            | AZURE_CLIENT_ID            | GOOGLE_APPLICATION_CREDENTIALS_JSON | 
+| VAULT_TOKEN  | AWS_SECRET_ACCESS_KEY        | AZURE_CLIENT_SECRET        | GOOGLE_CLOUD_PROJECT                |
+|              | AWS_SESSION_TOKEN (optional) | AZURE_TENANT_ID (optional) | GOOGLE_CLOUD_REGION (optional)      |
+|              |                              |                            | GOOGLE_API_KEY (optional)           |
+
+
 ## Step 1 - prerequisites
 
-Create a namespace for the prevent helm chart
+Create a namespace for the PRevent helm chart
 
 ```shell
 kubectl create namespace <namespace>
@@ -11,7 +21,7 @@ kubectl create namespace <namespace>
 Create a Kubernetes secret for your secret manager credentials
 Choose one of the following:
 
-#### Vault
+### Vault
 
 ```shell
 kubectl create secret generic vault-credentials \
@@ -20,7 +30,7 @@ kubectl create secret generic vault-credentials \
   --namespace=<namespace>
 ```
 
-#### AWS
+### AWS
 
 ```shell
 kubectl create secret generic aws-credentials \
@@ -31,7 +41,7 @@ kubectl create secret generic aws-credentials \
   --namespace=<namespace>
 ```
 
-#### Azure
+### Azure
 
 ```shell
 kubectl create secret generic azure-credentials \
@@ -42,7 +52,7 @@ kubectl create secret generic azure-credentials \
   --namespace=<namespace>
 ```
 
-#### GCP
+### GCP
 
 ```shell
 kubectl create secret generic gcloud-credentials \

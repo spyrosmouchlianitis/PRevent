@@ -2,7 +2,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 from typing import Any, Union
 from src.secret_manager import get_secret
-from settings import SECRET_MANAGER, BLOCK_PR, FP_STRICT, WEBHOOK_PORT, JWT_EXPIRY_SECONDS
+from src.settings import SECRET_MANAGER, BLOCK_PR, FP_STRICT, WEBHOOK_PORT, JWT_EXPIRY_SECONDS
 
 
 def validate_config_parameters() -> None:
