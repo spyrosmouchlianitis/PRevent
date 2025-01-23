@@ -44,11 +44,20 @@ spec:
             {{- include "secret-check-key" (dict "name" "azure-credentials" "key" "azure-tenant-id" "env" "AZURE_TENANT_ID" "namespace" .Release.Namespace) | indent 10 }}
             {{- end }}
             {{- if eq .Values.secreteManagerType "gcloud" }}
-            {{- include "secret-set-key-ref" (dict "name" "gcloud-credentials" "key" "google-application-credentials-json" "env" "GOOGLE_APPLICATION_CREDENTIALS_JSON") | indent 10 }}
             {{- include "secret-set-key-ref" (dict "name" "gcloud-credentials" "key" "google-cloud-project" "env" "GOOGLE_CLOUD_PROJECT") | indent 10 }}
             {{- include "secret-check-key" (dict "name" "gcloud-credentials" "key" "google-cloud-region" "env" "GOOGLE_CLOUD_REGION" "namespace" .Release.Namespace) | indent 10 }}
             {{- include "secret-check-key" (dict "name" "gcloud-credentials" "key" "google-api-key" "env" "GOOGLE_API_KEY" "namespace" .Release.Namespace) | indent 10 }}
             {{- end }}
+          {{- if eq .Values.secreteManagerType "gcloud" }}
+          volumeMounts:
+            - mountPath: /app/config/google-app-cred.json
+              subPath: google-application-credentials-json
+              name: google-app-cred-json-volume
+      volumes:
+        - name: google-app-cred-json-volume
+          secret:
+            secretName: gcloud-credentials
+          {{- end }}
 {{- if .Values.service.clusterIP.enabled }}
 ---
 apiVersion: v1
