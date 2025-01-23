@@ -53,3 +53,12 @@ kubectl create secret generic gcloud-credentials \
   --from-literal=google-api-key=<google-api-key-value> \
   --namespace=<namespace>
 ```
+
+## Step 2 - Helm deploy
+
+1. Edit [values.yaml](values.yaml)
+2. Run helm upgrade
+
+```shell
+helm upgrade -i prevent ./ -n prevent
+```
