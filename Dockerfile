@@ -27,7 +27,7 @@ RUN poetry install --no-interaction --no-dev
 EXPOSE 8080
 
 # Run setup.py from the ./setup directory
-RUN python -m setup.setup_container
+RUN poetry run python -m setup.setup_container
 
 # Run the prevent application
 CMD ["poetry", "run", "gunicorn", "--bind", "0.0.0.0:8080", "src.app:app"]

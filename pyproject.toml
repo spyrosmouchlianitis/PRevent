@@ -3,7 +3,7 @@ requires = [ "poetry-core=1.0.0",]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "PR-event"
+name = "PRevent"
 version = "1.0.0"
 description = "An open-source GitHub app for malware-in-code scanning"
 authors = [ "Matan Giladi <matan.giladi@apiiro.com>",]
