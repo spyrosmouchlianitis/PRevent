@@ -4,6 +4,7 @@ from typing import Any
 from contextlib import redirect_stderr
 from src.config import rewrite_setting
 from src.secret_manager import get_secret
+from src.validation.config import validate_config_parameters
 from setup.secret_managers.configure_cli import manage_secret_manager_dependency
 
 
@@ -21,8 +22,8 @@ for secret in ['SECRET_MANAGER', 'BLOCK_PR', 'FP_STRICT', 'WEBHOOK_PORT', 'JWT_E
         rewrite_setting(secret, value)
 
 try:
-    secret_manager = get_secret('SECRET_MANAGER')
-    if secret_manager:
+    validate_config_parameters()
+    if secret_manager := get_secret('SECRET_MANAGER'):
         manage_secret_manager_dependency(secret_manager)
 except Exception as e:
     logging.error(e)
