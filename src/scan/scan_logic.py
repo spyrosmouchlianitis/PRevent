@@ -1,5 +1,6 @@
-import json
 import os
+import re
+import json
 import concurrent.futures
 from flask import current_app
 from github import Repository, PullRequest
@@ -12,7 +13,12 @@ from src.scan.detectors.obfuscation_extras.detect_encoded import detect_encoded
 from src.scan.detectors.obfuscation_extras.detect_executable import detect_executable
 from src.scan.detectors.obfuscation_extras.detect_space_hidden import detect_space_hiding
 from src.scan.detectors.obfuscation_extras.detect_homoglyph import detect_homoglyph
-from src.utils.github import get_changed_files, determine_scan_status, create_commit_status
+from src.utils.github import (
+    get_changed_files,
+    determine_scan_status,
+    create_commit_status,
+    comment_detection
+)
 from src.settings import APP_REPO, FP_STRICT
 
 
@@ -27,7 +33,7 @@ def handle_scan(
     # Get full files for proper code analysis. PR contains only diffs.
     changed_files = get_changed_files(repo, pr)
     if changed_files:
-        scan_results = run_scan(changed_files)
+        scan_results = run_scan(changed_files, repo, pr)
         current_app.logger.info(f"Scanned PR #{pr.number}")
         status, description, comment = determine_scan_status(scan_results, pr, repo)
         target_url = comment.html_url if hasattr(comment, 'html_url') else APP_REPO
@@ -36,22 +42,31 @@ def handle_scan(
     return status
 
 
-def run_scan(changed_files: list[dict[str, str]]) -> Optional[DetectionType]:
+def run_scan(
+    changed_files: list[dict[str, str]],
+    repo: Repository,
+    pr: PullRequest
+) -> Optional[DetectionType]:
     """
     Scan changed files and return only the first detection to avoid spamming the PR.
     Infected code indicates active compromise and should be addressed immediately,
     not get listed and orchestrated like vulnerabilities.
     """
     for file in changed_files:
-        if not all(key in file for key in ['filename', 'diff', 'full_content']):
+        if not all(key in file for key in {'filename', 'diff', 'full_content'}):
             raise ValueError(f"File must contain 'filename', 'diff' and 'full_content': {json.dumps(file)}")
 
-        extension, language = get_lang(file['filename'])
+        filename = file['filename']
+        extension, language = get_lang(filename)
         if not language:
             return None
 
         additions_list = process_diff(file['diff'], language)
         if not additions_list:
+            continue
+
+        # Exclude minified files and other one-liners from the scan to avoid false-positives
+        if handle_one_liners(additions_list, filename, repo, pr):
             continue
 
         detection: DetectionType = get_first_detection(file, extension)
@@ -63,6 +78,30 @@ def run_scan(changed_files: list[dict[str, str]]) -> Optional[DetectionType]:
 def get_lang(filename: str) -> tuple[str, str]:
     ext = filename.split('.')[-1] if '.' in filename else None
     return ext, extensions.get(ext, '')
+
+
+def handle_one_liners(
+    additions_list: list[tuple[int, str]],
+    filename: str,
+    repo: Repository,
+    pr: PullRequest
+) -> bool:
+    for addition in additions_list:
+        if len(addition[1]) > 500:
+            if not FP_STRICT:
+                detection: DetectionType = {
+                    "filename": filename,
+                    "line_number": addition[0],
+                    "severity": "INFO",
+                    "message": "Including minified single-line files or similar in a codebase is discouraged, "
+                            "because code should be readable. "
+                            "'Unreadability' is a central indication of malicious code. "
+                            "currently, such files are excluded from this scan. "
+                            "It's recommended to store them in a CDN or a storage service."
+                }
+                comment_detection(detection, repo, pr)
+            return True
+    return False
 
 
 def get_first_detection(
