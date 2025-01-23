@@ -1,11 +1,31 @@
 # PRevent
 
-
-## Overview
-
 A self-hosted GitHub app that listens for pull request events, scans them for malicious code, and comments detections directly on the pull request.
 
-Typically, security scans are run by workflow files. However, files can be modified, and when dealing with source modification attacks, should be avoided. A GitHub app approach addresses this gap, ensuring the scan is not bypassed. The app's logic can be leveraged to run any scan. All you need is to add a scanner method to the [scan logic](https://github.com/apiiro/prevent/blob/main/src/scan/scan_logic.py).
+- [PRevent](#prevent)
+  - [Why Use a GitHub Application](#why-use-a-github-application)
+  - [Malicious Code Detection](#malicious-code-detection)
+  - [Extra Capabilities](#extra-capabilities)
+  - [Supported languages](#supported-languages)
+- [Setup](#setup)
+  - [Non-Containerized Setup](#non-containerized-setup)
+  - [Containerized Setup](#containerized-setup)
+    - [1. Secret Manager](#1-secret-manager)
+      - [Secret Manager Setup Instructions](#secret-manager-setup-instructions)
+    - [2. GitHub App](#2-github-app)
+    - [3. Deployment](#3-deployment)
+      - [Optional Parameters](#optional-parameters)
+- [General](#general)
+  - [Configuration Parameters Summary](#configuration-parameters-summary)
+  - [Contributing](#contributing)
+  - [License](#license)
+
+
+## Why Use a GitHub Application
+
+Typically, security scans are run by workflow files. However, files can be modified, and when dealing with source modification attacks, should be avoided. A GitHub-app approach addresses this gap, ensuring the scan is not bypassed while providing better flexibility. 
+
+The app's logic can be leveraged to run any scan. All you need is to add a scanner method to the [scan logic](https://github.com/apiiro/prevent/blob/main/src/scan/scan_logic.py).
 
 
 ## Malicious Code Detection
@@ -83,9 +103,9 @@ Parts 1 and 2 are handled during the interactive setup process in step 3:
    ```
 
 
-# Containerized Setup
+## Containerized Setup
 
-## 1. Secret Manager
+### 1. Secret Manager
 
 The application communicates with GitHub via authenticated requests, which require three sensitive parameters:
 - **Private Key** (`GITHUB_APP_PRIVATE_KEY`)
@@ -103,7 +123,7 @@ The application handles all parameters exclusively through the secret manager (s
 - **Webhook Port** (`WEBHOOK_PORT`) - has to be manually updated in the Dockerfile
 
 
-### Secret Manager Setup Instructions
+#### Secret Manager Setup Instructions
 
 First, set **SECRET_MANAGER** in your secret manager to either: vault, aws, azure, gcloud, or local.
 
@@ -121,7 +141,7 @@ Permissions required to operate the role:
 | scope      | path = "prevent-app/*" | resource = "prevent-app/*"    | secret = "prevent-app/*"  | secret = "prevent-app/*"  |
 
 
-## 2. GitHub App
+### 2. GitHub App
 
 1. Go to https://github.com/settings/apps to create a new GitHub App.
 2. Set metadata:  
@@ -155,14 +175,14 @@ Permissions required to operate the role:
 9.  Generate a private key, store it in your secret manager as **GITHUB_APP_PRIVATE_KEY**, and make sure to delete the file.
 
 
-## 3. Deployment
+### 3. Deployment
 
 1. Set any desired optional parameters from below in your secret manager.
 2. Follow the [Docker README](docker/README.md) to build, configure and register your container image.
 3. Follow the [Helm README](helm/README.md) to package and deploy your container to your Kubernetes cluster according to best practices.
 
 
-### Optional Parameters
+#### Optional Parameters
 
 - **BLOCK_PR**: 
 To block merging until either a reviewer approves the pull request or the scan passes, set it to `True` in your secret manager.
@@ -177,6 +197,9 @@ Ensure you run `json.dumps(security_reviewers)` or an equivalent method beforeha
 
 - **FP_STRICT**:
 To minimize false positives by running only `ERROR` severity rules and detectors (primarily a small subset of obfuscation detection), set it to `True` in your secret manager.
+
+
+# General
 
 
 ## Configuration Parameters Summary
