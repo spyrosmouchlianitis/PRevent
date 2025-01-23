@@ -159,7 +159,7 @@ Permissions required to operate the role:
 
 ### Optional Parameters
 
-- **PR_BLOCK**: 
+- **BLOCK_PR**: 
 To block merging until either a reviewer approves the pull request or the scan passes, set it to `True` in your secret manager.
 
 - **SECURITY_REVIEWERS**: 

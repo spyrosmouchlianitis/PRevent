@@ -12,15 +12,15 @@ resources:
     cpu: 1
     memory: 200Mi
     ephemeralStorage: 200Mi
-# options secreteManagerType: gcp,aws,azure,vault
-secreteManagerType: gcp
+# Options secreteManagerType: gcloud, aws, azure, vault
+secreteManagerType: gcloud
 service:
   clusterIP:
     enabled: true
   NodePort:
     enabled: true
-    # add annotations if required
+    # Add annotations if required
     annotations:
-      #exampleAnnotationKey: 'exampleAnnotationValue'
+      # exampleAnnotationKey: 'exampleAnnotationValue'
   port: 80
   targetPort: 8080

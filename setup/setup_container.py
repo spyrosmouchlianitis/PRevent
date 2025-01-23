@@ -15,12 +15,14 @@ def attempt_secret(secret: str) -> Any:
         return ''
 
 # Write the values locally to avoid unnecessary repeated remote fetching
-for secret in ['SECRET_MANAGER', 'PR_BLOCK', 'FP_STRICT', 'WEBHOOK_PORT', 'JWT_EXPIRY_SECONDS']:
+for secret in ['SECRET_MANAGER', 'BLOCK_PR', 'FP_STRICT', 'WEBHOOK_PORT', 'JWT_EXPIRY_SECONDS']:
     value = attempt_secret(secret)
     if value:
         rewrite_setting(secret, value)
 
 try:
-    manage_secret_manager_dependency(get_secret('SECRET_MANAGER'))
+    secret_manager = get_secret('SECRET_MANAGER')
+    if secret_manager:
+        manage_secret_manager_dependency(secret_manager)
 except Exception as e:
     logging.error(e)
