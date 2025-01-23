@@ -1,6 +1,29 @@
+import os
 import socket
 import ipaddress
 import subprocess
+from contextlib import redirect_stderr
+from typing import Callable, Any
+from src.secret_manager import get_secret
+
+
+def is_secret_set(secret):
+    try:
+        with open(os.devnull, 'w') as hide, redirect_stderr(hide):
+            get_secret(secret)
+        return True
+    except (ValueError, Exception):
+        pass
+    return False
+
+
+def validation_wrapper(validation: Callable, value: Any) -> bool:
+    try:
+        validation(value)
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 def get_public_domain() -> str:

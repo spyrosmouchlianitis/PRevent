@@ -42,7 +42,7 @@ def configure_aws():
         region = input("Insert region (verify inputs for typos and correct format): ") or ''
         if region:
             write_setting('AWS_REGION', f"'{region}'")
-            print(f"Successfully saved 'AWS_REGION as {region} in 'settings.py'.")
+            print(f"Successfully saved 'AWS_REGION as {region} in 'src/settings.py'.")
         else:
             print("Region is required for AWS API requests to succeed.")
             print("Please add 'AWS_REGION = your_region' to 'setting.py' manually or run again.")
@@ -60,7 +60,7 @@ def configure_azure():
         azure_vault_url = input("Insert the URL of your Azure's vault: ") or ''
         if azure_vault_url:
             write_setting('AZURE_VAULT_URL', f"'{azure_vault_url}'")
-            print(f"Successfully saved 'AZURE_VAULT_URL as {azure_vault_url} in 'settings.py'.")
+            print(f"Successfully saved 'AZURE_VAULT_URL as {azure_vault_url} in 'src/settings.py'.")
     except subprocess.CalledProcessError:
         print("Failed to configure Azure access.")
         print("Ensure it's installed, configure it, and rerun setup.py to continue")
@@ -76,7 +76,7 @@ def configure_gcloud():
         ) or 'PRevent-app-project'
         if project_id:
             write_setting('GCLOUD_PROJECT_ID', f"'{project_id}'")
-            print(f"Successfully saved 'GCLOUD_PROJECT_ID as {project_id} in 'settings.py'.")
+            print(f"Successfully saved 'GCLOUD_PROJECT_ID as {project_id} in 'src/settings.py'.")
     except subprocess.CalledProcessError:
         print("Failed to configure Google Cloud access.")
         print("Ensure it's installed, configure it, and rerun setup.py to continue")

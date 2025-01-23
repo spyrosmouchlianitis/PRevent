@@ -1,23 +1,27 @@
 import os
 
 
-# Local Flask server listens on
-WEBHOOK_PORT = 8080
+# Options: vault, aws, azure, gcloud, local (vault)
+SECRET_MANAGER = 'vault'
 
-# For the GitHub client
-JWT_EXPIRY_SECONDS = 120
-
-# Don't comment WARNING severity detections (many), only ERROR (few).
+# Don't run WARNING severity detectors (many), run only ERROR severity detectors (few).
 FP_STRICT = False
 
 # Block PR until approval. Respected only if reviewers were defined.
 BLOCK_PR = True
 
-# Set TLS on another level if not here
-APP_TLS = False
+# Local Flask server listens on
+WEBHOOK_PORT = 8080
+
+# For the GitHub client (minimum 10)
+# Processing times exceeding the expiry time may result in unexpected behavior.
+JWT_EXPIRY_SECONDS = 120
 
 # For branch protection rules
 SCAN_CONTEXT = "apiiro-scan"
+
+# Set TLS on another level if not here
+APP_TLS = False
 
 # Dir for storing log file, and if relevant: Vault address, TLS certificates
 CONFIG_DIR = os.path.expanduser('~/.prevent')
@@ -30,6 +34,3 @@ ERROR_LOG_FILE = f'{CONFIG_DIR}/error.log'
 # Repos
 APP_REPO = "https://github.com/apiiro/PRevent"
 RULESET_REPO = "https://github.com/apiiro/malicious-code-ruleset"
-
-# Set to a remote service
-SECRET_MANAGER = 'vault'

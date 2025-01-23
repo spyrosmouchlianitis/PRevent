@@ -22,7 +22,7 @@ def get_secret(key: str) -> Any:
     secret_manager = getattr(settings, "SECRET_MANAGER", None)
     if not secret_manager:
         log_and_raise_value_error(
-            "'SECRET_MANAGER' isn't set in settings.py. Set it, or run setup.py."
+            "'SECRET_MANAGER' isn't set in src/settings.py. Set it, or run setup.py."
         )
         print("\nOptions: 'vault', 'aws', 'azure', 'gcloud', 'local'")
     if secret_manager not in secret_getters:
@@ -43,7 +43,7 @@ def set_secret(key: str, value: Any) -> None:
     }
     secret_manager = getattr(settings, "SECRET_MANAGER", None)
     if not secret_manager:
-        log_and_raise_value_error("'SECRET_MANAGER' is not set in settings.py.")
+        log_and_raise_value_error("'SECRET_MANAGER' is not set in src/settings.py.")
         print("Options: 'vault', 'aws', 'azure', 'gcloud', 'local'")
     if secret_manager not in secret_setters:
         raise NotImplementedError(
