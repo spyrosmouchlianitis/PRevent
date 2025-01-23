@@ -28,8 +28,27 @@ spec:
             limits:
               cpu: {{ .Values.resources.limits.cpu | quote }}
               memory: {{ .Values.resources.limits.memory }}
-              #env: todo add
-              # todo add relevant fields per different secreteManagerType
+          env:
+            {{- if eq .Values.secreteManagerType "vault" }}
+            {{- include "secret-set-key-ref" (dict "name" "vault-credentials" "key" "vault-addr" "env" "VAULT_ADDR") | indent 10 }}
+            {{- include "secret-set-key-ref" (dict "name" "vault-credentials" "key" "vault-token" "env" "VAULT_TOKEN") | indent 10 }}
+            {{- end }}
+            {{- if eq .Values.secreteManagerType "aws" }}
+            {{- include "secret-set-key-ref" (dict "name" "aws-credentials" "key" "aws-access-key-id" "env" "AWS_ACCESS_KEY_ID") | indent 10 }}
+            {{- include "secret-set-key-ref" (dict "name" "aws-credentials" "key" "aws-secret-access-key" "env" "AWS_SECRET_ACCESS_KEY") | indent 10 }}
+            {{- include "secret-check-key" (dict "name" "aws-credentials" "key" "aws-session-token" "env" "AWS_SESSION_TOKEN" "namespace" .Release.Namespace) | indent 10 }}
+            {{- end }}
+            {{- if eq .Values.secreteManagerType "azure" }}
+            {{- include "secret-set-key-ref" (dict "name" "azure-credentials" "key" "azure-client-id" "env" "AZURE_CLIENT_ID") | indent 10 }}
+            {{- include "secret-set-key-ref" (dict "name" "azure-credentials" "key" "azure-client-secret" "env" "AZURE_CLIENT_SECRET") | indent 10 }}
+            {{- include "secret-check-key" (dict "name" "azure-credentials" "key" "azure-tenant-id" "env" "AZURE_TENANT_ID" "namespace" .Release.Namespace) | indent 10 }}
+            {{- end }}
+            {{- if eq .Values.secreteManagerType "gcloud" }}
+            {{- include "secret-set-key-ref" (dict "name" "gcloud-credentials" "key" "google-application-credentials-json" "env" "GOOGLE_APPLICATION_CREDENTIALS_JSON") | indent 10 }}
+            {{- include "secret-set-key-ref" (dict "name" "gcloud-credentials" "key" "google-cloud-project" "env" "GOOGLE_CLOUD_PROJECT") | indent 10 }}
+            {{- include "secret-check-key" (dict "name" "gcloud-credentials" "key" "google-cloud-region" "env" "GOOGLE_CLOUD_REGION" "namespace" .Release.Namespace) | indent 10 }}
+            {{- include "secret-check-key" (dict "name" "gcloud-credentials" "key" "google-api-key" "env" "GOOGLE_API_KEY" "namespace" .Release.Namespace) | indent 10 }}
+            {{- end }}
 {{- if .Values.service.clusterIP.enabled }}
 ---
 apiVersion: v1
