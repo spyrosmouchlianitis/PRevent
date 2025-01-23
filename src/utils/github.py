@@ -47,15 +47,15 @@ def get_changed_files(
 
 
 def determine_scan_status(
-    scan_results: DetectionType,
+    detection: DetectionType,
     pr: PullRequest,
     repo: Repository
 ) -> tuple:
     description = "Apiiro malware-in-code scan"
-    if scan_results:
+    if detection:
         status = "failure"
-        comment = comment_detection(scan_results, pr, repo)
-        current_app.logger.info(f"PR #{pr.number} scan found: {json.dumps(scan_results)}")
+        comment = comment_detection(detection, pr, repo)
+        current_app.logger.info(f"PR #{pr.number} scan found: {json.dumps(detection)}")
         return status, description, comment
     else:
         status = "success"

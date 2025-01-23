@@ -3,6 +3,10 @@ from sys import getsizeof
 
 
 def process_diff(diff: str, lang: str) -> list[tuple[int, str]]:
+    """
+    Receives a diff string and a language, cleans and verifies the diff,
+    and returns a list of added lines with their line numbers.
+    """
     diff = remove_comments(diff, lang)
     additions = get_additions_with_line_numbers(diff)  # Line numbers derived from hunk headers
     if not additions or getsizeof(diff) / (1024.0 ** 2) > 1:  # 1MB max diff size
@@ -29,7 +33,6 @@ def get_additions_with_line_numbers(diff: str) -> list[tuple[int, str]]:
         - The line numbers are adjusted based on the hunk headers (lines starting with '@@').
         - Non-deleted lines (not starting with '-') increment the line counter.
     """
-
     additions = []
     line_number = 0
     for line in diff.splitlines():
