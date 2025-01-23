@@ -6,7 +6,7 @@ from flask import current_app, request
 from werkzeug.exceptions import Unauthorized
 from github import Github
 from typing import Any
-from validation.webhook import validate_string, validate_pr_number, validate_sha
+from src.validation.webhook import validate_string, validate_pr_number, validate_sha
 from src.secret_manager import get_secret
 
 

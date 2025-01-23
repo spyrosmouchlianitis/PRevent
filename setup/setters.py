@@ -44,8 +44,8 @@ def set_webhook_secret(secret_manager: str, webhook_secret_key: str) -> None:
     print(f"\nAuto-generated secret: {random_secret}")
     
     webhook_secret = getpass(
-        "\033[1mInsert your secret both here (hidden) and in GitHub, "
-        "or copy this secret into GitHub and press Enter: \033[0m"
+        "\033[1mInsert your secret both here and in GitHub, "
+        "or copy this secret into GitHub and press Enter (hidden): \033[0m"
     ) or random_secret
     
     if validation_wrapper(validate_webhook_secret, webhook_secret):
@@ -62,7 +62,7 @@ def set_app_id(secret_manager: str, app_id_key: str) -> None:
     print("(verify inputs for typos, white-spaces and correct format)")
     
     app_id = getpass(
-        "\033[1mEnter the App ID (hidden) to save it in your secret manager: \033[0m"
+        "\033[1mEnter the App ID to save it in your secret manager (hidden): \033[0m"
     ) or False
     
     if validation_wrapper(validate_github_app_integration_id, app_id):
@@ -153,27 +153,31 @@ def set_security_reviewers(secret_manager: str, security_reviewers_key: str) -> 
 
 def set_branches_scope(secret_manager: str, branches_include_key: str, branches_exclude_key: str) -> None:
     def list_branches() -> list:
-        print("Format: repo_name:branch1,branch2 (leave empty for all).")
-        print("Press Enter once to finish.")
         print("(verify inputs for typos and correct format)")
-        branches = {}
+        print("Format: repo_a:branch1,branch3 repo_b:all")
+        all_repos_branches = {}
         while True:
             user_input = input("Repository and branches: ").strip()
             if not user_input:
                 break
-            repo, *branches = user_input.split(":")
-            branches[repo.strip()] = [
-                b.strip() for b in branches[0].split(",") if b.strip()
-            ] if branches else []
-        return branches
+            pairs = user_input.split(" ")
+            for pair in pairs:
+                repo, branches = pair.split(":")
+                if branches == 'all':
+                    all_repos_branches[repo.strip()] = 'all'
+                elif branches:
+                    all_repos_branches[repo.strip()] = [
+                        b.strip() for b in branches.split(",") if b.strip()
+                    ]
+            return all_repos_branches
 
     print("You can list branches for both inclusion and exclusion.")
 
     include = input("\033[1mDo you want to list branches for inclusion? [Y/n]: \033[0m") or "y"
-    include_branches = list_branches() if include.strip().lower() == "y" else []
+    include_branches = list_branches() if include.strip().lower() == "y" else {}
 
     exclude = input("\033[1mDo you want to list branches for exclusion? [Y/n]: \033[0m") or "y"
-    exclude_branches = list_branches() if exclude.strip().lower() == "y" else []
+    exclude_branches = list_branches() if exclude.strip().lower() == "y" else {}
 
     for branches, key in [
         (include_branches, branches_include_key), 

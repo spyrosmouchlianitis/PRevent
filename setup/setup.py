@@ -36,7 +36,8 @@ def main():
     set_github_app(secret_manager)
 
     # App level TLS
-    prompt = "\033[1mDo you want to setup TLS in the app level? [y/N]: \033[0m"
+    prompt = ("\033[1mDo you want to apply TLS at the app level "
+              "(typically applied at the gateway level)? [y/N]: \033[0m")
     tls_step = input(prompt).strip().lower() or "n"
     if tls_step == "y":
         setup_tls()

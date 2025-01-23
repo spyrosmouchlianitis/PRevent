@@ -52,7 +52,7 @@ def run_scan(
     not get listed and orchestrated like vulnerabilities.
     """
     for file in changed_files:
-        if not all(key in file for key ['filename', 'diff', 'full_content']):
+        if not all(key in file for key in ['filename', 'diff', 'full_content']):
             raise ValueError(f"File must contain 'filename', 'diff' and 'full_content': {json.dumps(file)}")
 
         filename = file['filename']
