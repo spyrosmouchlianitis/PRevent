@@ -77,6 +77,8 @@ Deploying PRevent involves three parts, typically completed in 5 minutes to an h
 2. Create a GitHub app within your GitHub organization or account.
 3. Deploy the application to a server.
 
+Use the latest Python version (3.9.2+ supported).
+
 
 ## Non-Containerized Setup
 
@@ -87,7 +89,7 @@ Parts 1 and 2 are handled during the interactive setup process in step 3:
    git clone https://github.com/apiiro/prevent.git
    cd prevent
    ```
-2. Install dependencies by either:  
+2. Install dependencies by either poetry (recommended) or pip:  
    ```bash
    poetry install  
   

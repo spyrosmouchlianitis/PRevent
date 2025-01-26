@@ -22,7 +22,7 @@ COPY ../setup /prevent/setup
 COPY ../pyproject.toml /prevent/pyproject.toml
 
 # Install project dependencies with Poetry
-RUN poetry install --no-interaction --no-dev
+RUN poetry install --no-interaction --only main
 
 EXPOSE 8080
 

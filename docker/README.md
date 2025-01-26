@@ -3,10 +3,10 @@
 1. Build the app using the provided `Dockerfile`:
 
 ```bash
-docker buildx build -t prevent .
+docker buildx build -t prevent . -f docker/Dockerfile
 ```
 
-1. Push the image to your container registry (e.g. GCR):
+2. Push the image to your container registry (e.g. GCR):
 
 ```bash
 PREVENT_PATH=<your.artifact.registry>
@@ -19,7 +19,7 @@ docker buildx build \
   ../.
 ```
 
-1. Run the container:
+3. Run the container:
 
 ```bash
 PREVENT_PATH=<your.artifact.registry>
@@ -27,7 +27,7 @@ PREVENT_TAG=1.0
 docker run --rm -it $PREVENT_PATH:$PREVENT_TAG
 ```
 
-1. Access the container:
+4. Access the container:
 
 ```bash
 PREVENT_PATH=<your.artifact.registry>
