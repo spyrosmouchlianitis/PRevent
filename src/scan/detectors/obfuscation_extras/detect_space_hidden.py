@@ -1,7 +1,8 @@
-from typing import Optional
+from src.settings import FULL_FINDINGS
 
 
-def detect_space_hiding(patch: str) -> Optional[dict]:
+def detect_space_hiding(patch: str) -> list[dict]:
+    results = []
     index = patch.find(' ' * 170)
     if index != -1:
         start_idx = patch.rfind('\n', 0, index)  # Last newline before the match
@@ -9,9 +10,11 @@ def detect_space_hiding(patch: str) -> Optional[dict]:
         line = patch[start_idx + 1:end_idx]  # Cut between the surrounding newlines
         line_content = line.replace('  ', '')
         if len(line) > 170 and len(line_content) > 20:
-            return {
+            results.append({
                 "message": "An unreasonable amount of spaces in line, probably for hiding",
                 "line_number": patch.count('\n', 0, start_idx) + 1,  # Count newlines up to match's start
                 "match": line_content
-            }
-    return None
+            })
+            if not FULL_FINDINGS:
+                return results
+    return results

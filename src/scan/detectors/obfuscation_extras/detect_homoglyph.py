@@ -1,19 +1,22 @@
-from typing import Optional
+from src.settings import FULL_FINDINGS
 
 
-def detect_homoglyph(patch: str) -> Optional[dict]:
+def detect_homoglyph(patch: str) -> list[dict]:
+    results = []
     impostors = ''.join(map(str, homoglyphs.values()))
     for impostor in impostors:
         index = patch.find(impostor)
         if index != -1:
             line_number = patch.count('\n', 0, index) + 1
             match = patch.splitlines()[line_number - 1]
-            return {
+            results.append({
                 "message": "A hardcoded base64 encoded string.",
                 "line_number": line_number,
                 "match": match
-            }
-    return None
+            })
+            if not FULL_FINDINGS:
+                return results
+    return results
 
 
 # These characters may be interpreted as similar chars in some programming languages.

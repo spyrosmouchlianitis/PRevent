@@ -1,10 +1,11 @@
 import re
 import base64
-from typing import Optional
 from cryptography import fernet
+from src.settings import FULL_FINDINGS
 
 
-def detect_encoded(patch: str) -> Optional[dict]:
+def detect_encoded(patch: str) -> list[dict]:
+    results = []
     for detector in [
         detect_fernet,
         detect_b64,
@@ -12,12 +13,15 @@ def detect_encoded(patch: str) -> Optional[dict]:
         detect_unicode,
         detect_hex
     ]:
-        if result := detector(patch):
-            return result
-    return None
+        if detector_results := detector(patch):
+            results.extend(detector_results)
+            if not FULL_FINDINGS:
+                return results
+    return results
 
 
-def detect_b64(patch: str) -> Optional[dict]:
+def detect_b64(patch: str) -> list[dict]:
+    results = []
     pattern = re.compile(r'[\'\"`]([A-Za-z0-9+/]{12,}={0,2})[\'\"`]')
     for match in pattern.finditer(patch):
         payload = match.group(1)
@@ -25,18 +29,21 @@ def detect_b64(patch: str) -> Optional[dict]:
             try:
                 decoded = base64.b64decode(payload).decode('utf-8')
                 if decoded and len(decoded) > 3:
-                    return {
+                    results.append({
                         "message": "A hardcoded base64 encoded string. Either malicious or a bad practice. "
                                    "(Set \"FP_STRICT = False\" to disable)",
                         "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
-                    }
+                    })
+                    if not FULL_FINDINGS:
+                        return results
             except (ValueError, UnicodeDecodeError):
                 continue  # Ignore FP
-    return None
+    return results
 
 
-def detect_b32(patch: str) -> Optional[dict]:
+def detect_b32(patch: str) -> list[dict]:
+    results = []
     pattern = re.compile(r'[\'\"`]([A-Z2-7]{8,}(?:={4}|={6}|))[\'\"`]')  # Last pipe represents "nothing"
     for match in pattern.finditer(patch):
         payload = match.group(1)
@@ -44,18 +51,21 @@ def detect_b32(patch: str) -> Optional[dict]:
             try:
                 decoded = base64.b32decode(payload).decode('utf-8')
                 if decoded and '\\u' not in decoded and len(decoded) > 3:
-                    return {
+                    results.append({
                         "message": "A hardcoded base32 encoded string. Either malicious or a bad practice. "
                                    "(Set \"FP_STRICT = False\" to disable)",
                         "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
-                    }
+                    })
+                    if not FULL_FINDINGS:
+                        return results
             except (ValueError, UnicodeDecodeError):
                 continue  # Ignore FP
-    return None
+    return results
 
 
-def detect_hex(patch: str) -> Optional[dict]:
+def detect_hex(patch: str) -> list[dict]:
+    results = []
     pattern = re.compile(r'((?:[0\\][xX][0-9a-fA-F]{8,})+)')
     for match in pattern.finditer(patch):
         payload = match.group(1).replace('\\\\', '\\')
@@ -76,16 +86,19 @@ def detect_hex(patch: str) -> Optional[dict]:
                 and '\\x' not in decoded
                 and len(decoded) > 3
             ):
-                return {
+                results.append({
                     "message": "A hardcoded hex encoded string. Either malicious or a bad practice. "
                                "(Set \"FP_STRICT = False\" to disable)",
                     "line_number": get_match_line_number(match, patch),
                     "decoded": decoded
-                }
-    return None
+                })
+                if not FULL_FINDINGS:
+                    return results
+    return results
 
 
-def detect_unicode(patch: str) -> Optional[dict]:
+def detect_unicode(patch: str) -> list[dict]:
+    results = []
     pattern = re.compile(r'((?:\\[uU][0-9A-Fa-f]{4})+)')
     for match in pattern.finditer(patch):
         payload = match.group(1).replace('\\\\', '\\')
@@ -97,18 +110,21 @@ def detect_unicode(patch: str) -> Optional[dict]:
                     and '\\u' not in decoded
                     and len(decoded) > 3
                 ):
-                    return {
+                    results.append({
                         "message": "A hardcoded unicode encoded string. Either malicious or a bad practice. "
                                    "(Set \"FP_STRICT = False\" to disable)",
                         "line_number": get_match_line_number(match, patch),
                         "decoded": decoded
-                    }
+                    })
+                    if not FULL_FINDINGS:
+                        return results
             except (UnicodeDecodeError, TypeError):
                 continue  # Ignore FP
-    return None
+    return results
 
 
-def detect_fernet(patch: str) -> Optional[dict]:
+def detect_fernet(patch: str) -> list[dict]:
+    results = []
     pattern_payload = re.compile(r'gAAAA[A-Za-z0-9_\-]+=+')
     for p_match in pattern_payload.finditer(patch):
         pattern_key = re.compile(r"b'[A-Za-z0-9_-]{43}='")
@@ -119,14 +135,16 @@ def detect_fernet(patch: str) -> Optional[dict]:
                 payload = p_match.group()
                 decoded = fernet.Fernet(key_bytes).decrypt(payload).decode('utf-8')
                 if decoded:
-                    return {
+                    results.append({
                         "message": "A hardcoded Fernet encoded string.",
                         "line_number": patch[:p_match.start()].count('\n') + 1,
                         "decoded": decoded
-                    }
+                    })
+                    if not FULL_FINDINGS:
+                        return results
             except fernet.InvalidToken:
                 continue  # Ignore FP
-    return None
+    return results
 
 
 def get_match_line_number(match: re.Match, patch: str) -> int:

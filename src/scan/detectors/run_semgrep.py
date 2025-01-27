@@ -9,28 +9,32 @@ from src.scan.detectors.utils import (
     get_ruleset_dir,
     create_temp_file
 )
-from src.settings import FP_STRICT
+from src.settings import FP_STRICT, FULL_FINDINGS
 
 
 def detect_dynamic_execution_and_obfuscation(
     code_string: str,
     extension: str
-) -> Optional[DetectionType]:
+) -> list[DetectionType]:
     """
     Analyzes code for dynamic execution and obfuscation patterns using Semgrep.
     Save scanned code to a temporary file, remove it in the end.
+    
+    Return a list of findings regardless if full scan or first detection only.
     """
-    findings = None
-    temp_file_path = create_temp_file(code_string, extension)
+    findings = []
+    temp_file_path: str = create_temp_file(code_string, extension)
     if temp_file_path and os.path.exists(temp_file_path):
-        findings = run_semgrep(temp_file_path)["results"]
+        findings: list = run_semgrep(temp_file_path)
         os.remove(temp_file_path)
-    if findings:
-        return process_semgrep_finding(random.choice(findings))
-    return None
+    if findings and not FULL_FINDINGS:
+        while (result := random.choice(findings)) is None:
+            pass
+        return [process_semgrep_finding(result)] if result else []
+    return [result for f in findings if (result := process_semgrep_finding(f)) is not None]
 
 
-def run_semgrep(temp_file_path: str) -> Optional[dict[str, Any]]:
+def run_semgrep(temp_file_path: str) -> list[dict[str, Any]]:
     try:
         ruleset_dir = get_ruleset_dir()
         command = [
@@ -51,14 +55,18 @@ def run_semgrep(temp_file_path: str) -> Optional[dict[str, Any]]:
             text=True
         )
 
-        for line in process.stdout:  # Monitor Semgrep output in real-time
-            if line.strip():
-                result = json.loads(line)
-                process.terminate()  # Stop the scan after the first result
-                return result
-
+        results = []
+        if FULL_FINDINGS:  # Collect all results
+            results = [json.loads(line) for line in process.stdout if line.strip()]
+        else:  # Stop after the first result
+            for line in process.stdout:
+                if line.strip():
+                    parsed_output = json.loads(line)
+                    results.append(parsed_output["results"])
+                    process.terminate()
+                    break
         process.wait()  # Clean termination
-        return None
+        return results
 
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Semgrep failed: {e}")
