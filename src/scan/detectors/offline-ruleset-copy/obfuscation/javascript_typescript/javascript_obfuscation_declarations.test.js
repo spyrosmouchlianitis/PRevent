@@ -2,15 +2,9 @@
 
 import { x as _0x1qaz } from 'module';
 
-const _0xafds = 1;
-
 class trsg8yuihrtsgfiuyhrgfiuhgrfkjrssdfghfdfdsgsfhsfhdfhdf {
   q1q() {}
 }
-
-const obj = {
-  get a() {}
-};
 
 
 // FP

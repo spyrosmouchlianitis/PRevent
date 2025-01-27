@@ -3,7 +3,6 @@ import java.util.List;
 
 public class JavaObfuscationDeclarationsTest {
     // TP
-    public class c {}
     private int _0xfuscatedVar;
     public String superlongnameThatExceedsTheLimitOfThirtyOneCharacters;
 

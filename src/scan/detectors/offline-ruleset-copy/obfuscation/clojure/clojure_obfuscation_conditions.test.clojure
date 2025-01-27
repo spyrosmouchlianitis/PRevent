@@ -1,3 +1,8 @@
 (if true (println "True"))
-(when false (println "False"))
+(when (> 2 1) (println "noise"))
 (cond (nil) (println "Nil"))
+
+(case []
+  1 "One"
+  2 "Two"
+  "Default")

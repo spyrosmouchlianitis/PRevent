@@ -1,7 +1,6 @@
 rules:
   - id: generic-obfuscation-operators
-    patterns:
-      - pattern-regex: ([~<>\^&\*\+].*[^~<>\^&\*\+]){9,}
+    pattern-regex: ^[^'"`\n]*([~<>\^&\*\+][^'"`\n]*[^~<>\^&\*\+]){9,}[^'"`\n]*$
     message: Obfuscation containing operators that are uncommon in sequences of 10 or more consecutive occurrences.
     severity: WARNING
     languages: 

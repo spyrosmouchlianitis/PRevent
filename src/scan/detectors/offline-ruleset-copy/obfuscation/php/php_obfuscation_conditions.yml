@@ -1,7 +1,16 @@
 rules:
   - id: php-obfuscation-conditions
-    pattern-regex: (if|elseif|while|for|switch)\s*\((true|false|null|empty)\)
-    message: Obfuscation by spurious conditions.
+    patterns:
+      - pattern-not-inside: '...'
+      - pattern-either:
+          - pattern: if ($VAR) { ... }
+          - pattern: while ($VAR) { ... }
+          - pattern: |
+              switch ($VAR) { case $C: ... }
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: ^(?!.*(?<!['"`])\b(?!true|false|null|empty)[a-zA-Z_$\->]).*$
+    message:  Detect obfuscation by spurious conditions.
     severity: WARNING
     languages: 
       - php

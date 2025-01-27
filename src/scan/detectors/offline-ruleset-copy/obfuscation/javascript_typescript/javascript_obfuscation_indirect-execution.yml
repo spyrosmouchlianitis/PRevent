@@ -25,10 +25,6 @@ rules:
               $VAR = globalThis
               ...
               $VAR.Function
-          - pattern: Array['prototype'][...]['call']
-          - pattern-regex: Array(\.|\[).*prototype.*call
-          - pattern: Object['prototype'][...]['call']
-          - pattern-regex: Object(\.|\[).*prototype.*call
     severity: ERROR
     message: Obfuscation by indirect calls.
     languages:

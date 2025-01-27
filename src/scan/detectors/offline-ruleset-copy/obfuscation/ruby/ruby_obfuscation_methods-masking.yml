@@ -1,10 +1,10 @@
 rules:
   - id: ruby-obfuscation-methods-masking
     pattern-either:
-      - pattern-regex: (ord|chr|\.unpack|pack|gsub|tr|sub)(.*\1){2,}
-      - pattern-regex: (inspect|join|split|reverse|slice|scan|traverse)(.*\1){2,}
-      - pattern-regex: (Base64|random_bytes|rand|to_s)(.*\1){2,}
-    message: Obfuscation by concatenation of string manipulating methods.
+      - pattern-regex: (?<!\w|\$|@)(ord|chr|\.unpack|pack|gsub|tr|sub)(?!\w|\$|@)(.*(?<!\w|\$|@)\1(?!\w|\$|@)){3,}
+      - pattern-regex: (?<!\w|\$|@)(inspect|join|split|reverse|slice|scan|traverse)(?<!\w|\$|@)(.*(?<!\w|\$|@)\1(?!\w|\$|@)){3,}
+      - pattern-regex: (?<!\w|\$|@)(Base64|random_bytes|rand|to_s)(?<!\w|\$|@)(.*(?<!\w|\$|@)\1(?!\w|\$|@)){3,}
+    message: Obfuscation by concatenation of a repeating string manipulating method.
     severity: WARNING
     languages:
       - ruby

@@ -1,7 +1,7 @@
 rules:
   - id: clojure-obfuscation-methods-masking
-    pattern-regex: \((str|subs|clojure\.string|re-find|re-seq|re-matches)\s(.*\1){2,}
-    message: Obfuscation by concatenation of string manipulating methods.
+    pattern-regex: \((str|subs|clojure\.string|re-find|re-seq|re-matches)\s(.*\(\1\s){3,}
+    message: Obfuscation by concatenation of a repeating string manipulating method.
     severity: WARNING
     languages:
       - clojure

@@ -2,7 +2,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 from typing import Any, Union
 from src.secret_manager import get_secret
-from src.settings import SECRET_MANAGER, BLOCK_PR, FP_STRICT, WEBHOOK_PORT, JWT_EXPIRY_SECONDS
+from src.settings import SECRET_MANAGER, BLOCK_PR, FP_STRICT, FULL_FINDINGS, WEBHOOK_PORT, JWT_EXPIRY_SECONDS
 
 
 def validate_config_parameters() -> None:
@@ -10,6 +10,7 @@ def validate_config_parameters() -> None:
     validate_secret_manager(SECRET_MANAGER)
     validate_block_pr(BLOCK_PR)
     validate_fp_strict(FP_STRICT)
+    validate_full_findings(FULL_FINDINGS)
     validate_webhook_port(WEBHOOK_PORT)
     validate_jwt_expiry_seconds(JWT_EXPIRY_SECONDS)
     
@@ -73,6 +74,11 @@ def validate_block_pr(value: Any) -> None:
 def validate_fp_strict(value: Any) -> None:
     if not isinstance(value, bool):
         raise ValueError("FP_STRICT must be a boolean")
+
+
+def validate_full_findings(value: Any) -> None:
+    if not isinstance(value, bool):
+        raise ValueError("FULL_FINDINGS must be a boolean")
 
 
 def validate_webhook_port(value: Any) -> None:

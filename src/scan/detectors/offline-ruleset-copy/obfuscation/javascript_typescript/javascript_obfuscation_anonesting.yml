@@ -1,7 +1,7 @@
 rules:
   - id: javascript-obfuscation-anonymous-nesting
-    pattern: () => { () => { ... } }
-    message:  Detect obfuscation by anonymous nesting.
+    pattern: () => { () => { () => { ... } } }
+    message:  Detect obfuscation by deep anonymous nesting.
     severity: WARNING
     languages: 
       - javascript

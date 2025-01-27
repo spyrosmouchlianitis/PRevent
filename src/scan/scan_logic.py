@@ -86,7 +86,7 @@ def handle_one_liners(
     pr: PullRequest
 ) -> bool:
     for addition in additions_list:
-        if len(addition[1]) > 500:
+        if len(addition[1]) > 400:
             if not FP_STRICT:
                 detection: DetectionType = {
                     "filename": filename,

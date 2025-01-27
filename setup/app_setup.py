@@ -26,6 +26,7 @@ protected_branches_key = 'PROTECTED_BRANCHES'
 webhook_port_key = 'WEBHOOK_PORT'
 block_pr_key = 'BLOCK_PR'
 fp_strict_key = 'FP_STRICT'
+full_findings_key = 'FULL_FINDINGS'
 
 
 def set_github_app(secret_manager):
@@ -152,7 +153,7 @@ def set_github_app(secret_manager):
 
     # Minimize FP
     print("\n")
-    print("Few or no false positives are expected.")
+    print("Few or no false-positives are expected.")
     print("\033[1mDo you want to deprecate 'WARNING' severity detections (less coverage, less false-positives)?\033[0m")
     print(
         "Enter 'y' to run only 'ERROR' severity detectors (less frequent) "
@@ -166,6 +167,16 @@ def set_github_app(secret_manager):
     if fp_strict.strip().lower() == "y":
         rewrite_setting(fp_strict_key, 'True')
         print(f"Successfully updated {fp_strict_key} to True in 'src/settings.py'.")
+    input("\nPress Enter when you've completed this step.")
+
+    # Full Findings
+    print("\n")
+    print("\033[1mDo you want to continue scanning after first detection?\033[0m")
+    print("While the false-positives rate may slightly increase, it generally remains negligible.")
+    full_findings = input("[y/N]: ") or "n"
+    if full_findings.strip().lower() == "y":
+        rewrite_setting(full_findings_key, 'True')
+        print(f"Successfully updated {full_findings_key} to True in 'src/settings.py'.")
     input("\nPress Enter when you've completed this step.")
 
     # Protected branches: a list of branches that were applied a branch protection rule

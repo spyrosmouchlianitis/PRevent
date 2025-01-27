@@ -15,12 +15,12 @@ rules:
             - pattern: $X::$VAR = (...)
         - metavariable-pattern:
             metavariable: $VAR
-            pattern-regex: ^\$\d|^\$.$|(.)\1{2,}|.{64,}|_0x|([^a-zA-Z0-9$_\->])
+            pattern-regex: ^\$\d|(.)\1{2,}|.{64,}|_0x|([^a-zA-Z0-9_$\->])
       - patterns:
         - pattern: define($DEF, ...)
         - metavariable-pattern:
             metavariable: $DEF
-            pattern-regex: (['"](\d|.|.*(.)\3{2,}.*|.{64,}|_0x.*|([^a-zA-Z0-9$_\->]))['"])
+            pattern-regex: (['"](\d|.*(.)\3{2,}.*|.{64,}|_0x.*|([^a-zA-Z0-9_$\->]))['"])
     message: Obfuscated declarations names.
     severity: ERROR
     languages:

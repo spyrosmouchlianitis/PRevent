@@ -1,7 +1,30 @@
 rules:
   - id: ruby-obfuscation-conditions
-    pattern-regex: (if|elsif|else|while|until|case)\s+(true|false|nil)\s
-    message: Obfuscation by spurious conditions.
+    patterns:
+      - pattern-not-inside: '...'
+      - pattern-either:
+          - pattern: |
+              if $VAR
+                ...
+              end
+          - pattern: |
+              elseif $VAR
+                ...
+              end
+          - pattern: |
+              while $VAR
+                ...
+              end
+          - pattern: |
+              until $VAR
+                ...
+              end
+          - pattern: |
+              case $VAR
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: \(?^(?!.*(?<!['"`])\b(?!true|false|nil)[a-zA-Z_.$@[]]).*$\)?
+    message:  Detect obfuscation by spurious conditions.
     severity: WARNING
     languages: 
       - ruby

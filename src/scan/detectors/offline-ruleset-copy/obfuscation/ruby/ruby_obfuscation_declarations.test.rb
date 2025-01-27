@@ -5,11 +5,8 @@ def ___func
   "no"
 end
 
-class X
-  @@y = 1
-end
-
 obj._0xfa12ab = {}
+
 
 # FP
 @valid_instance_var = 5

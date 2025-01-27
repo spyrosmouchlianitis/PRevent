@@ -1,3 +1,3 @@
-if (true) { print("True"); }
-while (false) { print("False"); }
-switch (null) { case true: print("True"); break; }
+if ([]) { print("True"); }
+while (2>1) { print("False"); }
+switch ('a') { case true: print("True"); break; }

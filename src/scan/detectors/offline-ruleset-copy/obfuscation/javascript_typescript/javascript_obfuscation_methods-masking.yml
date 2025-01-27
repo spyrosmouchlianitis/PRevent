@@ -1,11 +1,11 @@
 rules:
-  - id: javascript-obfuscation-methods-masking
+  - id: java-obfuscation-methods-masking
     pattern-either:
-      - pattern-regex: (atob\(|Buffer\.from|charCodeAt|decode|encode|fromCharCode|function)(.*\1){2,}
-      - pattern-regex: (indexOf|\.join\(|Math\.random|parseInt|\.replace|\.reverse|substr)(.*\1){2,}
-      - pattern-regex: (TextDecoder|toString)(.*\1){2,}
+      - pattern-regex: (?<!\w|\$)((Base64|DatatypeConverter|Random|String|StringBuilder|StringBuffer)\.)(.*(?<!\w|\$)\2){3,}
+      - pattern-regex: (\.(append|charAt|concat|delete|format|indexOf|insert))(?!\w|\$)(.*\2(?!\w|\$)){3,}
+      - pattern-regex: (\.(join|lastIndexOf|replace|replaceAll|setCharAt|split|startsWith))(?!\w|\$)(.*\2(?!\w|\$)){3,}
+      - pattern-regex: (\.(substring|toString|valueOf))(?!\w|\$)(.*\2(?!\w|\$)){3,}
     message: Obfuscation by concatenation of string manipulating methods.
     severity: WARNING
-    languages: 
-      - javascript
-      - typescript
+    languages:
+      - java

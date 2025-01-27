@@ -1,12 +1,5 @@
 // TP
 
-const i, j = 60, 70
-
-type s struct {
-    Name string
-    Age  int
-}
-
 func (p Person) _0x20Ed() string {
     return "Hello, " + p.Name
 }

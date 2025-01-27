@@ -16,7 +16,14 @@ def attempt_secret(secret: str) -> Any:
         return ''
 
 # Write the values locally to avoid unnecessary repeated remote fetching
-for secret in ['SECRET_MANAGER', 'BLOCK_PR', 'FP_STRICT', 'WEBHOOK_PORT', 'JWT_EXPIRY_SECONDS']:
+for secret in [
+    'SECRET_MANAGER',
+    'BLOCK_PR',
+    'FP_STRICT',
+    'FULL_FINDINGS',
+    'WEBHOOK_PORT',
+    'JWT_EXPIRY_SECONDS'
+]:
     value = attempt_secret(secret)
     if value:
         rewrite_setting(secret, value)

@@ -1,6 +1,5 @@
 ;; TP
 (def _0x1234 ...)
-(defn a ...)
 (let [vvv ...] ...)
 (loop [a-bc-de$ ...] ...)
 (defrecord _0xabcd ...)

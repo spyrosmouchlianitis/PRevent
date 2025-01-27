@@ -1,5 +1,5 @@
 // TP
-var asd = parseInt('64', 8) + parseInt('20', 16) + parseInt('20', 16);
+var asd = parseInt('64', 8) + parseInt('20', 16) + parseInt('20', 16) + parseInt('90', 32);
 
 B100.P8=function (){return typeof B100.H8.I1==='function'?B100.H8.I1.apply(B100.H8,arguments):B100.H8.I1;};B100.q=function (){return typeof B100.H.C==='function'?B100.H.C.apply(B100.H,arguments):B100.H.C;};B100.B1=function (){return typeof B100.a1.b1==='function'?B100.a1.b1.apply(B100.a1,arguments):B100.a1.b1;};
 

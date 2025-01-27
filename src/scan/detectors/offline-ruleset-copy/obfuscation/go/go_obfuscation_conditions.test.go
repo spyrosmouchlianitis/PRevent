@@ -4,6 +4,16 @@ if true {
     fmt.Println("Condition is true")
 }
 
+func x() {
+    a := 1
+    switch 2 {
+    case 3:
+        fmt.Println("1")
+    default:
+        fmt.Println("Invalid")
+    }
+}
+
 
 // FP
 

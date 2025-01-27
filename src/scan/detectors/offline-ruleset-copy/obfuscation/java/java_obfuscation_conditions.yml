@@ -1,6 +1,15 @@
 rules:
   - id: java-obfuscation-conditions
-    pattern-regex: (if|while|for|switch)\s*\((true|false|null)\)
+    patterns:
+      - pattern-not-inside: '...'
+      - pattern-either:
+          - pattern: if ($VAR) { ... }
+          - pattern: while ($VAR) { ... }
+          - pattern: |
+              switch ($VAR) { case $C: ... }
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: ^(?!.*(?<!['"`])\b(?!true|false|null)[a-zA-Z_$]).*$
     message: Obfuscation by spurious conditions.
     severity: WARNING
     languages: 

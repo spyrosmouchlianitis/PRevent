@@ -20,7 +20,7 @@ rules:
           - pattern: void $VAR(...) { ... }
       - metavariable-pattern:
           metavariable: $VAR
-          pattern-regex: ^\d|^.$|(.)\1{2,}|.{64,}|^_0x|([^a-zA-Z0-9_$@])
+          pattern-regex: ^\d|(.)\1{2,}|.{64,}|^_0x|([^a-zA-Z0-9_$@])
     message: Obfuscated declarations names.
     severity: ERROR
     languages:

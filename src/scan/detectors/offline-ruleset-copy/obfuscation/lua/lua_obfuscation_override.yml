@@ -5,7 +5,7 @@ rules:
           - pattern: $IMPOSTOR = ...
           - metavariable-pattern:
               metavariable: $IMPOSTOR
-              pattern-regex: ^(assert|error|getmetatable|io\.|ipairs|load|math\.|next|os\.|pairs|pcall|print|require|select|setmetatable|string|table|tonumber|tostring|type|package)
+              pattern-regex: ^(assert|error|getmetatable|ipairs|load|next|pairs|pcall|print|require|select|setmetatable|string|table|tonumber|tostring|type|package|io\.[a-zA-Z]+|math\.[a-zA-Z]+|os\.[a-zA-Z]+)$
     message: Obfuscation by overriding builtin constructs.
     severity: ERROR
     languages: 

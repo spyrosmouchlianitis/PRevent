@@ -1,8 +1,14 @@
 rules:
   - id: javascript-obfuscation-conditions
-    pattern-either:
-      - pattern-regex: (if|switch|while)\s?\((false|true|\d|!![^\s]|undefined|null|NaN)\)
-      - pattern-regex: (?<=\n|\s|;)(false|true|\d|!![^\s]|undefined|null|NaN)\s?\?
+    patterns:
+      - pattern-not-inside: '...'
+      - pattern-either:
+          - pattern: if ($VAR) { ... }
+          - pattern: while ($VAR) { ... }
+          - pattern: switch ($VAR) { case ... }
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: ^(?!.*(?<!['"`])\b(?!true|false|undefined|null|NaN)[a-zA-Z_$]).*$
     message:  Detect obfuscation by spurious conditions.
     severity: WARNING
     languages: 

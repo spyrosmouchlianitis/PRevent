@@ -1,8 +1,9 @@
 rules:
   - id: csharp-obfuscation-methods-masking
     pattern-either:
-      - pattern-regex: (Convert\.|\.Concat|Encoding\.|\.Format|GetBytes|IndexOf|\.Join)(.*\1){2,}
-      - pattern-regex: (new Random|\.Replace|\.Split|StringBuilder|Substring)(.*\1){2,}
+      - pattern-regex: (?<!\w|\$|@)(Convert|Encoding)\.((?<!\w|\$|@).*\1\.){3,}
+      - pattern-regex: \.(Concat|Format|Join|Replace|Split)(?!\w|\$|@)(.*\.\1(?!\w|\$|@)){3,}
+      - pattern-regex: (?<!\w|\$|@)(GetBytes|IndexOf|new Random|StringBuilder|Substring)(?!\w|\$|@)(.*(?<!\w|\$|@)\1(?!\w|\$|@)){3,}
     message: Obfuscation by reconstruction of hardcoded data.
     severity: WARNING
     languages:

@@ -1,7 +1,6 @@
 // TP
 class $$$InvalidClass123 {}
 trait _0xVar
-def x() = {}
 
 // FP
 class ValidClass {}

@@ -3,8 +3,6 @@ rules:
     pattern-either:
       - pattern: $VAR = os
       - pattern: $VAR = subprocess
-      - pattern: $VAR = os.$CMD
-      - pattern: $VAR = subprocess.$CMD
       - pattern: |
           subprocess.$CMD(['python', '-c', '...']);
       - pattern: |
@@ -22,7 +20,7 @@ rules:
           - metavariable-regex:
               metavariable: $STR
               regex: .*python -c.*
-    message: Language code dynamic execution using system commands.
+    message: Dynamic execution using system commands.
     severity: ERROR
     languages:
       - python

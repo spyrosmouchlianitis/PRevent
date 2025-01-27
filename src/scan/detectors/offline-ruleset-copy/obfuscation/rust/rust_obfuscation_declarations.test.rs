@@ -1,8 +1,6 @@
 // TP
 fn ___func() {}
-struct x;
 trait Traaait {}
-const _0xCONST: i32 = 10;
 static _0xSTATIC: i32 = 20;
 
 // FP

@@ -1,9 +1,10 @@
 rules:
   - id: scala-obfuscation-methods-masking
     pattern-either:
-      - pattern-regex: (\.append|Base64|concat|encodeToString|.format|getBytes|getEncoder)(.*\1){2,}
-      - pattern-regex: (MessageDigest|Random|replace|\.slice|split|StringBuilder|toChar|valueOf)(.*\1){2,}
-    message: Obfuscation by concatenation of string manipulating methods.
+      - pattern-regex: (?<!\w|\$)(Base64|concat|encodeToString|getBytes|getEncoder)(?!\w|\$)(.*(?<!\w|\$)\1(?!\w|\$)){3,}
+      - pattern-regex: (?<!\w|\$)(MessageDigest|Random|replace|split|StringBuilder|toChar|valueOf)(?!\w|\$)(.*(?<!\w|\$)\1(?!\w|\$)){3,}
+      - pattern-regex: \.(append|format|slice)(?!\w|\$)(.*\.\1(?!\w|\$)){3,}
+    message: Obfuscation by concatenation of a repeating string manipulating method.
     severity: WARNING
     languages:
       - scala

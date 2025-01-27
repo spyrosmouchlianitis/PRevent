@@ -1,7 +1,18 @@
 rules:
   - id: rust-obfuscation-conditions
-    pattern-regex: (if|while|loop|match)\s+(true|false)\s
-    message: Obfuscation by spurious conditions.
+    patterns:
+      - pattern-not-inside: '...'
+      - pattern-either:
+          - pattern: |
+              if $VAR { ... }
+          - pattern: |
+              while $VAR { ... }
+          - pattern: |
+              match $VAR { $X => ... }
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: \(?^(?!.*(?<!['"`])\b(?!true|false)[a-zA-Z_]).*$\)?
+    message:  Detect obfuscation by spurious conditions.
     severity: WARNING
     languages: 
       - rust

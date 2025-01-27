@@ -5,7 +5,7 @@ rules:
           - pattern: $IMPOSTOR.prototype.$METHOD = $OVERRIDE
           - metavariable-pattern:
               metavariable: $IMPOSTOR
-              pattern-regex: (Array|Boolean|Date|Error|Function|Number|Object|Promise|RegExp|String|Symbol|URL|define|jQuery|require)
+              pattern-regex: ^(Array|Boolean|Date|Error|Function|Number|Object|Promise|RegExp|String|Symbol|URL|define|jQuery|require)$
     message: Obfuscation by overriding builtin constructs.
     severity: ERROR
     languages: 

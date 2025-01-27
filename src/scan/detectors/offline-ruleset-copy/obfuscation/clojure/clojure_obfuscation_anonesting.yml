@@ -5,7 +5,7 @@ rules:
           (fn [$Y]
             (fn [$Z]
                 ...)))
-    message: Common obfuscation by anonymous nesting.
+    message: Detect obfuscation by deep anonymous nesting.
     severity: WARNING
     languages: 
       - clojure

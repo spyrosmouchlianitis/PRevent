@@ -1,2 +1,2 @@
 if true { println!("yes"); }
-while false { println!("no"); }
+while ('a'*5) { println!("no"); }

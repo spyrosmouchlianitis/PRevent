@@ -1,6 +1,27 @@
 rules:
   - id: python-obfuscation-conditions
-    pattern-regex: (if|elif|while)\s(True|False|1|0|\[\]|\{\}|None)\s
+    patterns:
+      - pattern-not-inside: '...'
+      - pattern-regex: ^(if|elif|while|match)(?!.*\bin\b).*:\s.*
+      - pattern-either:
+          - pattern: |
+              if $VAR:
+                ...
+          - pattern: |
+              if $X:
+                ...
+              elif $VAR:
+                ...
+          - pattern: |
+              while $VAR:
+                ...
+          - pattern: |
+              match $VAR:
+                case $C:
+                  ...
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: \(?^(?!.*(?<!['"`])\b(?!True|False|None)[a-zA-Z_.()[]]).*$\)?
     message: Obfuscation by spurious conditions.
     severity: WARNING
     languages: 

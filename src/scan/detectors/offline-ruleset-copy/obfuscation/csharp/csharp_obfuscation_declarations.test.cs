@@ -1,6 +1,5 @@
 
 // TP
-public class c {}
 private int _0xfuscatedVar;
 public string superlongnameThatExceedsTheLimitOfThirtyOneCharacters { ... }
 void __000() {}

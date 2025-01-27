@@ -1,12 +1,10 @@
 <?php
 
 // TP
-$c = 1;
 function __obfuscatedFunccc() {}
 $object->_0xValue = "hidden";
 class _0x123abc {}
-const ___CONST = 42;
-define('x', "value");
+define('___CONST', "value");
 
 // FP
 $validVar = 1;

@@ -1,6 +1,17 @@
 rules:
   - id: clojure-obfuscation-conditions
-    pattern-regex: (if|when|cond|if-not|when-not|case)\s\(?(true|false|nil|1|\[\]|\(\)|\{\})\)?\s
+    patterns:
+      - pattern-not-inside: '...'
+      - pattern-either:
+          - pattern: (if $VAR ...)
+          - pattern: (if-not $VAR ...)
+          - pattern: (when $VAR ...)
+          - pattern: (when-not $VAR ...)
+          - pattern: (cond $VAR ...)
+          - pattern: (case $VAR ...)
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: \(?^(?!.*(?<!['"`])\b(?!true|false|nil)[a-zA-Z_.\/\-\n]).*$\)?
     message: Obfuscation by spurious conditions.
     severity: WARNING
     languages: 

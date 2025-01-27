@@ -1,3 +1,12 @@
-if true { puts "True" }
-while nil { puts "Nil" }
-case false when true then puts 1 end
+if true
+    puts "True"
+end
+  
+while nil
+    puts "Nil"
+end
+
+case 'a'
+when true
+    puts 1
+end

@@ -7,6 +7,9 @@ SECRET_MANAGER = 'vault'
 # Don't run WARNING severity detectors (many), run only ERROR severity detectors (few).
 FP_STRICT = False
 
+# Continue scanning after first detection
+FULL_FINDINGS = False
+
 # Block PR until approval. Respected only if reviewers were defined.
 BLOCK_PR = True
 
