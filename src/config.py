@@ -1,6 +1,7 @@
 import os
 import logging
 from pathlib import Path
+from typing import Any
 from logging.handlers import RotatingFileHandler
 from src.settings import INFO_LOG_FILE, ERROR_LOG_FILE
 
@@ -33,7 +34,7 @@ def get_app_root() -> str:
     raise FileNotFoundError(f'{root_marker} not found in any directory.')
 
 
-def rewrite_setting(setting_name: str, new_value: str) -> None:
+def rewrite_setting(setting_name: str, new_value: Any) -> None:
     file_path = f'{get_app_root()}/src/settings.py'
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File not found: {file_path}")

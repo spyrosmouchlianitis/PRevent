@@ -36,9 +36,7 @@ vault write -f auth/approle/role/app-role/secret-id
         """, BashLexer(), TerminalFormatter()))
         print(bold_text("\nStep 3: Return here to \"vault login\", or do it independently.\n\n"))
 
-
     # AWS Secrets Manager
-
     elif manager == 'aws':
         print(bold_text("\n##### AWS Secrets Manager Setup #####\n"))
         print(bold_text(
@@ -77,8 +75,8 @@ aws iam put-role-policy --role-name prevent-app-role \
         """, BashLexer(), TerminalFormatter()))
         print(bold_text("Step 3: Assume the role to retrieve temporary security credentials:"))
         print(highlight("""
-aws sts assume-role \ 
---role-arn arn:aws:iam::account-id:role/prevent-app-role \ 
+aws sts assume-role \\ 
+--role-arn arn:aws:iam::account-id:role/prevent-app-role \\
 --role-session-name "prEventAppSession"
         """, BashLexer(), TerminalFormatter()))
         print(bold_text(
@@ -90,9 +88,7 @@ aws sts assume-role \
             "or make sure to do it independently.\n\n"
         ))
 
-
     # Azure Key Vault
-
     elif manager == 'azure':
         print(bold_text("\n##### Azure Key Vault Setup #####\n"))
         print(bold_text(
@@ -109,7 +105,7 @@ aws sts assume-role \
         ))
         print(highlight("""
 az keyvault set-policy --name prevent-keyvault \\
---object-id $(az identity show --name prevent-app-identity \ 
+--object-id $(az identity show --name prevent-app-identity \\
 --resource-group prevent-rg --query 'principalId' -o tsv) \\
 --secret-permissions get list set delete --resource-id /secrets/prevent-secret-*
         """, BashLexer(), TerminalFormatter()))
@@ -126,9 +122,7 @@ az keyvault set-policy --name prevent-keyvault \\
             "or do it independently.)\n\n"
         ))
 
-
     # Google Cloud Secret Manager
-
     elif manager == 'gcloud':
         print(bold_text("\n##### Google Cloud Secret Manager Setup #####\n"))
         print(bold_text(
@@ -147,13 +141,13 @@ gcloud config set project prevent-app-project
         print(highlight("""
 gcloud iam service-accounts create prevent-app-sa --display-name "Service Account for prevent app"
 
-gcloud projects add-iam-policy-binding prevent-app-project \
---member "serviceAccount:prevent-app-sa@prevent-app-project.iam.gserviceaccount.com" \ 
+gcloud projects add-iam-policy-binding prevent-app-project \\
+--member "serviceAccount:prevent-app-sa@prevent-app-project.iam.gserviceaccount.com" \\
 --role "roles/secretmanager.secretAccessor"
         """, BashLexer(), TerminalFormatter()))
         print(bold_text("Step 3: Generate and download the service account key."))
         print(highlight("""
-gcloud iam service-accounts keys create prevent-app-sa-key.json \
+gcloud iam service-accounts keys create prevent-app-sa-key.json \\
 --iam-account prevent-app-sa@prevent-app-project.iam.gserviceaccount.com
         """, BashLexer(), TerminalFormatter()))
         print(bold_text(
@@ -161,9 +155,7 @@ gcloud iam service-accounts keys create prevent-app-sa-key.json \
             "or do it independently.\n\n"
         ))
 
-
     # Local HashiCorp Vault
-
     elif manager == 'local':
         print(bold_text("\n##### Local HashiCorp Vault Setup #####\n"))
         print(

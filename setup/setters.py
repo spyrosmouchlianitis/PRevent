@@ -4,7 +4,7 @@ from getpass import getpass
 from src.secret_manager import set_secret
 from src.settings import WEBHOOK_PORT
 from src.config import rewrite_setting
-from setup.utils import get_host, is_secret_set, validation_wrapper
+from setup.utils import validation_wrapper
 from src.validation.config import (
     validate_webhook_port,
     validate_github_app_integration_id,
@@ -13,6 +13,7 @@ from src.validation.config import (
     validate_branches,
     validate_security_reviewers
 )
+
 
 def set_webhook_port(webhook_port_key: str) -> int:
     try:
@@ -53,7 +54,7 @@ def set_webhook_secret(secret_manager: str, webhook_secret_key: str) -> None:
         print(f"Successfully saved '{webhook_secret_key}' to your {secret_manager} secret manager.")
     else:
         print("Try again")
-        set_webhook_secret(secret_manager)
+        set_webhook_secret(secret_manager, webhook_secret_key)
         
     input("\nPress Enter when you've completed this step.")
 
@@ -152,7 +153,7 @@ def set_security_reviewers(secret_manager: str, security_reviewers_key: str) -> 
 
 
 def set_branches_scope(secret_manager: str, branches_include_key: str, branches_exclude_key: str) -> None:
-    def list_branches() -> list:
+    def list_branches() -> dict:
         print("(verify inputs for typos and correct format)")
         print("Format: repo_a:branch1,branch3 repo_b:all")
         all_repos_branches = {}
@@ -162,12 +163,12 @@ def set_branches_scope(secret_manager: str, branches_include_key: str, branches_
                 break
             pairs = user_input.split(" ")
             for pair in pairs:
-                repo, branches = pair.split(":")
-                if branches == 'all':
+                repo, repo_branches = pair.split(":")
+                if repo_branches == 'all':
                     all_repos_branches[repo.strip()] = 'all'
-                elif branches:
+                elif repo_branches:
                     all_repos_branches[repo.strip()] = [
-                        b.strip() for b in branches.split(",") if b.strip()
+                        b.strip() for b in repo_branches.split(",") if b.strip()
                     ]
             return all_repos_branches
 

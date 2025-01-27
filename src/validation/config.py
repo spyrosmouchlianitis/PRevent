@@ -6,14 +6,17 @@ from src.settings import SECRET_MANAGER, BLOCK_PR, FP_STRICT, FULL_FINDINGS, WEB
 
 
 def validate_config_parameters() -> None:
-    
+
+    # Containerized: these are written to settings.py after read from secret manager
+    # Non-containerized: these are written to settings.py by the interactive setup/setup.py script
     validate_secret_manager(SECRET_MANAGER)
     validate_block_pr(BLOCK_PR)
     validate_fp_strict(FP_STRICT)
     validate_full_findings(FULL_FINDINGS)
     validate_webhook_port(WEBHOOK_PORT)
     validate_jwt_expiry_seconds(JWT_EXPIRY_SECONDS)
-    
+
+    # Secrets
     validate_github_app_integration_id(get_secret('GITHUB_APP_INTEGRATION_ID'))
     validate_github_app_private_key(get_secret('GITHUB_APP_PRIVATE_KEY'))
     validate_webhook_secret(get_secret('WEBHOOK_SECRET'))
@@ -21,7 +24,7 @@ def validate_config_parameters() -> None:
     validate_branches(get_secret('BRANCHES_EXCLUDE'))
     validate_security_reviewers(get_secret('SECURITY_REVIEWERS'))
     
-    return True
+    return None
 
 
 def validate_secret_manager(value: str) -> None:

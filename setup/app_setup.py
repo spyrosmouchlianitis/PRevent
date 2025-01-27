@@ -132,7 +132,6 @@ def set_github_app(secret_manager):
         print(f"Successfully updated {block_pr_key} to True in 'src/settings.py'.")
     input("\nPress Enter when you've completed this step.")
 
-
     # Branches scope
     print("\n")
     if is_secret_set(branches_include_key) or is_secret_set(branches_exclude_key):

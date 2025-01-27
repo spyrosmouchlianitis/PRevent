@@ -1,7 +1,6 @@
 import os
 import socket
 import ipaddress
-import os
 import subprocess
 from contextlib import redirect_stderr
 from typing import Callable, Any

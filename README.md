@@ -156,19 +156,19 @@ Permissions required to operate the role:
    - https://10.0.0.7/webhook
 4. Under the webhook URL field, set the secret field in order to process only requests originating from GitHub. You can run `python -c 'import secrets; print(secrets.token_hex(32))'` to generate one. Then, store it in your secrets manager as **WEBHOOK_SECRET**.
 5. Set required permissions:
-
-| Parent     | Permission      | Action          | Reason                                                |
-|------------|-----------------|-----------------|-------------------------------------------------------|
-| Repository | Pull requests   | Read and Write  | Read PR, write comments (if enabled: trigger reviews) |
-| Repository | Commit statuses | Read and write  | Monitor scan-results by setting commits-statuses      |
-| Repository | Contents        | Read-only       | Get full files, can't build AST from diff             |
+    
+    | Parent     | Permission      | Action          | Reason                                                |
+    |------------|-----------------|-----------------|-------------------------------------------------------|
+    | Repository | Pull requests   | Read and Write  | Read PR, write comments (if enabled: trigger reviews) |
+    | Repository | Commit statuses | Read and write  | Monitor scan-results by setting commits-statuses      |
+    | Repository | Contents        | Read-only       | Get full files, can't build AST from diff             |
 
 6. Set optional permissions:
-
-| Parent        | Permission     | Action          | Reason                   |
-|---------------|----------------|-----------------|--------------------------|
-| Organization  | Members        | Read-only       | Trigger reviews          |
-| Repository    | Administration | Read and write  | Manage branch protection |
+    
+    | Parent        | Permission     | Action          | Reason                   |
+    |---------------|----------------|-----------------|--------------------------|
+    | Organization  | Members        | Read-only       | Trigger reviews          |
+    | Repository    | Administration | Read and write  | Manage branch protection |
 
 7. Subscribe to the following events:
    * `Pull request`

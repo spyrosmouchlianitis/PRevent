@@ -16,19 +16,21 @@ def mock_get_branches_lists(setting):
     }
     return data.get(setting, {})
 
+
 # Patch the function for testing
 @pytest.fixture(autouse=True)
 def patch_get_branches_lists(monkeypatch):
     monkeypatch.setattr('src.branch_protection.get_branches_lists', mock_get_branches_lists)
 
+
 @pytest.mark.parametrize("repo_name, branch_name, expected", [
-    ('repo1', 'main', True),  # Included explicitly
-    ('repo1', 'dev', True),   # Included explicitly
-    ('repo1', 'test', False), # Excluded explicitly
-    ('repo2', 'release', True),  # Included explicitly
-    ('repo2', 'main', False),    # Not included
-    ('repo3', 'staging', False), # Excluded explicitly
-    ('repo3', 'main', False),    # Not included or excluded
+    ('repo1', 'main', True),        # Included explicitly
+    ('repo1', 'dev', True),         # Included explicitly
+    ('repo1', 'test', False),       # Excluded explicitly
+    ('repo2', 'release', True),     # Included explicitly
+    ('repo2', 'main', False),       # Not included
+    ('repo3', 'staging', False),    # Excluded explicitly
+    ('repo3', 'main', False),       # Not included or excluded
 ])
 def test_is_branch_included(repo_name, branch_name, expected):
     assert is_branch_included(repo_name, branch_name) == expected

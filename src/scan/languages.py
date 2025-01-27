@@ -71,7 +71,6 @@ minor = {
     "pm": "perl",
     "proj": "dotnet",
     "ps1xml": "powershell",
-    "ps1xml": "powershell",
     "psc1": "powershell",
     "psd1": "powershell",
     "psm1": "powershell",
@@ -95,8 +94,7 @@ minor = {
     "tsx": "javascript",
     "whl": "python",
     "wsgi": "python",
-    "yml": "yaml",
-    "tf": "terraform"
+    "yml": "yaml"
 }
 
 extras = {
@@ -121,7 +119,6 @@ extras = {
     "dotsettings": "dotnet",
     "dust": "template",
     "editorconfig": "configuration",
-    "editorconfig": "configuration",
     "edn": "edn",
     "ejs": "template",
     "env": "configuration",
@@ -137,7 +134,6 @@ extras = {
     "gql": "graphql",
     "gradle": "gradle",
     "graphql": "graphql",
-    "haml": "haml",
     "haml": "template",
     "handlebars": "template",
     "hbs": "handlebars",
@@ -159,10 +155,7 @@ extras = {
     "svelte": "javascript",
     "swiftmodule": "swift",
     "tmpl": "template",
-    "tmpl": "template",
-    "tmpl": "template",
     "tmux.conf": "configuration",
-    "tpl": "template",
     "tpl": "template",
     "twig": "template",
     "vb": "dotnet",

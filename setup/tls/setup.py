@@ -52,7 +52,8 @@ def ensure_cert_and_key() -> None:
     try:
         os.chmod(CERT_PATH, 0o644)
         os.chmod(KEY_PATH, 0o600)
-        print(f"\nFiles verified successfully:\n   Certificate: {CERT_PATH} (permissions: 644)\n   Key: {KEY_PATH} (permissions: 600)")
+        print("\nFiles verified successfully:")
+        print(f"Certificate: {CERT_PATH} (permissions: 644)\n   Key: {KEY_PATH} (permissions: 600)")
     except Exception as e:
         print(f"Error setting file permissions: {e}\nPlease set the permissions manually.")
 

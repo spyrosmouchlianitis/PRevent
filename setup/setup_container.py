@@ -15,8 +15,9 @@ def attempt_secret(secret: str) -> Any:
     except Exception:
         return ''
 
+
 # Write the values locally to avoid unnecessary repeated remote fetching
-for secret in [
+for secret_key in [
     'SECRET_MANAGER',
     'BLOCK_PR',
     'FP_STRICT',
@@ -24,9 +25,9 @@ for secret in [
     'WEBHOOK_PORT',
     'JWT_EXPIRY_SECONDS'
 ]:
-    value = attempt_secret(secret)
+    value = attempt_secret(secret_key)
     if value:
-        rewrite_setting(secret, value)
+        rewrite_setting(secret_key, value)
 
 try:
     validate_config_parameters()

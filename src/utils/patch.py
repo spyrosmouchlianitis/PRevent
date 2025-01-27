@@ -54,15 +54,47 @@ def get_additions_with_line_numbers(diff: str) -> list[tuple[int, str]]:
 def remove_comments(diff: str, lang: str):
     patterns = [
         {
-            'languages': ['Bash', 'Perl', 'Python', 'R', 'Ruby', 'Rust'],
+            'languages': [
+                'Bash',
+                'Perl',
+                'Python',
+                'R',
+                'Ruby',
+                'Rust'
+            ],
             'pattern': r'(?:^|\s)(#.*)',
         },
         {
-            'languages': ['Dart', 'Go', 'Groovy', 'JavaScript', 'Kotlin', 'Objective-C', 'PHP', 'Rust', 'Scala', 'Swift'],
+            'languages': [
+                'Dart',
+                'Go',
+                'Groovy',
+                'JavaScript',
+                'Kotlin',
+                'Objective-C',
+                'PHP',
+                'Rust',
+                'Scala',
+                'Swift'
+            ],
             'pattern': r'(?:^|\s)(//.*)',
         },
         {
-            'languages': ['C', 'C++', 'CSS', 'Dart', 'Go', 'Groovy', 'JavaScript', 'Kotlin', 'Objective-C', 'PHP', 'Rust', 'Scala', 'Swift'],
+            'languages': [
+                'C',
+                'C++',
+                'CSS',
+                'Dart',
+                'Go',
+                'Groovy',
+                'JavaScript',
+                'Kotlin',
+                'Objective-C',
+                'PHP',
+                'Rust',
+                'Scala',
+                'Swift'
+            ],
             'pattern': r'/\*[\s\S]*?\*/',
         },
         {
