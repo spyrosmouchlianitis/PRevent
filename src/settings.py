@@ -2,7 +2,7 @@ import os
 
 
 # Options: vault, aws, azure, gcloud, local (vault)
-SECRET_MANAGER = 'vault'
+SECRET_MANAGER = 'local'
 
 # Don't run WARNING severity detectors (many), run only ERROR severity detectors (few).
 FP_STRICT = False

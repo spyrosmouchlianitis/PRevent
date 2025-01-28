@@ -15,7 +15,6 @@ from src.branch_protection import (
     apply_branch_protection_rule,
     update_protected_branches
 )
-from src.reviewers import resolve_reviewers
 from src.scan.scan_logic import handle_scan
 from src.secret_manager import get_secret
 from src.settings import BLOCK_PR
@@ -39,7 +38,6 @@ class GitHubPRWebhook:
 
         try:
             (
-                org_name,
                 repo_name,
                 branch_name,
                 pr_number,
@@ -62,7 +60,7 @@ class GitHubPRWebhook:
             status = handle_scan(repo, pr, commit_sha)
 
             # Trigger a code review (optional)
-            self._request_code_review(status, pr, repo_name, org_name)
+            self._request_code_review(status, pr, repo_name)
 
             # Block merging upon detection (optional)
             self._handle_block_mode(repo_name, branch_name)
@@ -83,8 +81,7 @@ class GitHubPRWebhook:
         self,
         status: str,
         pr: PullRequest,
-        repo_name: str,
-        org_name: str
+        repo_name: str
     ) -> None:
         """
         If reviewers are defined, a review request is triggered upon detection.
@@ -93,7 +90,7 @@ class GitHubPRWebhook:
         """
         if status == 'failure':
             if self.security_reviewers:
-                self._request_security_review(pr, repo_name, org_name)
+                self._request_security_review(pr, repo_name)
 
     def _handle_block_mode(self, repo_name, branch_name):
         """
@@ -125,16 +122,9 @@ class GitHubPRWebhook:
         self,
         pr: PullRequest,
         repo_name: str,
-        org_name: str
     ):
-        security_reviewers = resolve_reviewers(
-            self.security_reviewers,
-            org_name,
-            self.github_client
-        )
-
         # Separate requests so if one request fails the rest still succeed.
-        for reviewer in security_reviewers:
+        for reviewer in self.security_reviewers:
             single_reviewer_list = [reviewer]  # PyGithub doesn't accept strings despite hint
             try:
                 # Requires Repository Permissions: Pull requests -> Read and write

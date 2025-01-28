@@ -78,7 +78,7 @@ Deployment:
 
 Deploying PRevent involves three parts, typically completed in 5 minutes to an hour, depending on your setup and familiarity:  
 1. Configure an existing secret manager or create a new one.
-2. Create a GitHub app within your GitHub organization or account.
+2. Create a GitHub app within your GitHub Organization or account.
 3. Deploy the application to a server.
 
 Use the latest Python version (3.9.2+ supported).
@@ -165,13 +165,12 @@ Permissions required to operate the role:
     |------------|-----------------|-----------------|-------------------------------------------------------|
     | Repository | Pull requests   | Read and Write  | Read PR, write comments (if enabled: trigger reviews) |
     | Repository | Commit statuses | Read and write  | Monitor scan-results by setting commits-statuses      |
-    | Repository | Contents        | Read-only       | Get full files, can't build AST from diff             |
+    | Repository | Contents        | Read-only       | Get full files so AST can get built                   |
 
 6. Set optional permissions:
     
     | Parent        | Permission     | Action          | Reason                   |
     |---------------|----------------|-----------------|--------------------------|
-    | Organization  | Members        | Read-only       | Trigger reviews          |
     | Repository    | Administration | Read and write  | Manage branch protection |
 
 7. Subscribe to the following events:

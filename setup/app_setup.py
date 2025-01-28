@@ -65,7 +65,7 @@ def set_github_app(secret_manager):
 
     # App permissions
     print("\n")
-    print("Between 3 to 5 permissions are required for the app's operation.")
+    print("Between 3 or 4 permissions are required for the app's operation.")
     print("""
         During GitHub app setup, assign the following permissions:
             1. For PR scanning: read for data fetching, write for: commenting, triggering a review:
@@ -74,9 +74,7 @@ def set_github_app(secret_manager):
               \033[1mRepository Permissions: Contents -> Read-only\033[0m
             3. For creating commit statuses to monitor scan results:
               \033[1mRepository Permissions: Commit statuses -> Read and write\033[0m
-            4. If you want to trigger reviews: referencing and listing teams and :
-              \033[1mOrganization Permissions: Members -> Read-only\033[0m
-            5. If you want to block on detection (manage branch protection):
+            4. If you want to block on detection (manage branch protection):
               \033[1mRepository Permissions: Administration -> Read and write\033[0m
     """)
     print("Notice that to change the permissions later,")

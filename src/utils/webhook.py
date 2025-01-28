@@ -12,19 +12,17 @@ from src.secret_manager import get_secret
 
 def extract_pr_info(webhook_data: dict[str, Any]) -> tuple:
     try:
-        org_name = webhook_data['repository']['owner']['login']
         repo_name = webhook_data['repository']['full_name']
         branch_name = webhook_data['pull_request']['base']['ref']
         pr_number = webhook_data['pull_request']['number']
         commit_sha = webhook_data['pull_request']['head']['sha']
 
-        validate_string(org_name)
         validate_string(repo_name)
         validate_string(branch_name)
         validate_pr_number(pr_number)
         validate_sha(commit_sha)
 
-        return org_name, repo_name, branch_name, pr_number, commit_sha
+        return repo_name, branch_name, pr_number, commit_sha
 
     except KeyError as e:
         current_app.logger.error(f"Missing expected key: {e}")

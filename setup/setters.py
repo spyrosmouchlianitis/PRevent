@@ -120,8 +120,8 @@ def set_security_reviewers(secret_manager: str, security_reviewers_key: str) -> 
     def get_reviewers() -> list:
         try:
             print("Enter reviewer account or teams.")
-            print("For teams, list as 'team:team_id' to include all members.")
-            print("Format: account1, account2, team:devsecops, etc.")
+            print("For teams, list as 'team:team-id' to include all members.")
+            print("Format: account1, account2, team:appsec, etc.")
             print("(verify inputs for typos and correct format)")
             security_reviewers = []
             while True:
