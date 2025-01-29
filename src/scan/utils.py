@@ -1,5 +1,5 @@
 from github import Repository, PullRequest
-from src.utils.github import comment_detection
+from src.utils.github import comment_detections
 from src.scan.languages import extensions
 from src.scan.detectors.utils import DetectionType
 from src.settings import FP_STRICT
@@ -36,6 +36,6 @@ def handle_one_liners(
                                 "currently, such files are excluded from this scan. "
                                 "It's recommended to store them in a CDN or a storage service."
                 }
-                comment_detection(detection, repo, pr)
+                comment_detections(detection, repo, pr)
             return True
     return False

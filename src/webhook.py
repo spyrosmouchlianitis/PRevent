@@ -15,7 +15,7 @@ from src.branch_protection import (
     apply_branch_protection_rule,
     update_protected_branches
 )
-from src.scan.scan_logic import handle_scan
+from src.scan.scan_logic import process_scan
 from src.secret_manager import get_secret
 from src.settings import BLOCK_PR
 
@@ -56,8 +56,8 @@ class GitHubPRWebhook:
             # Requires Repository Permissions: Pull requests -> Read
             pr = repo.get_pull(pr_number)
 
-            # Malware-in-code scan
-            status = handle_scan(repo, pr, commit_sha)
+            # Malicious-code scan
+            status = process_scan(repo, pr, commit_sha)
 
             # Trigger a code review (optional)
             self._request_code_review(status, pr, repo_name)

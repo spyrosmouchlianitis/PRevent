@@ -13,30 +13,17 @@ def get_changed_files(
     # Requires Repository Permissions: Pull requests -> Read
     changes = pr.get_files()
     changed_files = []
-
     for file_changes in changes:
         if getattr(file_changes, 'patch', None) and '+0,0' not in file_changes.patch:
             try:
-                # Get full files because diff isn't enough to generate AST
-                # Requires Repository Permissions: Contents -> Read
-                full_file_content = repo.get_contents(
-                    file_changes.filename,
-                    ref=pr.head.sha
-                ).decoded_content.decode('utf-8')
-
                 changed_files.append({
                     "filename": file_changes.filename,
-                    "diff": file_changes.patch,
-                    "full_content": full_file_content
+                    "diff": file_changes.patch
                 })
 
             except KeyError as e:
                 current_app.logger.error(
                     f"Missing key in {repo.name}/{file_changes.filename}, {file_changes}: {e}"
-                )
-            except GithubException as e:
-                current_app.logger.error(
-                    f"GitHub API error: {e}"
                 )
             except UnicodeDecodeError as e:
                 current_app.logger.error(
@@ -46,7 +33,23 @@ def get_changed_files(
     return changed_files
 
 
-def determine_scan_status(
+def get_file_full_content(repo, filename, pr) -> str:
+    # Get full files because diff isn't enough to generate AST
+    # Requires Repository Permissions: Contents -> Read
+    try:
+        return repo.get_contents(
+            filename,
+            ref=pr.head.sha
+        ).decoded_content.decode('utf-8')
+
+    except GithubException as e:
+        current_app.logger.error(
+            f"GitHub API error: {e}"
+        )
+    return ''
+
+
+def determine_and_comment_scan_status(
     detections: list[DetectionType],
     pr: PullRequest,
     repo: Repository
@@ -54,10 +57,10 @@ def determine_scan_status(
     description = "Apiiro malicious-code scan"
     if detections:
         status = "failure"
-        comment = None
-        for detection in detections:
-            comment: PullRequestComment = comment_detection(detection, pr, repo)
-            current_app.logger.info(f"PR #{pr.number} scan found: {json.dumps(detection)}")
+        comment: PullRequestComment = comment_detections(detections, pr, repo)
+        current_app.logger.info(
+            f"PR #{pr.number} scan found: {json.dumps(detections)}"
+        )
         return status, description, comment
     else:
         status = "success"
@@ -65,42 +68,43 @@ def determine_scan_status(
         return status, description, comment
 
 
-def comment_detection(
-    detection: DetectionType,
+def comment_detections(
+    detections: list[DetectionType],
     pr: PullRequest,
     repo: Repository
 ) -> PullRequestComment:
     landmark_string = f"{repo.full_name}, PR #{pr.number}"
     comment = None
     try:
-        landmark_string = (
-            f"{repo.full_name}/{detection['filename']}, "
-            f"PR #{pr.number} line {str(detection['line_number'])}"
-        )
+        for detection in detections:
+            landmark_string = (
+                f"{repo.full_name}/{detection['filename']}, "
+                f"PR #{pr.number} line {str(detection['line_number'])}"
+            )
 
-        image_source = "https://avatars.githubusercontent.com/u/48519090?s=30&v=4"
-        logo = f"[![Logo]({image_source})]({APP_REPO})"
-        body = "\n".join([
-            f"### {logo} Suspicious code detected ###",
-            f"**Detected:** {detection['message']}",
-            f"**File:** {detection['filename']}",
-            f"**Line:** {str(detection['line_number'])}",
-            *[
-                f"**{key}:** {value}" for key, value in detection.items()
-                if key not in ['message', 'severity', 'line_number', 'filename']
-            ]
-        ])
+            image_source = "https://avatars.githubusercontent.com/u/48519090?s=30&v=4"
+            logo = f"[![Logo]({image_source})]({APP_REPO})"
+            body = "\n".join([
+                f"### {logo} Suspicious code detected ###",
+                f"**Detected:** {detection['message']}",
+                f"**File:** {detection['filename']}",
+                f"**Line:** {str(detection['line_number'])}",
+                *[
+                    f"**{key}:** {value}" for key, value in detection.items()
+                    if key not in ['message', 'severity', 'line_number', 'filename']
+                ]
+            ])
 
-        # Requires Repository Permissions: Pull requests -> Read and write
-        comment = pr.create_review_comment(
-            body=body,
-            commit=repo.get_commit(pr.head.sha),
-            path=detection['filename'],
-            line=detection['line_number']
-        )
-        current_app.logger.info(
-            f"Comment posted on {landmark_string}"
-        )
+            # Requires Repository Permissions: Pull requests -> Read and write
+            comment = pr.create_review_comment(
+                body=body,
+                commit=repo.get_commit(pr.head.sha),
+                path=detection['filename'],
+                line=detection['line_number']
+            )
+            current_app.logger.info(
+                f"Comment posted on {landmark_string}"
+            )
 
     except KeyError as e:
         current_app.logger.error(

@@ -5,7 +5,6 @@ from flask import current_app
 from github import Repository, PullRequest
 from typing import Optional, Callable
 from src.scan.detectors.utils import DetectionType
-from src.utils.patch import process_diff
 from src.scan.detectors.run_semgrep import detect_dynamic_execution_and_obfuscation
 from src.scan.detectors.obfuscation_extras.detect_encoded import detect_encoded
 from src.scan.detectors.obfuscation_extras.detect_executable import detect_executable
@@ -18,13 +17,15 @@ from src.scan.utils import (
 )
 from src.utils.github import (
     get_changed_files,
-    determine_scan_status,
+    get_file_full_content,
+    determine_and_comment_scan_status,
     create_commit_status
 )
+from src.utils.diffs import process_diff
 from src.settings import APP_REPO, FP_STRICT, FULL_FINDINGS
 
 
-def handle_scan(
+def process_scan(
     repo: Repository,
     pr: PullRequest,
     commit_sha: str
@@ -35,16 +36,16 @@ def handle_scan(
     # Get full files for proper code analysis. PR contains only diffs.
     changed_files = get_changed_files(repo, pr)
     if changed_files:
-        scan_results: list = run_scan(changed_files, repo, pr)
+        scan_results: list = scan_additions(changed_files, repo, pr)
         current_app.logger.info(f"Scanned PR #{pr.number}")
-        status, description, comment = determine_scan_status(scan_results, pr, repo)
+        status, description, comment = determine_and_comment_scan_status(scan_results, pr, repo)
         target_url = comment.html_url if hasattr(comment, 'html_url') else APP_REPO
         create_commit_status(repo, commit_sha, status, description, target_url)
 
     return status
 
 
-def run_scan(
+def scan_additions(
     changed_files: list[dict[str, str]],
     repo: Repository,
     pr: PullRequest
@@ -55,9 +56,6 @@ def run_scan(
     not get listed and orchestrated like vulnerabilities.
     """
     for file in changed_files:
-        if not all(key in file for key in ['filename', 'diff', 'full_content']):
-            raise ValueError(f"File must contain 'filename', 'diff' and 'full_content': {json.dumps(file)}")
-
         filename = file['filename']
         extension, language = get_lang(filename)
         if not language:
@@ -71,6 +69,7 @@ def run_scan(
         if handle_one_liners(additions_list, filename, repo, pr):
             continue
 
+        file['full_content'] = get_file_full_content(repo, filename, pr)
         detections: list[DetectionType] = get_detections(file, extension)
 
         results = []
@@ -121,7 +120,9 @@ def run_detection_tasks(tasks: list[tuple[Callable, tuple]]) -> list[dict]:
     # CPU-bound string processing. Semgrep is I/O bound, but runs as a single-command blackbox.
     if tasks:
         try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=os.cpu_count()) as executor:
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=os.cpu_count()
+            ) as executor:
                 futures = [
                     executor.submit(task[0], *task[1]) for task in tasks
                 ]

@@ -1,5 +1,7 @@
 import re
 from sys import getsizeof
+from flask import current_app
+from github import GithubException
 
 
 def process_diff(diff: str, lang: str) -> list[tuple[int, str]]:
