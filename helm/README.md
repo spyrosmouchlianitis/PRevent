@@ -1,14 +1,13 @@
 # PRevent Helm Chart
 
-Credentials required to operate your secret manager's dedicated app-role: 
+Credentials required to operate your secret manager's dedicated app-role:
 
-| Vault        | AWS                          | Azure                      | GCloud                              |
-|--------------|------------------------------|----------------------------|-------------------------------------|
-| VAULT_ADDR   | AWS_ACCESS_KEY_ID            | AZURE_CLIENT_ID            | GOOGLE_APPLICATION_CREDENTIALS_JSON | 
-| VAULT_TOKEN  | AWS_SECRET_ACCESS_KEY        | AZURE_CLIENT_SECRET        | GOOGLE_CLOUD_PROJECT                |
-|              | AWS_SESSION_TOKEN (optional) | AZURE_TENANT_ID (optional) | GOOGLE_CLOUD_REGION (optional)      |
-|              |                              |                            | GOOGLE_API_KEY (optional)           |
-
+| Vault       | AWS                          | Azure                      | GCloud                              |
+|-------------|------------------------------|----------------------------|-------------------------------------|
+| VAULT_ADDR  | AWS_ACCESS_KEY_ID            | AZURE_CLIENT_ID            | GOOGLE_APPLICATION_CREDENTIALS_JSON | 
+| VAULT_TOKEN | AWS_SECRET_ACCESS_KEY        | AZURE_CLIENT_SECRET        | GOOGLE_CLOUD_PROJECT                |
+|             | AWS_SESSION_TOKEN (optional) | AZURE_TENANT_ID (optional) | GOOGLE_CLOUD_REGION (optional)      |
+|             |                              |                            | GOOGLE_API_KEY (optional)           |
 
 ## Step 1 - prerequisites
 
@@ -67,8 +66,17 @@ kubectl create secret generic gcloud-credentials \
 ## Step 2 - Helm deploy
 
 1. Edit [values.yaml](values.yaml)
+    1. If you're deploying on GKE you can configure ingress also via the `externalIngress` tree.
 2. Run helm upgrade
 
 ```shell
 helm upgrade -i prevent ./ -n prevent
 ```
+
+## Step 3 - Create ingress
+
+Depending on platform you're deploying on and the `ingress-controller` you have configured - the ingress yaml
+configuration will vary.
+
+Follow the [Kubernetes Ingress docs](https://kubernetes.io/docs/concepts/services-networking/ingress/) and
+supported [Ingress Controllers](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/).
