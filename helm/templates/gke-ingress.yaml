@@ -1,0 +1,46 @@
+{{- if and .Values.externalIngress.enabled .Values.externalIngress.gke.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prevent-ingress
+  {{- if .Values.externalIngress.gke.annotations }}
+  annotations:
+    {{- range .Values.externalIngress.gke.annotations }}
+    {{ toYaml . }}
+    {{- end }}
+  {{- end }}
+spec:
+  defaultBackend:
+    service:
+      name: prevent-nodeport
+      port:
+        number: {{ .Values.service.port }}
+---
+{{- if .Values.externalIngress.gke.managedCertificate.enabled }}
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: prevent-certificate
+spec:
+  domains:
+    - {{ .Values.externalIngress.gke.managedCertificate.domain }}
+---
+{{- end }}
+{{- if .Values.externalIngress.gke.frontendConfig.enabled }}
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: prevent-frontendconfig
+spec:
+{{ .Values.externalIngress.gke.frontendConfig.spec | toYaml  | indent 2 }}
+---
+{{- end }}
+{{- if .Values.externalIngress.gke.backendConfig.enabled }}
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: prevent-backendconfig
+spec:
+{{ .Values.externalIngress.gke.backendConfig.spec | toYaml  | indent 2 }}
+{{- end }}
+{{- end }}

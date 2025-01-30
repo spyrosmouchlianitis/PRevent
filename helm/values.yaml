@@ -19,8 +19,26 @@ service:
     enabled: true
   NodePort:
     enabled: true
-    # Add annotations if required
     annotations:
-      # exampleAnnotationKey: 'exampleAnnotationValue'
+    #- exampleAnnotationKey: 'exampleAnnotationValue'
   port: 80
   targetPort: 8080
+externalIngress:
+  enabled: false
+  gke:
+    enabled: false
+    annotations:
+    #- exampleAnnotationKey: 'exampleAnnotationValue'
+    managedCertificate:
+      enabled: false
+      domain: ""
+    frontendConfig:
+      enabled: false
+      #spec:
+      #  frontendConfigSpec:
+      #    item1: value1
+    backendConfig:
+      enabled: false
+      #spec:
+      #  frontendConfigSpec:
+      #    item1: value1
