@@ -15,10 +15,9 @@ A self-hosted GitHub app that listens for pull request events, scans them for ma
     - [2. GitHub App](#2-github-app)
     - [3. Deployment](#3-deployment)
       - [Optional Parameters](#optional-parameters)
-- [General](#general)
-  - [Configuration Parameters Summary](#configuration-parameters-summary)
-  - [Contributing](#contributing)
-  - [License](#license)
+- [Docs](#docs)
+- [Contributing](#contributing)
+- [License](#license)
 
 
 ## Why Use a GitHub Application
@@ -80,6 +79,7 @@ Deploying PRevent involves three parts, typically completed in 5 minutes to an h
 1. Configure an existing secret manager or create a new one.
 2. Create a GitHub app within your GitHub Organization or account.
 3. Deploy the application to a server.
+4. If network access controls apply, the ["hooks" IP addresses](https://api.github.com/meta) should be allowed.
 
 Use the latest Python version (3.9.2+ supported).
 
@@ -208,32 +208,15 @@ To minimize false-positives by running only `ERROR` severity rules and detectors
 To maximize security and enable detection of all findings without stopping after the first detection, set it to `True` in your secret manager. While the false-positives rate may slightly increase, it generally remains negligible.
 
 
-# General
+# Docs
 
+[Here](docs) you can find architecture, sequence and code logic flow diagrams, and a configuration parameters summary.
 
-## Configuration Parameters Summary
-
-| Parameter                 | Purpose                                            | Source | Required | Type                   | Default | Example              |
-|---------------------------|----------------------------------------------------|--------|----------|------------------------|---------|----------------------|
-| SECRET_MANAGER            | SM to use (cli client, Python package, calls)      | user   | yes      | str                    | vault   | aws                  |
-| GITHUB_APP_PRIVATE_KEY    | Authenticates the app with GitHub                  | GitHub | yes      | str                    | -       | -----BEGIN RSA...    |
-| GITHUB_APP_INTEGRATION_ID | Authenticates the app with GitHub (app ID)         | GitHub | yes      | str                    | -       | 1234567              |
-| WEBHOOK_SECRET            | Validates requests source (>32 random characters)  | GitHub | yes      | str                    | -       | 039e362cd52...       |
-| BRANCHES_INCLUDE          | Repos and branches to scan (all by default)        | user   | no       | dict[str, list \| str] | {}      | {'r1': ['b1', 'b2']} |
-| BRANCHES_EXCLUDE          | Repos and branches to not scan                     | user   | no       | dict[str, list \| str] | {}      | {'r': 'all'}         |
-| SECURITY_REVIEWERS        | GitHub accounts and teams to review detections     | user   | no       | list                   | []      | ['jdoe', 'team:sec'] |
-| BLOCK_PR                  | Block merging in pull requests with detections     | user   | no       | bool                   | False   | True                 |
-| FP_STRICT                 | Run only `ERROR` severity rules, exclude `WARNING` | user   | no       | bool                   | False   | True                 |
-| FULL_FINDINGS             | Detect all findings instead of just the first one  | user   | no       | bool                   | False   | True                 |
-| WEBHOOK_PORT              | The port on which the app listens                  | user   | no       | int                    | 8080    | 8443                 |
-| JWT_EXPIRY_SECONDS        | Limit the app's GitHub auth token TTL              | user   | no       | int                    | 120     | 60                   |
-
-
-## Contributing
+# Contributing
 
 Contributions are welcome through pull requests or issues.
 
-## License
+# License
 
 This repository is licensed under the [MIT License](LICENSE).
 

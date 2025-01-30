@@ -1,0 +1,43 @@
+flowchart TD
+    webhook{Webhook} --> sv([GH signature validation])
+    sv --> |handle GH rate-limit| edv([event data validation])
+    edv --> hpre[Handle PR Event]
+        hpre --> ibi{is branch included?}
+        ibi --> |yes| ic@{ shape: procs, label: "Iterate Additions"}
+        ic --> ils{is language supported?}
+        ils --> |no| next[next]
+        ils --> |yes| cd{are there code additions?}
+        cd --> |no| next[next]
+        cd --> |yes| size{is size < 1mb?}
+        size --> |no| next[next]
+        size --> |yes| ilo{is file minified or similar?}
+        ilo --> |yes| next[Next]
+        ilo --> |no| gffc[Get Full File Content]
+        gffc --> ifs@{ shape: hex, label: "is full-scan or only until first-detection?"}
+        ifs --> fps@{ shape: hex, label: "is running only ERROR severity rules?"}
+        fps --> scan((Concurrent-Detectors Addition Scan))
+            scan --> semgrep[Semgrep Malicious-Code Detection Ruleset]
+                semgrep --> dyex@{ shape: procs, label: "Dynamic Execution"}
+                semgrep --> obf@{ shape: procs, label: "Obfuscation"}
+            scan --> pyd@{ shape: procs, label: "Python Extra Obfuscation Detectors"}
+        dyex --> dss{determine scan status}
+        obf --> dss{determine scan status}
+        pyd --> dss{determine scan status}
+        dss --> |not detected| suc[Create Commit Status: 'success']
+        dss --> |detected: failure| fail[Comment Detection]
+        fail --> ccs[Create Commit Status: 'failure']
+        ccs --> tcr{is code-reviews triggering enabled?}
+            tcr --> |yes| cre[Trigger code reviews for reviewers list]
+            tcr --> |no| fin((Finish))
+                cre --> bpr{Is merge-blocking enabled?}
+                    bpr --> |yes| bme[Apply Branch Protection Rule]
+                    bpr --> |no| fin2((finish))
+                    bme --> fin2((finish))
+        ibi --> |no| fin1[Finish]
+    edv --> hre[Handle PR-Review Event]
+    hre --> ra{did review approve the PR?}
+    ra --> |no| fin1((Finish))
+    ra --> |yes| ril{is reviewer in the reviewers list?}
+    ril --> |no| fin1((Finish))
+    ril --> |yes| scc[Update commit status to 'success']
+    scc --> fin1((Finish))

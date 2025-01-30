@@ -1,0 +1,61 @@
+<html>
+  <body>
+    <pre class="mermaid">
+        architecture-beta
+            service github(logos:github)[GitHub]
+            group vpc(gravity-ui:nodes-down)[Network Perimeter]
+                service firewall(clarity:firewall-line)[Firewall] in vpc
+                group k8s_cluster(logos:kubernetes)[K8S Cluster] in vpc
+                    service ingress(ix:data-ingress)[prevent ingress] in k8s_cluster
+                    service nodeport(carbon:kubernetes-ip-address)[prevent nodeport] in k8s_cluster
+                    service deploy(carbon:kubernetes-pod)[prevent deploy] in k8s_cluster
+                    service secret(codicon:gist-secret)[k8s secret] in k8s_cluster
+            github:R --> L:firewall
+            firewall:R --> L:ingress
+            ingress:B --> T:nodeport
+            nodeport:B --> T:deploy
+						deploy:R --> L:secret
+    </pre>
+
+
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true });
+
+      // copy-pasta from the documentation
+      mermaid.registerIconPacks([
+        {
+          name: 'logos',
+          loader: () =>
+            fetch('https://unpkg.com/@iconify-json/logos@1/icons.json').then((res) => res.json()),
+        },
+        {
+          name: 'clarity',
+          loader: () =>
+            fetch('https://unpkg.com/@iconify-json/clarity@1/icons.json').then((res) => res.json()),
+        },
+        {
+          name: 'gravity-ui',
+          loader: () =>
+            fetch('https://unpkg.com/@iconify-json/gravity-ui@1/icons.json').then((res) => res.json()),
+        },
+        {
+          name: 'ix',
+          loader: () =>
+            fetch('https://unpkg.com/@iconify-json/ix@1/icons.json').then((res) => res.json()),
+        },
+        {
+          name: 'carbon',
+          loader: () =>
+            fetch('https://unpkg.com/@iconify-json/carbon@1/icons.json').then((res) => res.json()),
+        },
+        {
+          name: 'codicon',
+          loader: () =>
+            fetch('https://unpkg.com/@iconify-json/codicon@1/icons.json').then((res) => res.json()),
+        },
+      ]);
+
+    </script>
+  </body>
+</html>

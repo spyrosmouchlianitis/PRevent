@@ -36,6 +36,22 @@ def is_branch_included(repo_name, branch_name) -> bool:
     return True
 
 
+def get_existing_protection_conf(repo_name: str, branch_name: str) -> dict:
+    """
+    Fetches the full branch protection rule for a given branch.
+    In GitHub, all sub-rules are organized together in a single parent rule.
+    When modifying this app's protection settings, handle the rest.
+
+    Returns:
+        dict: The protection settings of the branch.
+    """
+
+    # Use `requests` because GitHub's API has discrepancies here that PyGithub doesn't handle.
+    url = f"https://api.github.com/repos/{repo_name}/branches/{branch_name}"
+    response = requests.get(url, headers=token_headers())
+    return response.json().get("protection", {})
+
+
 def apply_branch_protection_rule(
     repo_name: str,
     branch_name: str,
@@ -106,22 +122,6 @@ def apply_branch_protection_rule(
     response = requests.put(url, json=data, headers=token_headers())
     if response.status_code != 200:
         current_app.logger.error(f"Failed to update branch protection: {response.json()}")
-
-
-def get_existing_protection_conf(repo_name: str, branch_name: str) -> dict:
-    """
-    Fetches the full branch protection rule for a given branch.
-    In GitHub, all sub-rules are organized together in a single parent rule.
-    When modifying this app's protection settings, handle the rest.
-
-    Returns:
-        dict: The protection settings of the branch.
-    """
-
-    # Use `requests` because GitHub's API has discrepancies here that PyGithub doesn't handle.
-    url = f"https://api.github.com/repos/{repo_name}/branches/{branch_name}"
-    response = requests.get(url, headers=token_headers())
-    return response.json().get("protection", {})
 
 
 def is_branch_status_check_protected(protection: dict) -> bool:

@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor r as Reviewers
+    participant g as GitHub
+    participant s as Server
+    g-)s: POST <server>/webhook: Event data [repo, branch, number, ...]
+    Note over s: validate source using webhook secret
+    s->>g: GET api.github.com/rate_limit
+    Note over s: generate a JWT with App ID signed by private key
+    s->>g: GET api.github.com/app/installations
+    Note over g: validate server's JWT
+    s->>g: GET api.github.com/app/installations/{installation_id}/access_tokens
+    g->>s: 200: {"token": auth_token, ...}
+    Note over s,g: PR event [commit_sha, ...]
+    activate s
+    s-->>g: GET /repos/{owner}/{repo}/pulls/{number}/files [full changed files]
+    Note over s: scan
+    s-->>g: POST /repos/{owner}/{repo}/pulls/{number}/comments
+    s->>g: POST /repos/{owner}/{repo}/statuses/{sha}
+    s-->>g: POST /repos/{owner}/{repo}/pulls/{number}/requested_reviewers
+    g-->>r: do you approve?
+    s-->>g: GET api.github.com/repos/{repo_name}/branches/{branch_name}
+    s-->>g: PUT api.github.com/repos/{repo_name}/branches/{branch_name}/protection
+    Note over s,g: PR review event [review_state, reviewer, ...]
+    r-->>g: approved
+    s-->>g: POST /repos/{owner}/{repo}/statuses/{sha}
+    deactivate s
