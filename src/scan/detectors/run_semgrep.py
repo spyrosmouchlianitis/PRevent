@@ -56,15 +56,20 @@ def run_semgrep(temp_file_path: str) -> list[dict[str, Any]]:
         )
 
         results = []
+        # Prioritize performance
         if FULL_FINDINGS:  # Collect all results
-            results = [json.loads(line) for line in process.stdout if line.strip()]
+            for line in process.stdout:
+                if line.strip():
+                    parsed_output = json.loads(line)
+                    results.extend(parsed_output["results"])
         else:  # Stop after the first result
             for line in process.stdout:
                 if line.strip():
                     parsed_output = json.loads(line)
-                    results.append(parsed_output["results"])
+                    results.extend(parsed_output["results"])
                     process.terminate()
                     break
+
         process.wait()  # Clean termination
         return results
 

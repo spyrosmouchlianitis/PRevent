@@ -124,19 +124,22 @@ class GitHubPRWebhook:
         repo_name: str,
     ):
         # Separate requests so if one request fails the rest still succeed.
+        team_reviewers = []
+        individual_reviewers = []
         for reviewer in self.security_reviewers:
-            single_reviewer_list = [reviewer]  # PyGithub doesn't accept strings despite hint
-            try:
-                # Requires Repository Permissions: Pull requests -> Read and write
-                pr.create_review_request(reviewers=single_reviewer_list)
-                current_app.logger.info(
-                    f"Requested review from {reviewer} for {repo_name}, PR #{pr.number}"
-                )
-            except GithubException as e:
-                current_app.logger.error(
-                    f"GitHub API error on review request for {reviewer} "
-                    f"on {repo_name}, PR #{pr.number}: {e}"
-                )
+            if reviewer.startswith("team:"):
+                team_reviewers.append(reviewer[5:])
+            else:
+                individual_reviewers.append(reviewer)
+        try:
+            pr.create_review_request(team_reviewers=team_reviewers, reviewers=individual_reviewers)
+            current_app.logger.info(
+                f"Requested review from {self.security_reviewers} for {repo_name}, PR #{pr.number}"
+            )
+        except GithubException as e:
+            current_app.logger.error(
+                f"GitHub API error on review request for {repo_name}, PR #{pr.number}: {e}"
+            )
 
     def on_pull_request_review(self, webhook_data: dict[str, Any]) -> tuple:
         """
