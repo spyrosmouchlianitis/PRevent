@@ -81,7 +81,9 @@ metadata:
   name: prevent-nodeport
   {{- if .Values.service.NodePort.annotations }}
   annotations:
-{{ .Values.service.NodePort.annotations | toYaml | indent 4 }}
+    {{- range .Values.service.NodePort.annotations }}
+    {{ toYaml . }}
+    {{- end }}
   {{- end }}
 spec:
   type: NodePort
@@ -89,6 +91,6 @@ spec:
     app: prevent
   ports:
     - name: http
-      port: 80
-      targetPort: 8086
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
 {{- end }}

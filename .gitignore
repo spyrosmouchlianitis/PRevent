@@ -173,3 +173,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# apiiro-dev
+apiiro.values.yaml
+testOP/

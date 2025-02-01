@@ -31,7 +31,7 @@ The app's logic can be leveraged to run any scan. All you need is to add a scann
 
 Currently, PRevent detects dynamic code execution and obfuscation, patterns found in nearly 100% of malicious code attacks reported to this day, while being rare in benign code, making the scan very effective. It uses Apiiro's [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) for Semgrep, alongside additional Python-based detectors. Only rules and detectors with low false-positive rates are included. 
 
-![detection comment](https://github.com/user-attachments/assets/a68cd344-49bd-4aa5-82be-247ebe5fe500)
+![detection comment](https://github.com/user-attachments/assets/6c2d44ef-2967-4ed2-a69a-5ca89c38ea49)
 
 
 ## Extra Capabilities
@@ -52,7 +52,7 @@ Deployment:
   - Google Cloud Secret Manager
   - Local HashiCorp Vault (for development and testing)
 
-![merge blocking](https://github.com/user-attachments/assets/96fcdcbd-3a0e-4592-91a7-26a236e9ac77)
+![merge blocking](https://github.com/user-attachments/assets/4abf58ce-90e9-4624-841b-b5d60bb8dcbb)
 
 
 ## Supported languages
