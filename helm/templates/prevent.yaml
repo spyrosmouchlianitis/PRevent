@@ -29,6 +29,10 @@ spec:
               cpu: {{ .Values.resources.limits.cpu | quote }}
               memory: {{ .Values.resources.limits.memory }}
           env:
+            # todo move this logic into helpers
+            # todo add support for local k8s secret manager
+            # todo add configMap for "config flags" - user values file
+            # todo check if I can unify the secret-set-key-ref and secret-check-key functions
             {{- if eq .Values.secreteManagerType "vault" }}
             {{- include "secret-set-key-ref" (dict "name" "vault-credentials" "key" "vault-addr" "env" "VAULT_ADDR") | indent 10 }}
             {{- include "secret-set-key-ref" (dict "name" "vault-credentials" "key" "vault-token" "env" "VAULT_TOKEN") | indent 10 }}

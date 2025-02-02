@@ -17,3 +17,7 @@
         key: {{ .key }}
   {{- end }}
 {{- end }}
+
+{{- define "set-env-secrets" }}
+
+{{- end }}

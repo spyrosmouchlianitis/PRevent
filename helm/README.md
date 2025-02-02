@@ -63,6 +63,19 @@ kubectl create secret generic gcloud-credentials \
   --namespace=<namespace>
 ```
 
+### Kubernetes
+
+```shell
+kubectl create secret generic prevent-secrets \
+  --from-literal=github-app-private-key=<github-app-private-key-value> \
+  --from-literal=github-app-integration-id=<github-app-integration-id-value> \
+  --from-literal=webhook-secret=<webhook-secret-value> \
+  --from-literal=branches-include=<branches-include-value> \
+  --from-literal=branches-exclude=<branches-exclude-value> \
+  --from-literal=security-reviewers=<security-reviewers-value> \
+  --namespace=<namespace>
+```
+
 ## Step 2 - Helm deploy
 
 1. Edit [values.yaml](values.yaml)
