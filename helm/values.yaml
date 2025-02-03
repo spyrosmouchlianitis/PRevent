@@ -12,8 +12,6 @@ resources:
     cpu: 1
     memory: 200Mi
     ephemeralStorage: 200Mi
-# Options secreteManagerType: gcloud, aws, azure, vault, k8s
-secreteManagerType: gcloud
 service:
   clusterIP:
     enabled: true
@@ -24,13 +22,14 @@ service:
   port: 80
   targetPort: 8080
 app:
-  settings:
-    secretManager: ""
-    blockPr: ""
-    fpStrict: ""
-    fullFindings: ""
-    webhookPort: ""
-    jwtExpirySeconds: ""
+  config:
+    # Options secretManager: gcloud, aws, azure, vault, k8s
+    secretManager: k8s
+    blockPr: false
+    fpStrict: false
+    fullFindings: false
+    webhookPort: 8080
+    jwtExpirySeconds: 120
 externalIngress:
   enabled: false
   gke:

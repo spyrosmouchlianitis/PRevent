@@ -4,9 +4,9 @@ metadata:
   name: prevent-configmap
 data:
   prevent.conf: |
-    SECRET_MANAGER={{ .Values.app.settings.secretManager }}
-    BLOCK_PR={{ .Values.app.settings.blockPr }}
-    FP_STRICT={{ .Values.app.settings.fpStrict }}
-    FULL_FINDINGS={{ .Values.app.settings.fullFindings }}
-    WEBHOOK_PORT={{ .Values.app.settings.webhookPort }}
-    JWT_EXPIRY_SECONDS={{ .Values.app.settings.jwtExpirySeconds }}
+    SECRET_MANAGER={{ .Values.app.config.secretManager }}
+    BLOCK_PR={{ .Values.app.config.blockPr }}
+    FP_STRICT={{ .Values.app.config.fpStrict }}
+    FULL_FINDINGS={{ .Values.app.config.fullFindings }}
+    WEBHOOK_PORT={{ .Values.app.config.webhookPort }}
+    JWT_EXPIRY_SECONDS={{ .Values.app.config.jwtExpirySeconds }}

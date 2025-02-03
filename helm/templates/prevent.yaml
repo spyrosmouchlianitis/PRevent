@@ -29,39 +29,30 @@ spec:
               cpu: {{ .Values.resources.limits.cpu | quote }}
               memory: {{ .Values.resources.limits.memory }}
           env:
+            {{- include "env-secrets" (dict "secreteManagerType" .Values.app.config.secretManager) | indent 6 }}
             # todo move this logic into helpers
             # todo add support for local k8s secret manager
             # todo add configMap for "config flags" - user values file
-            # todo check if I can unify the secret-set-key-ref and secret-check-key functions
-            {{- if eq .Values.secreteManagerType "vault" }}
-            {{- include "secret-set-key-ref" (dict "name" "vault-credentials" "key" "vault-addr" "env" "VAULT_ADDR") | indent 10 }}
-            {{- include "secret-set-key-ref" (dict "name" "vault-credentials" "key" "vault-token" "env" "VAULT_TOKEN") | indent 10 }}
-            {{- end }}
-            {{- if eq .Values.secreteManagerType "aws" }}
-            {{- include "secret-set-key-ref" (dict "name" "aws-credentials" "key" "aws-access-key-id" "env" "AWS_ACCESS_KEY_ID") | indent 10 }}
-            {{- include "secret-set-key-ref" (dict "name" "aws-credentials" "key" "aws-secret-access-key" "env" "AWS_SECRET_ACCESS_KEY") | indent 10 }}
-            {{- include "secret-check-key" (dict "name" "aws-credentials" "key" "aws-session-token" "env" "AWS_SESSION_TOKEN" "namespace" .Release.Namespace) | indent 10 }}
-            {{- end }}
-            {{- if eq .Values.secreteManagerType "azure" }}
-            {{- include "secret-set-key-ref" (dict "name" "azure-credentials" "key" "azure-client-id" "env" "AZURE_CLIENT_ID") | indent 10 }}
-            {{- include "secret-set-key-ref" (dict "name" "azure-credentials" "key" "azure-client-secret" "env" "AZURE_CLIENT_SECRET") | indent 10 }}
-            {{- include "secret-check-key" (dict "name" "azure-credentials" "key" "azure-tenant-id" "env" "AZURE_TENANT_ID" "namespace" .Release.Namespace) | indent 10 }}
-            {{- end }}
-            {{- if eq .Values.secreteManagerType "gcloud" }}
-            {{- include "secret-set-key-ref" (dict "name" "gcloud-credentials" "key" "google-cloud-project" "env" "GOOGLE_CLOUD_PROJECT") | indent 10 }}
-            {{- include "secret-check-key" (dict "name" "gcloud-credentials" "key" "google-cloud-region" "env" "GOOGLE_CLOUD_REGION" "namespace" .Release.Namespace) | indent 10 }}
-            {{- include "secret-check-key" (dict "name" "gcloud-credentials" "key" "google-api-key" "env" "GOOGLE_API_KEY" "namespace" .Release.Namespace) | indent 10 }}
-            {{- end }}
-          {{- if eq .Values.secreteManagerType "gcloud" }}
+            # todo check if I can unify the secret-keyref-required and secret-keyref-optional functions
           volumeMounts:
+            - name: vol-prevent-configmap
+              mountPath: /etc/prevent/prevent.conf
+              subPath: prevent.conf
+              readOnly: true
+          {{- if eq .Values.app.config.secretManager "gcloud" }}
             - mountPath: /app/config/google-app-cred.json
               subPath: google-application-credentials-json
               name: google-app-cred-json-volume
+          {{- end }}
       volumes:
+        - name: vol-prevent-configmap
+          configMap:
+            name: prevent-configmap
+        {{- if eq .Values.app.config.secretManager "gcloud" }}
         - name: google-app-cred-json-volume
           secret:
             secretName: gcloud-credentials
-          {{- end }}
+        {{- end }}
 {{- if .Values.service.clusterIP.enabled }}
 ---
 apiVersion: v1
