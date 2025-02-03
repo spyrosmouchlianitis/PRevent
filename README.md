@@ -29,7 +29,7 @@ The app's logic can be leveraged to run any scan. All you need is to add a scann
 
 ## Malicious Code Detection
 
-Currently, PRevent detects dynamic code execution and obfuscation, patterns found in nearly 100% of malicious code attacks reported to this day, while being rare in benign code, making the scan very effective. It uses Apiiro's [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) for Semgrep, alongside additional Python-based detectors. Only rules and detectors with low false-positive rates are included. 
+Currently, PRevent detects dynamic code execution and obfuscation, patterns found in nearly 100% of malicious code attacks reported to this day, while being rare in benign code, making the scan very effective. It uses Apiiro's [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) for Semgrep, alongside additional Python-based detectors. Only rules and detectors with low false-positive rates are included. When a false-positive occurs, it's almost always due to poor coding practices.
 
 ![detection comment](https://github.com/user-attachments/assets/6c2d44ef-2967-4ed2-a69a-5ca89c38ea49)
 
@@ -215,6 +215,13 @@ To maximize security and enable detection of all findings without stopping after
 # Contributing
 
 Contributions are welcome through pull requests or issues.
+
+# Known Limitations
+
+- The app does not persist pull request states.
+- Only files up to 1 MB are scanned.
+- Files consisting of long single-line are excluded from scanning.
+- Response time ranges from 600 milliseconds to 7 seconds, with an average of 1.8 seconds. Longer times occur when detectors are updated.
 
 # License
 
