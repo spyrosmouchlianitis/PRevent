@@ -29,11 +29,7 @@ spec:
               cpu: {{ .Values.resources.limits.cpu | quote }}
               memory: {{ .Values.resources.limits.memory }}
           env:
-            {{- include "env-secrets" (dict "secreteManagerType" .Values.app.config.secretManager) | indent 6 }}
-            # todo move this logic into helpers
-            # todo add support for local k8s secret manager
-            # todo add configMap for "config flags" - user values file
-            # todo check if I can unify the secret-keyref-required and secret-keyref-optional functions
+            {{- include "env-secrets" (dict "secreteManagerType" .Values.app.config.secretManager "namespace" .Release.Namespace) | indent 10 }}
           volumeMounts:
             - name: vol-prevent-configmap
               mountPath: /etc/prevent/prevent.conf
