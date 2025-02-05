@@ -10,11 +10,12 @@
 
     ```bash
     PREVENT_PATH=<your.artifact.registry>
-    PREVENT_TAG=1.0
+    PREVENT_TAG=1.1
 
     docker buildx build \
       --platform linux/arm64/v8,linux/amd64 \
       --push --pull \
+      -f Dockerfile \
       -t $PREVENT_PATH:$PREVENT_TAG \
       ../.
     ```

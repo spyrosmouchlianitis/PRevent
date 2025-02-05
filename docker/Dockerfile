@@ -17,9 +17,9 @@ RUN apk update && \
 WORKDIR /prevent
 
 # Copying the source code of prevent to image
-COPY ../src /prevent/src
-COPY ../setup /prevent/setup
-COPY ../pyproject.toml /prevent/pyproject.toml
+COPY ./src /prevent/src
+COPY ./setup /prevent/setup
+COPY ./pyproject.toml /prevent/pyproject.toml
 
 # Install project dependencies with Poetry
 RUN poetry install --no-interaction --only main
