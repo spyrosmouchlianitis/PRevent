@@ -1,69 +1,21 @@
 # PRevent Helm Chart
 
-Credentials required to operate your secret manager's dedicated app-role:
-
-| Vault       | AWS                          | Azure                      | GCloud                              |
-|-------------|------------------------------|----------------------------|-------------------------------------|
-| VAULT_ADDR  | AWS_ACCESS_KEY_ID            | AZURE_CLIENT_ID            | GOOGLE_APPLICATION_CREDENTIALS_JSON | 
-| VAULT_TOKEN | AWS_SECRET_ACCESS_KEY        | AZURE_CLIENT_SECRET        | GOOGLE_CLOUD_PROJECT                |
-|             | AWS_SESSION_TOKEN (optional) | AZURE_TENANT_ID (optional) | GOOGLE_CLOUD_REGION (optional)      |
-|             |                              |                            | GOOGLE_API_KEY (optional)           |
-
 ## Step 1 - prerequisites
 
-Create a namespace for the PRevent helm chart
+Create a namespace for the PRevent helm chart:
 
 ```shell
 kubectl create namespace <namespace>
 ```
 
-Create a Kubernetes secret for your secret manager credentials
+Create a Kubernetes secret for your secret manager credentials.
 Choose one of the following:
 
-### Vault
-
-```shell
-kubectl create secret generic vault-credentials \
-  --from-literal=vault-addr=<vault-addr-value> \
-  --from-literal=vault-token=<vault-token-value> \
-  --namespace=<namespace>
-```
-
-### AWS
-
-```shell
-kubectl create secret generic aws-credentials \
-  --from-literal=aws-access-key-id=<aws-access-key-id-value> \
-  --from-literal=aws-secret-access-key=<aws-secret-access-key-value> \
-  # optional
-  --from-literal=aws-session-token=<aws-session-token-value> \
-  --namespace=<namespace>
-```
-
-### Azure
-
-```shell
-kubectl create secret generic azure-credentials \
-  --from-literal=azure-client-id=<azure-client-id-value> \
-  --from-literal=azure-client-secret=<azure-client-secret-value> \
-  # optional
-  --from-literal=azure-tenant-id=<azure-tenant-id-value> \
-  --namespace=<namespace>
-```
-
-### GCP
-
-```shell
-kubectl create secret generic gcloud-credentials \
-  --from-file=google-application-credentials-json=<google-application-credentials-json-file-directory> \
-  --from-literal=google-cloud-project=<google-cloud-project-value> \
-  # optional
-  --from-literal=google-cloud-region=<google-cloud-region-value> \
-  --from-literal=google-api-key=<google-api-key-value> \
-  --namespace=<namespace>
-```
-
 ### Kubernetes
+
+It's a best practice to use a secrets manager, but you can choose Kubernetes Secrets.
+Store all [parameters](/docs/DOCS.md) with sensitivity of medium and above in it. 
+Low sensitivity parameters are configured in [values.yaml](values.yaml).
 
 ```shell
 kubectl create secret generic k8s-credentials \
@@ -77,10 +29,90 @@ kubectl create secret generic k8s-credentials \
   --namespace=<namespace>
 ```
 
+### Vault
+
+Credentials required to operate Vault with your dedicated AppRole to restrict access: 
+- ROLE_ID
+- SECRET_ID
+
+```shell
+kubectl create secret generic vault-approle-credentials \
+  --from-literal=role-id=<role-id-value> \
+  --from-literal=secret-id=<secret-id-value> \
+  --namespace=<namespace>
+```
+
+Credentials required to operate Vault without a dedicated AppRole:
+- VAULT_ADDR
+- VAULT_TOKEN
+
+```shell
+kubectl create secret generic vault-approle-credentials \
+  --from-literal=vault-addr=<vault-addr-value> \
+  --from-literal=vault-token=<vault-token-value> \
+  --namespace=<namespace>
+```
+
+### AWS
+
+Credentials required to operate your AWS Secret Manager: 
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
+- AWS_SESSION_TOKEN (optional)
+
+```shell
+kubectl create secret generic aws-credentials \
+  --from-literal=aws-access-key-id=<aws-access-key-id-value> \
+  --from-literal=aws-secret-access-key=<aws-secret-access-key-value> \
+  --from-literal=aws-session-token=<aws-session-token-value>  # optional \
+  --namespace=<namespace>
+```
+
+To use with a dedicated IAM role to restrict access:
+Associate the IAM role with the K8S service account (e.g., using IRSA for EKS).
+
+### Azure
+
+Credentials required to operate your Azure Key Vault:
+- AZURE_CLIENT_ID
+- AZURE_CLIENT_SECRET
+- AZURE_TENANT_ID (optional)
+
+```shell
+kubectl create secret generic azure-credentials \
+  --from-literal=azure-client-id=<azure-client-id-value> \
+  --from-literal=azure-client-secret=<azure-client-secret-value> \
+  --from-literal=azure-tenant-id=<azure-tenant-id-value>  # optional \
+  --namespace=<namespace>
+```
+
+To use with a dedicated Azure Key Vault role to restrict access:
+Associate the Azure Managed Identity with the K8S service account (e.g., using AAD Pod Identity for AKS).
+
+### GCP
+
+- GOOGLE_APPLICATION_CREDENTIALS_JSON
+- GOOGLE_CLOUD_PROJECT
+- GOOGLE_CLOUD_REGION (optional)
+- GOOGLE_API_KEY (optional)
+
+```shell
+kubectl create secret generic gcloud-credentials \
+  --from-file=google-application-credentials-json=<google-application-credentials-json-file-directory> \
+  --from-literal=google-cloud-project=<google-cloud-project-value> \
+  # optional
+  --from-literal=google-cloud-region=<google-cloud-region-value> \
+  --from-literal=google-api-key=<google-api-key-value> \
+  --namespace=<namespace>
+```
+
+To use with a dedicated GCP role to restrict access:
+Associate the GCP IAM role with the K8S service account (e.g., using Workload Identity for GKE).
+
 ## Step 2 - Helm deploy
 
-1. Edit [values.yaml](values.yaml)
-    1. If you're deploying on GKE you can configure ingress also via the `externalIngress` tree.
+1. Edit [values.yaml](values.yaml).
+   * You can configure ingress via the `externalIngress` tree.
 2. Run helm upgrade
 
 ```shell

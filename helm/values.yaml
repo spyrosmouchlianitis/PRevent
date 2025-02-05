@@ -49,3 +49,23 @@ externalIngress:
       #spec:
       #  frontendConfigSpec:
       #    item1: value1
+  aws:
+    enabled: false
+    annotations:
+    #- alb.ingress.kubernetes.io/scheme: internet-facing
+    #- alb.ingress.kubernetes.io/target-type: ip
+    certificateArn: ""
+  azure:
+    enabled: false
+    annotations:
+    #- appgw.ingress.kubernetes.io/use-private-ip: "false"
+    #- appgw.ingress.kubernetes.io/request-timeout: "300"
+    managedCertificate:
+      enabled: false
+      domain: ""
+  vault:
+    enabled: false
+    annotations:
+    #- service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service:
+      type: LoadBalancer

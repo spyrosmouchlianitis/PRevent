@@ -17,6 +17,7 @@ A self-hosted GitHub app that listens for pull request events, scans them for ma
       - [Optional Parameters](#optional-parameters)
 - [Docs](#docs)
 - [Contributing](#contributing)
+- [Known Limitations](#known-limitations)
 - [License](#license)
 
 
