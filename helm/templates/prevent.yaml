@@ -21,6 +21,10 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.pod.containerPort }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.targetPort }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu | quote }}
