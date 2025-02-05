@@ -34,6 +34,11 @@ def webhook() -> tuple[Response, int]:
         return jsonify({"error": "Internal server error"}), 500
 
 
+@app.route('/health')
+def health():
+    return '', 200
+
+
 def handle_event(
     event_type: str,
     webhook_listener: GitHubPRWebhook,
