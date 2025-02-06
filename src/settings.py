@@ -1,7 +1,7 @@
 import os
 
 
-# Options: vault, aws, azure, gcloud, local (vault)
+# Options: aws, azure, gcloud, vault, local (vault)
 SECRET_MANAGER = 'local'
 
 # Don't run WARNING severity detectors (many), run only ERROR severity detectors (few).

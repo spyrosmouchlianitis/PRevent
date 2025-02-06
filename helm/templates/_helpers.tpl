@@ -19,10 +19,6 @@
 {{- end }}
 
 {{- define "env-secrets" }}
-  {{- if eq .secreteManagerType "vault" }}
-    {{- include "secret-keyref-required" (dict "name" "vault-credentials" "key" "vault-addr" "env" "VAULT_ADDR") }}
-    {{- include "secret-keyref-required" (dict "name" "vault-credentials" "key" "vault-token" "env" "VAULT_TOKEN") }}
-  {{- end }}
   {{- if eq .secreteManagerType "aws" }}
     {{- include "secret-keyref-required" (dict "name" "aws-credentials" "key" "aws-access-key-id" "env" "AWS_ACCESS_KEY_ID") }}
     {{- include "secret-keyref-required" (dict "name" "aws-credentials" "key" "aws-secret-access-key" "env" "AWS_SECRET_ACCESS_KEY") }}
@@ -37,6 +33,10 @@
     {{- include "secret-keyref-required" (dict "name" "gcloud-credentials" "key" "google-cloud-project" "env" "GOOGLE_CLOUD_PROJECT") }}
     {{- include "secret-keyref-optional" (dict "name" "gcloud-credentials" "key" "google-cloud-region" "env" "GOOGLE_CLOUD_REGION" "namespace" .namespace) }}
     {{- include "secret-keyref-optional" (dict "name" "gcloud-credentials" "key" "google-api-key" "env" "GOOGLE_API_KEY" "namespace" .namespace) }}
+  {{- end }}
+  {{- if eq .secreteManagerType "vault" }}
+    {{- include "secret-keyref-required" (dict "name" "vault-credentials" "key" "vault-addr" "env" "VAULT_ADDR") }}
+    {{- include "secret-keyref-required" (dict "name" "vault-credentials" "key" "vault-token" "env" "VAULT_TOKEN") }}
   {{- end }}
   {{- if eq .secreteManagerType "k8s" }}
     {{- include "secret-keyref-required" (dict "name" "k8s-credentials" "key" "github-app-private-key" "env" "GITHUB_APP_PRIVATE_KEY") }}

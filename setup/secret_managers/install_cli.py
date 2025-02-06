@@ -21,15 +21,6 @@ def verify_checksum(file_path: str, expected_checksum: str) -> None:
             raise ValueError(f"Checksum mismatch for {file_path}")
 
 
-def extract_zip(zip_path: str) -> None:
-    subprocess.run(["unzip", zip_path], check=True)
-
-
-def move_vault_to_bin(bin_dir: str) -> None:
-    bin_path = os.path.join(bin_dir, "vault")
-    subprocess.run(["mv", "vault", bin_path], check=True)
-
-
 def update_shell_profile(bin_dir: str) -> None:
     shell_config_files = [
         "~/.bash_profile",
@@ -54,55 +45,6 @@ def cleanup(files: list[str]) -> None:
             os.remove(file)
         except OSError:
             pass  # Ignore errors if file doesn't exist
-
-
-def install_vault() -> None:
-    system = platform.system().lower()
-    arch = platform.machine()
-    version = "1.13.0"
-
-    zip_file = os.path.join(base_dir, f"vault_{version}_{system}_{arch}.zip")
-    checksum_file = os.path.join(base_dir, f"vault_{version}_SHA256SUMS")
-    signature_file = os.path.join(base_dir, f"vault_{version}_SHA256SUMS.sig")
-    gpg_file = os.path.join(base_dir, "vault_gpg.asc")
-
-    zip_url = f"https://releases.hashicorp.com/vault/{version}/vault_{version}_{system}_{arch}.zip"
-    checksum_url = f"https://releases.hashicorp.com/vault/{version}/vault_{version}_SHA256SUMS"
-    signature_url = f"https://releases.hashicorp.com/vault/{version}/vault_{version}_SHA256SUMS.sig"
-    gpg_key_url = "https://www.hashicorp.com/.well-known/pgp-key.txt"
-
-    try:
-        download_file(zip_url, zip_file)
-        download_file(checksum_url, checksum_file)
-        download_file(signature_url, signature_file)
-        download_file(gpg_key_url, gpg_file)
-
-        subprocess.run(["gpg", "--import", gpg_file], check=True)
-
-        verify_gpg_signature(checksum_file, signature_file)
-
-        with open(checksum_file, "r") as f:
-            checksums = {line.split()[-1]: line.split()[0] for line in f if line.strip()}
-        if os.path.basename(zip_file) not in checksums:
-            raise ValueError(f"Checksum not found for {os.path.basename(zip_file)}")
-        verify_checksum(zip_file, checksums[os.path.basename(zip_file)])
-
-        extract_zip(zip_file)
-
-        bin_dir = os.path.expanduser("~/bin")
-        os.makedirs(bin_dir, exist_ok=True)
-        move_vault_to_bin(bin_dir)
-
-        update_shell_profile(bin_dir)
-
-    except subprocess.CalledProcessError as e:
-        print(f"Command failed with error: {e}")
-    except FileNotFoundError as e:
-        print(f"File error: {e}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-    finally:
-        cleanup([zip_file, checksum_file, signature_file, gpg_file])
 
 
 def install_aws() -> None:
@@ -200,6 +142,64 @@ def install_gcloud() -> None:
 
     finally:
         cleanup([tar_file])
+
+
+def move_vault_to_bin(bin_dir: str) -> None:
+    bin_path = os.path.join(bin_dir, "vault")
+    subprocess.run(["mv", "vault", bin_path], check=True)
+
+
+def extract_zip(zip_path: str) -> None:
+    subprocess.run(["unzip", zip_path], check=True)
+
+
+def install_vault() -> None:
+    system = platform.system().lower()
+    arch = platform.machine()
+    version = "1.13.0"
+
+    zip_file = os.path.join(base_dir, f"vault_{version}_{system}_{arch}.zip")
+    checksum_file = os.path.join(base_dir, f"vault_{version}_SHA256SUMS")
+    signature_file = os.path.join(base_dir, f"vault_{version}_SHA256SUMS.sig")
+    gpg_file = os.path.join(base_dir, "vault_gpg.asc")
+
+    zip_url = f"https://releases.hashicorp.com/vault/{version}/vault_{version}_{system}_{arch}.zip"
+    checksum_url = f"https://releases.hashicorp.com/vault/{version}/vault_{version}_SHA256SUMS"
+    signature_url = f"https://releases.hashicorp.com/vault/{version}/vault_{version}_SHA256SUMS.sig"
+    gpg_key_url = "https://www.hashicorp.com/.well-known/pgp-key.txt"
+
+    try:
+        download_file(zip_url, zip_file)
+        download_file(checksum_url, checksum_file)
+        download_file(signature_url, signature_file)
+        download_file(gpg_key_url, gpg_file)
+
+        subprocess.run(["gpg", "--import", gpg_file], check=True)
+
+        verify_gpg_signature(checksum_file, signature_file)
+
+        with open(checksum_file, "r") as f:
+            checksums = {line.split()[-1]: line.split()[0] for line in f if line.strip()}
+        if os.path.basename(zip_file) not in checksums:
+            raise ValueError(f"Checksum not found for {os.path.basename(zip_file)}")
+        verify_checksum(zip_file, checksums[os.path.basename(zip_file)])
+
+        extract_zip(zip_file)
+
+        bin_dir = os.path.expanduser("~/bin")
+        os.makedirs(bin_dir, exist_ok=True)
+        move_vault_to_bin(bin_dir)
+
+        update_shell_profile(bin_dir)
+
+    except subprocess.CalledProcessError as e:
+        print(f"Command failed with error: {e}")
+    except FileNotFoundError as e:
+        print(f"File error: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+    finally:
+        cleanup([zip_file, checksum_file, signature_file, gpg_file])
 
 
 def is_sm_installed(manager: str) -> bool:

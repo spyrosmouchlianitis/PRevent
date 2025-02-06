@@ -29,30 +29,6 @@ kubectl create secret generic k8s-credentials \
   --namespace=<namespace>
 ```
 
-### Vault
-
-Credentials required to operate Vault with your dedicated AppRole to restrict access: 
-- ROLE_ID
-- SECRET_ID
-
-```shell
-kubectl create secret generic vault-approle-credentials \
-  --from-literal=role-id=<role-id-value> \
-  --from-literal=secret-id=<secret-id-value> \
-  --namespace=<namespace>
-```
-
-Credentials required to operate Vault without a dedicated AppRole:
-- VAULT_ADDR
-- VAULT_TOKEN
-
-```shell
-kubectl create secret generic vault-approle-credentials \
-  --from-literal=vault-addr=<vault-addr-value> \
-  --from-literal=vault-token=<vault-token-value> \
-  --namespace=<namespace>
-```
-
 ### AWS
 
 Credentials required to operate your AWS Secret Manager: 
@@ -108,6 +84,21 @@ kubectl create secret generic gcloud-credentials \
 
 To use with a dedicated GCP role to restrict access:
 Associate the GCP IAM role with the K8S service account (e.g., using Workload Identity for GKE).
+
+### Vault
+
+Credentials required to operate Vault, preferably generated with a dedicated AppRole:
+- VAULT_ADDR
+- VAULT_TOKEN
+
+```shell
+kubectl create secret generic vault-approle-credentials \
+  --from-literal=vault-addr=<vault-addr-value> \
+  --from-literal=vault-token=<vault-token-value> \
+  --namespace=<namespace>
+```
+
+The best practice is to use Vault Agent with Auto-Auth or Kubernetes Auth to dynamically authenticate and securely retrieve tokens, avoiding static token storage. This is currently unsupported – contributions are welcome.
 
 ## Step 2 - Helm deploy
 

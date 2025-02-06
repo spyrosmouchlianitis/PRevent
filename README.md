@@ -47,10 +47,10 @@ Deployment:
 - Supports containerization.
 - Non-containerized deployment is fully automated with an interactive setup script.
 - To manage GitHub key (required for any GitHub app), multiple secret managers are supported:
-  - HashiCorp Vault
   - AWS Secrets Manager
   - Azure Key Vault
   - Google Cloud Secret Manager
+  - HashiCorp Vault
   - Local HashiCorp Vault (for development and testing)
 
 ![merge blocking](https://github.com/user-attachments/assets/4abf58ce-90e9-4624-841b-b5d60bb8dcbb)
@@ -133,7 +133,7 @@ The application handles all parameters exclusively through the secret manager (s
 
 #### Secret Manager Setup Instructions
 
-First, set **SECRET_MANAGER** in your secret manager to either: vault, aws, azure, gcloud, or local.
+First, set **SECRET_MANAGER** in your secret manager to either: aws, azure, gcloud, vault, or local.
 
 Dedicate a section in your secret manager for this app, separated from the rest. Create an app role with minimal permissions, to access the dedicated section only. If you are not sure how, try the following instructions:
 ```bash
@@ -142,11 +142,11 @@ python3 setup/secret_managers/print_instructions.py SECRET_MANAGER
 
 Permissions required to operate the role:
 
-| Permission | Vault                  | AWS                           | Azure                     | GCloud                    |
-|------------|------------------------|-------------------------------|---------------------------|---------------------------|
-| read       | read                   | secretsmanager:GetSecretValue | KeyVaultSecret:Get        | secretmanager.secrets.get | 
-| write      | create, update         | secretsmanager:PutSecretValue | KeyVaultSecret:Set        | secretmanager.secrets.add |
-| scope      | path = "prevent-app/*" | resource = "prevent-app/*"    | secret = "prevent-app/*"  | secret = "prevent-app/*"  |
+| Permission | AWS                           | Azure                     | GCloud                    | Vault                  |
+|------------|-------------------------------|---------------------------|---------------------------|------------------------|
+| read       | secretsmanager:GetSecretValue | KeyVaultSecret:Get        | secretmanager.secrets.get | read                   | 
+| write      | secretsmanager:PutSecretValue | KeyVaultSecret:Set        | secretmanager.secrets.add | create, update         |
+| scope      | resource = "prevent-app/*"    | secret = "prevent-app/*"  | secret = "prevent-app/*"  | path = "prevent-app/*" |
 
 
 ### 2. GitHub App

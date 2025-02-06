@@ -13,10 +13,10 @@ def log_and_raise_value_error(message: str):
 
 def get_secret(key: str) -> Any:
     secret_getters = {
-        "vault": vault_get_secret,
         "aws": aws_get_secret,
         "azure": azure_get_secret,
         "gcloud": gcloud_get_secret,
+        "vault": vault_get_secret,
         "local": vault_get_secret,
     }
     secret_manager = getattr(settings, "SECRET_MANAGER", None)
@@ -24,7 +24,7 @@ def get_secret(key: str) -> Any:
         log_and_raise_value_error(
             "'SECRET_MANAGER' isn't set in src/settings.py. Set it, or run setup.py."
         )
-        print("\nOptions: 'vault', 'aws', 'azure', 'gcloud', 'local'")
+        print("\nOptions: 'aws', 'azure', 'gcloud', 'vault', 'local'")
     if secret_manager not in secret_getters:
         raise NotImplementedError(
             f"get_secret not implemented for '{secret_manager}'"
@@ -35,80 +35,21 @@ def get_secret(key: str) -> Any:
 
 def set_secret(key: str, value: Any) -> None:
     secret_setters = {
-        "vault": vault_set_secret,
         "aws": aws_set_secret,
         "azure": azure_set_secret,
         "gcloud": gcloud_set_secret,
+        "vault": vault_set_secret,
         "local": vault_set_secret,
     }
     secret_manager = getattr(settings, "SECRET_MANAGER", None)
     if not secret_manager:
         log_and_raise_value_error("'SECRET_MANAGER' is not set in src/settings.py.")
-        print("Options: 'vault', 'aws', 'azure', 'gcloud', 'local'")
+        print("Options: 'aws', 'azure', 'gcloud', 'vault', 'local'")
     if secret_manager not in secret_setters:
         raise NotImplementedError(
             f"set_secret not implemented for '{secret_manager}'"
         )
     secret_setters[secret_manager](key, json.dumps(value))
-
-
-# HashiCorp Vault
-
-def read_existent_file(file_path: str) -> str:
-    if not os.path.exists(file_path):
-        return ''
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read().strip()
-            if not content:
-                current_app.logger.warning(f"File is empty: {file_path}")
-            return content
-    except FileNotFoundError:
-        raise OSError(f"File not found: {file_path}")
-    except PermissionError:
-        raise OSError(f"Permission denied when reading file: {file_path}")
-
-
-def init_vault_client():
-    hvac = importlib.import_module("hvac")
-    token_file_path = os.path.expanduser("~/.vault-token")
-
-    token = read_existent_file(token_file_path)
-    if not token:
-        log_and_raise_value_error(
-            f"Vault token file {token_file_path} is missing."
-        )
-        print("Authenticate using `vault login`.")
-
-    address_file_path = f"{settings.CONFIG_DIR}/vault-address"
-    address = (
-        read_existent_file(address_file_path)
-        or os.getenv("VAULT_ADDR", "http://127.0.0.1:8200")
-    )
-    if not address:
-        print(f"Vault address file {address_file_path} is missing.")
-        print("Set 'VAULT_ADDR' or provide a vault-address file.")
-
-    return hvac.Client(url=address, token=token)
-
-
-def vault_get_secret(key: str) -> Any:
-    try:
-        client = init_vault_client()
-        data = client.secrets.kv.v2.read_secret_version(path=key)
-        return data["data"]["data"]["data"]
-    except KeyError as e:
-        log_and_raise_value_error(
-            f"Unexpected key ({key}) or secret structure: {e}"
-        )
-
-
-def vault_set_secret(key: str, value: Any) -> None:
-    client = init_vault_client()
-    client.secrets.kv.v2.create_or_update_secret(
-        path=key,
-        secret={"data": value}
-    )
 
 
 # AWS Secrets Manager
@@ -181,4 +122,63 @@ def gcloud_set_secret(key: str, value: str) -> None:
     client.add_secret_version(
         parent=secret.name,
         payload={"data": value.encode("UTF-8")}
+    )
+
+
+# HashiCorp Vault
+
+def read_existent_file(file_path: str) -> str:
+    if not os.path.exists(file_path):
+        return ''
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read().strip()
+            if not content:
+                current_app.logger.warning(f"File is empty: {file_path}")
+            return content
+    except FileNotFoundError:
+        raise OSError(f"File not found: {file_path}")
+    except PermissionError:
+        raise OSError(f"Permission denied when reading file: {file_path}")
+
+
+def init_vault_client():
+    hvac = importlib.import_module("hvac")
+    token_file_path = os.path.expanduser("~/.vault-token")
+
+    token = read_existent_file(token_file_path)
+    if not token:
+        log_and_raise_value_error(
+            f"Vault token file {token_file_path} is missing."
+        )
+        print("Authenticate using `vault login`.")
+
+    address_file_path = f"{settings.CONFIG_DIR}/vault-address"
+    address = (
+        read_existent_file(address_file_path)
+        or os.getenv("VAULT_ADDR", "http://127.0.0.1:8200")
+    )
+    if not address:
+        print(f"Vault address file {address_file_path} is missing.")
+        print("Set 'VAULT_ADDR' or provide a vault-address file.")
+
+    return hvac.Client(url=address, token=token)
+
+
+def vault_get_secret(key: str) -> Any:
+    try:
+        client = init_vault_client()
+        data = client.secrets.kv.v2.read_secret_version(path=key)
+        return data["data"]["data"]["data"]
+    except KeyError as e:
+        log_and_raise_value_error(
+            f"Unexpected key ({key}) or secret structure: {e}"
+        )
+
+
+def vault_set_secret(key: str, value: Any) -> None:
+    client = init_vault_client()
+    client.secrets.kv.v2.create_or_update_secret(
+        path=key,
+        secret={"data": value}
     )

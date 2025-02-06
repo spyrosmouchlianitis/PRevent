@@ -23,7 +23,7 @@ service:
   targetPort: 8080
 app:
   config:
-    # Options secretManager: gcloud, aws, azure, vault, k8s
+    # Options secretManager: k8s, aws, azure, gcloud, vault
     secretManager: k8s
     blockPr: false
     fpStrict: false
@@ -49,13 +49,13 @@ externalIngress:
       #spec:
       #  frontendConfigSpec:
       #    item1: value1
-  aws:
+  eks:
     enabled: false
     annotations:
     #- alb.ingress.kubernetes.io/scheme: internet-facing
     #- alb.ingress.kubernetes.io/target-type: ip
     certificateArn: ""
-  azure:
+  aks:
     enabled: false
     annotations:
     #- appgw.ingress.kubernetes.io/use-private-ip: "false"
@@ -63,9 +63,3 @@ externalIngress:
     managedCertificate:
       enabled: false
       domain: ""
-  vault:
-    enabled: false
-    annotations:
-    #- service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-    service:
-      type: LoadBalancer

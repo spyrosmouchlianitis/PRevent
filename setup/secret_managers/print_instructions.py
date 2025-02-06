@@ -10,34 +10,8 @@ def bold_text(text: str) -> str:
 
 def print_instructions(manager):
 
-    # HashiCorp Vault
-
-    if manager == 'vault':
-        print(bold_text("\n##### HashiCorp Vault Setup #####\n"))
-        print(bold_text("Step 1: On the Vault server, create an AppRole and a policy for prevent:"))
-        print(highlight("""
-vault auth enable approle
-
-vault policy write app-policy - <<EOF
-path "secret/data/prevent/*" {
-    capabilities = ["create", "read", "update", "delete"]
-}
-EOF
-
-vault write auth/approle/role/app-role token_policies="prevent-app-policy"
-        """, BashLexer(), TerminalFormatter()))
-        print(bold_text(
-            "\nStep 2: On the Vault server, generate AppRole credentials (role_id, secret_id):\n"
-        ))
-        print(highlight("""
-vault read auth/approle/role/app-role/role-id
-
-vault write -f auth/approle/role/app-role/secret-id
-        """, BashLexer(), TerminalFormatter()))
-        print(bold_text("\nStep 3: Return here to \"vault login\", or do it independently.\n\n"))
-
     # AWS Secrets Manager
-    elif manager == 'aws':
+    if manager == 'aws':
         print(bold_text("\n##### AWS Secrets Manager Setup #####\n"))
         print(bold_text(
             "Step 1: Create an IAM Role for the specific application (e.g. prevent-app-role):"))
@@ -154,6 +128,31 @@ gcloud iam service-accounts keys create prevent-app-sa-key.json \\
             "Step 4: Return here to \"gcloud auth login\" and fill in the resulted credentials, "
             "or do it independently.\n\n"
         ))
+
+    # HashiCorp Vault
+    elif manager == 'vault':
+        print(bold_text("\n##### HashiCorp Vault Setup #####\n"))
+        print(bold_text("Step 1: On the Vault server, create an AppRole and a policy for prevent:"))
+        print(highlight("""
+vault auth enable approle
+
+vault policy write app-policy - <<EOF
+path "secret/data/prevent/*" {
+    capabilities = ["create", "read", "update", "delete"]
+}
+EOF
+
+vault write auth/approle/role/app-role token_policies="prevent-app-policy"
+        """, BashLexer(), TerminalFormatter()))
+        print(bold_text(
+            "\nStep 2: On the Vault server, generate AppRole credentials (role_id, secret_id):\n"
+        ))
+        print(highlight("""
+vault read auth/approle/role/app-role/role-id
+
+vault write -f auth/approle/role/app-role/secret-id
+        """, BashLexer(), TerminalFormatter()))
+        print(bold_text("\nStep 3: Return here to \"vault login\", or do it independently.\n\n"))
 
     # Local HashiCorp Vault
     elif manager == 'local':

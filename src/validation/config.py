@@ -28,7 +28,7 @@ def validate_config_parameters() -> None:
 
 
 def validate_secret_manager(value: str) -> None:
-    allowed_values = ["vault", "aws", "azure", "gcloud", "local"]
+    allowed_values = ["aws", "azure", "gcloud", "vault", "local"]
     if value not in allowed_values:
         raise ValueError(f"SECRET_MANAGER must be one of: {', '.join(allowed_values)}")
 
