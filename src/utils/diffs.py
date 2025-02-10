@@ -1,7 +1,5 @@
 import re
 from sys import getsizeof
-from flask import current_app
-from github import GithubException
 
 
 def process_diff(diff: str, lang: str) -> list[tuple[int, str]]:
@@ -53,6 +51,7 @@ def get_additions_with_line_numbers(diff: str) -> list[tuple[int, str]]:
     return additions
 
 
+# Languages listed as they appear in src/scan/languages.py values
 def remove_comments(diff: str, lang: str):
     patterns = [
         {
@@ -69,8 +68,10 @@ def remove_comments(diff: str, lang: str):
         {
             'languages': [
                 'Dart',
+                'dotnet',
                 'Go',
                 'Groovy',
+                'Java',
                 'JavaScript',
                 'Kotlin',
                 'Objective-C',
@@ -79,16 +80,18 @@ def remove_comments(diff: str, lang: str):
                 'Scala',
                 'Swift'
             ],
-            'pattern': r'(?:^|\s)(//.*)',
+            'pattern': r'(?:^|\s)(//.*)$',
         },
         {
             'languages': [
                 'C',
                 'C++',
                 'CSS',
+                'dotnet',
                 'Dart',
                 'Go',
                 'Groovy',
+                'Java',
                 'JavaScript',
                 'Kotlin',
                 'Objective-C',
@@ -98,6 +101,26 @@ def remove_comments(diff: str, lang: str):
                 'Swift'
             ],
             'pattern': r'/\*[\s\S]*?\*/',
+        },
+        {
+            'languages': ['Bash'],
+            'pattern': r'\:\s*\'[\s\S]*?\'',
+        },
+        {
+            'languages': ['Clojure'], 
+            'pattern': r'(?:^|\s)(;.*)',
+        },
+        {
+            'languages': ['dotnet'],
+            'pattern': r'///.*$',
+        },
+        {
+            'languages': ['HTML', 'dotnet'],
+            'pattern': r'<!--[\s\S]*?-->',
+        },
+        {
+            'languages': ['Lua'],
+            'pattern': r'--\[\[[\s\S]*?\]\]',
         },
         {
             'languages': ['Python'],
@@ -112,20 +135,8 @@ def remove_comments(diff: str, lang: str):
             'pattern': r'=begin[\s\S]*?=end',
         },
         {
-            'languages': ['HTML'],
-            'pattern': r'<!--[\s\S]*?-->',
-        },
-        {
             'languages': ['SQL'],
             'pattern': r'--.*',
-        },
-        {
-            'languages': ['Lua'],
-            'pattern': r'--\[\[[\s\S]*?\]\]',
-        },
-        {
-            'languages': ['Clojure'],
-            'pattern': r'(?:^|\s)(;.*)',
         }
     ]
 
@@ -136,8 +147,12 @@ def remove_comments(diff: str, lang: str):
         if lang.lower() in list(map(lambda s: s.lower(), p['languages']))
     ]
 
+    # First preserve all strings to avoid matching inside of them
+    strings = re.findall(r'([\'"`])(?:\\.|[^\\])*?\1', diff)
+    for i, s in enumerate(strings):
+        diff = diff.replace(s, f'__STRING_{i}__')
+
     # Remove comments using the matched patterns
     for pattern in matched_patterns:
         diff = re.sub(pattern, '', diff, flags=re.MULTILINE)
-    
     return diff
