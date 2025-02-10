@@ -2,7 +2,6 @@ import subprocess
 import os
 
 
-# TP
 
 subprocess.run(['python', '-c', 'print("Hello World")'])
 
@@ -31,7 +30,6 @@ X = os.system
 Y = subprocess
 
 
-# FP
 
 os.system('ls')
 

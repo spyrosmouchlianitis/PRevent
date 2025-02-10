@@ -41,6 +41,7 @@ def run_semgrep(temp_file_path: str) -> list[dict[str, Any]]:
             'semgrep',
             '--config', ruleset_dir,
             '--metrics', 'off',
+            '--max-target-bytes', '2000000',
             '--quiet',
             '--json',
             temp_file_path

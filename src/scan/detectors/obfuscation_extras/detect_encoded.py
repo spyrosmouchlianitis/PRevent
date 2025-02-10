@@ -9,7 +9,6 @@ def detect_encoded(patch: str) -> list[dict]:
     for detector in [
         detect_fernet,
         detect_b64,
-        detect_b32,
         detect_unicode,
         detect_hex
     ]:
@@ -31,28 +30,6 @@ def detect_b64(patch: str) -> list[dict]:
                 if decoded and len(decoded) > 3:
                     results.append({
                         "message": "A hardcoded base64 encoded string. Either malicious or a bad practice. "
-                                   "(Set \"FP_STRICT = False\" to disable)",
-                        "line_number": get_match_line_number(match, patch),
-                        "decoded": decoded
-                    })
-                    if not FULL_FINDINGS:
-                        return results
-            except (ValueError, UnicodeDecodeError):
-                continue  # Ignore FP
-    return results
-
-
-def detect_b32(patch: str) -> list[dict]:
-    results = []
-    pattern = re.compile(r'[\'\"`]([A-Z2-7]{8,}(?:={4}|={6}|))[\'\"`]')  # Last pipe represents "nothing"
-    for match in pattern.finditer(patch):
-        payload = match.group(1)
-        if len(payload.split('=')[0]) % 8 == 0:
-            try:
-                decoded = base64.b32decode(payload).decode('utf-8')
-                if decoded and '\\u' not in decoded and len(decoded) > 3:
-                    results.append({
-                        "message": "A hardcoded base32 encoded string. Either malicious or a bad practice. "
                                    "(Set \"FP_STRICT = False\" to disable)",
                         "line_number": get_match_line_number(match, patch),
                         "decoded": decoded

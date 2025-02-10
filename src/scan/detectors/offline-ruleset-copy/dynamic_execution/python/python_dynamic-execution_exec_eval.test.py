@@ -1,4 +1,4 @@
-# TP
+
 
 exec("print('Literal exec')")
 
@@ -20,13 +20,12 @@ eval(param)
 eval('print("Literal eval with single quotes")')
 
 
-# FP
 
 def other_exec(code):
     print(code)
 other_exec(param)
 
-import someModule  # Simulate an imported module
+import someModule 
 someModule.exec('print("Imported module exec")')
 
 class SomeClass:

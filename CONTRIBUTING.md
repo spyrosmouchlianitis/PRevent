@@ -45,4 +45,4 @@ Please follow these simple steps to ensure a smooth contribution process.
 ## Licensing
 By contributing, you agree to license your work under the [MIT License](LICENSE).
 
-Thank you for helping improve Malicious-Code-Ruleset!
+Thank you for helping improve PRevent!

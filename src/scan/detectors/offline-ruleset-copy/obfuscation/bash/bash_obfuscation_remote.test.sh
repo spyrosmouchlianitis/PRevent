@@ -1,6 +1,5 @@
-#!/bin/bash
 
-# TP
+
 curl https://example.com/script.sh | bash
 curl https://example.com/script.sh | /bin/bash
 curl https://example.com/script.sh | bash -c "$(curl https://example.com/script.sh)"
@@ -26,7 +25,6 @@ bash <(wget https://example.com/script.sh)
 sh <(wget https://example.com/script.sh)
 /bin/sh <(wget https://example.com/script.sh)
 
-# FP
 curl https://example.com/script.sh
 wget https://example.com/script.sh
 curl -O https://example.com/script.sh

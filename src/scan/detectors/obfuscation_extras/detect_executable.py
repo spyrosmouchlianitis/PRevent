@@ -55,12 +55,14 @@ def detect_executable(filename: str, patch: str) -> list[DetectionType]:
     if magic_bytes[:4] == b'\x7fELF':
         return [{"message": "An executable: ELF", **result_base}]
 
-    # PE (Windows executables like .exe, .dll, .sys)
+    # PE (Windows executables like .exe, .dll, .sys) and EFI
     if magic_bytes[:2] == b'MZ':
         return [{"message": "A Windows executable.", **result_base}]
-
-    # macOS Disk Images (.dmg)
-    if magic_bytes[:4] == b'koly':
+    # MacOS Disk Images (.dmg, zlib-compressed)
+    if magic_bytes[:7] == b'\x78\x01\x73\x0D\x62\x62\x60':
+        return [{"message": "An executable: dmg", **result_base}]
+   
+    if magic_bytes[-4:] == b'koly':
         return [{"message": "An executable: dmg", **result_base}]
 
     # Debian packages (.deb)
@@ -71,16 +73,8 @@ def detect_executable(filename: str, patch: str) -> list[DetectionType]:
     if magic_bytes[:4] == b'\xed\xab\xee\xdb':
         return [{"message": "An executable: rpm", **result_base}]
 
-    # EFI executables
-    if magic_bytes[:2] == b'MZ':
-        return [{"message": "An executable: EFI", **result_base}]
-
     # Self-contained Linux binaries (.bin, .run) - GZIP
     if magic_bytes[:2] == b'\x1f\x8b': 
         return [{"message": "An Linux executable.", **result_base}]
-
-    # # JAR (and ZIP, APK)
-    # if magic_bytes[:4] == b'PK\x03\x04': 
-    #     return [{"message": "An executable archive", **result_base}]
     
     return []

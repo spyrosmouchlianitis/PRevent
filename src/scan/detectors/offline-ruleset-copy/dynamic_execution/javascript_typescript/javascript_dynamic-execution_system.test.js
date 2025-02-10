@@ -1,4 +1,4 @@
-// TP
+
 
 require('child_process').exec('node -e ...');
 
@@ -21,7 +21,6 @@ let cp = require('child_process');
 cp.exec('node -e "console.log(\'Dynamic execution\')"');
 
 
-// FP
 
 const os = require('os');
 os.hostname();

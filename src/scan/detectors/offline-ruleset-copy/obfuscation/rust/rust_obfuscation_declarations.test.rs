@@ -1,9 +1,8 @@
-// TP
+
 fn ___func() {}
 trait Traaait {}
 static _0xSTATIC: i32 = 20;
 
-// FP
 let valid_name = 5;
 fn valid_function() {}
 struct ValidStruct;

@@ -1,9 +1,8 @@
-// TP
+
 
 if (true) {}
 if (!![]) {}
 
-// FP
 
 let aa = 1;
 let bb = 2;

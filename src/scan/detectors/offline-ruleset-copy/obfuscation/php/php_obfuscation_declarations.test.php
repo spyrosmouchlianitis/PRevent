@@ -1,12 +1,10 @@
 <?php
 
-// TP
 function __obfuscatedFunccc() {}
 $object->_0xValue = "hidden";
 class _0x123abc {}
 define('___CONST', "value");
 
-// FP
 $validVar = 1;
 function validFunction() {}
 $object->validProperty = "accessible";

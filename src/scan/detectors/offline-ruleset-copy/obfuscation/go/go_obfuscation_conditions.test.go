@@ -1,4 +1,4 @@
-// TP
+
 
 if true {
     fmt.Println("Condition is true")
@@ -15,7 +15,6 @@ func x() {
 }
 
 
-// FP
 
 name := "Go"
 if name == "Go" {
