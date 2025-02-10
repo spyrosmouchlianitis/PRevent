@@ -2,7 +2,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-from flask import current_app
+from fastapi.logger import logger
 from typing import TypedDict, Optional
 from src.settings import RULESET_REPO
 from src.config import get_app_root
@@ -37,7 +37,7 @@ def get_ruleset_dir():
         return ruleset_dir
 
     except subprocess.CalledProcessError:
-        current_app.logger.error(
+        logger.error(
             f"No internet connection or error fetching ruleset from {RULESET_REPO} . "
             "Using local version."
         )
@@ -48,13 +48,13 @@ def get_ruleset_dir():
 def is_git_installed() -> bool:
     if shutil.which('git'):
         return True
-    current_app.logger.error("Git is not installed or not found in the PATH.")
+    logger.error("Git is not installed or not found in the PATH.")
     return False
 
 
 def clone_repo(repo: str, destination_path: str) -> None:
     subprocess.run(['git', 'clone', repo, destination_path], check=True)
-    current_app.logger.info(f"Cloned repository from {repo}.")
+    logger.info(f"Cloned repository from {repo}.")
 
 
 def fetch_repo(repo_path: str) -> None:
@@ -73,7 +73,7 @@ def has_new_commits(repo_path: str) -> bool:
 
 def pull_repo(repo_path: str, repo_url: str) -> None:
     subprocess.run(['git', 'pull', 'origin', 'main'], cwd=repo_path, check=True)
-    current_app.logger.info(f"Pulled latest changes from the {repo_url}.")
+    logger.info(f"Pulled latest changes from the {repo_url}.")
 
 
 def create_temp_file(code_string: str, extension: str) -> str:
@@ -86,5 +86,5 @@ def create_temp_file(code_string: str, extension: str) -> str:
             return temp_file.name
         
     except (OSError, IOError) as e:
-        current_app.logger.error(f"Failed to create temporary file: {e}")
+        logger.error(f"Failed to create temporary file: {e}")
         return ''

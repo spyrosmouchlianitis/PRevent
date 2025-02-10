@@ -2,7 +2,7 @@ import jwt
 import time
 import requests
 from github import Github
-from flask import current_app
+from fastapi.logger import logger
 from src.secret_manager import get_secret
 from src.settings import JWT_EXPIRY_SECONDS
 
@@ -48,10 +48,10 @@ def create_jwt() -> str:
             algorithm="RS256"
         )
     except KeyError as e:
-        current_app.logger.error(f"Missing secret key: {e}")
+        logger.error(f"Missing secret key: {e}")
         raise
     except jwt.PyJWTError as e:
-        current_app.logger.error(f"JWT encoding error: {e}")
+        logger.error(f"JWT encoding error: {e}")
         raise
 
 

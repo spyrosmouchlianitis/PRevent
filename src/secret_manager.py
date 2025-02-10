@@ -2,12 +2,12 @@ import os
 import json
 import importlib
 from src import settings
-from flask import current_app
+from fastapi.logger import logger
 from typing import Any
 
 
 def log_and_raise_value_error(message: str):
-    current_app.logger.error(message)
+    logger.error(message)
     raise ValueError(message)
 
 
@@ -134,7 +134,7 @@ def read_existent_file(file_path: str) -> str:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read().strip()
             if not content:
-                current_app.logger.warning(f"File is empty: {file_path}")
+                logger.warning(f"File is empty: {file_path}")
             return content
     except FileNotFoundError:
         raise OSError(f"File not found: {file_path}")

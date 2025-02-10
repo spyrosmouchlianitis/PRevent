@@ -1,6 +1,7 @@
 from typing import Any
-from werkzeug.middleware.proxy_fix import ProxyFix
-from flask import Flask, current_app, request, Response, jsonify
+from fastapi import FastAPI, Request, Response, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.logger import logger
 from src.webhook import GitHubPRWebhook
 from src.utils.webhook import verify_webhook_signature, check_rate_limit
 from src.secret_manager import get_secret
@@ -8,35 +9,30 @@ from src.github_client import initialize_github_client
 from setup.tls.settings import CERT_PATH, KEY_PATH
 from src.settings import APP_TLS, WEBHOOK_PORT
 from src.config import configure_logging
+import uvicorn
 
 
-app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+app = FastAPI()
 
 
-@app.route('/webhook', methods=['POST'])
-def webhook() -> tuple[Response, int]:
+@app.post("/webhook")
+async def webhook(request: Request) -> JSONResponse:
     try:
-        # Ensure only GitHub's webhook deliveries are processed
-        verify_webhook_signature(request)
+        # Ensure only GitHub's webhook's requests are processed
+        await verify_webhook_signature(request)
         check_rate_limit(initialize_github_client())
 
         event_type: str = request.headers.get('X-GitHub-Event', '')
-        app.logger.info(f"Received event: {str(event_type)}")
+        logger.info(f"Received event: {str(event_type)}")
 
-        webhook_data: dict[str, Any] = request.get_json() or {}
+        webhook_data: dict[str, Any] = await request.json()
         webhook_listener = GitHubPRWebhook()
 
         return handle_event(event_type, webhook_listener, webhook_data)
 
     except Exception as e:
-        current_app.logger.error(f"Error processing request: {e}")
-        return jsonify({"error": "Internal server error"}), 500
-
-
-@app.route('/health')
-def health():
-    return '', 200
+        logger.error(f"Error processing request: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 def handle_event(
@@ -48,21 +44,23 @@ def handle_event(
         webhook_listener.on_pull_request(webhook_data)
     elif event_type == 'pull_request_review' and get_secret('SECURITY_REVIEWERS'):
         webhook_listener.on_pull_request_review(webhook_data)
-    return jsonify({"message": "Webhook received"}), 200
+    return JSONResponse(content={"message": "Webhook received"}, status_code=200)
 
 
-if __name__ == '__main__':
+@app.get("/health")
+def health():
+    return JSONResponse(content={}, status_code=200)
 
-    configure_logging(app)
 
-    if APP_TLS:
-        app.run(
-            port=WEBHOOK_PORT,
-            debug=False,
-            ssl_context=(CERT_PATH, KEY_PATH)
-        )
-    else:
-        app.run(
-            port=WEBHOOK_PORT,
-            debug=False
-        )
+if __name__ == "__main__":
+    configure_logging()
+
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=WEBHOOK_PORT,
+        ssl_certfile=CERT_PATH if APP_TLS else None,
+        ssl_keyfile=KEY_PATH if APP_TLS else None,
+        log_level="debug",
+        reload=True,
+    )

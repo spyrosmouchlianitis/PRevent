@@ -13,7 +13,7 @@ FULL_FINDINGS = False
 # Block PR until approval. Respected only if reviewers were defined.
 BLOCK_PR = True
 
-# Local Flask server listens on
+# Local server listens on
 WEBHOOK_PORT = 8080
 
 # For the GitHub client (minimum 10)

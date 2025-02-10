@@ -3,7 +3,6 @@ FROM python:3.11-alpine
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=off \
     POETRY_VERSION=1.8.0 \
-    FLASK_ENV=production \
     PYTHONPATH=/prevent
 
 # Installing required linux packages + poetry
@@ -30,4 +29,4 @@ EXPOSE 8080
 RUN poetry run python -m setup.setup_container
 
 # Run the prevent application
-CMD ["poetry", "run", "gunicorn", "--bind", "0.0.0.0:8080", "src.app:app"]
+CMD ["poetry", "run", "uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8080"]

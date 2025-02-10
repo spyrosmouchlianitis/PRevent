@@ -1,7 +1,6 @@
 import os
-import json
 import concurrent.futures
-from flask import current_app
+from fastapi.logger import logger
 from github import Repository, PullRequest
 from typing import Optional, Callable
 from src.scan.detectors.utils import DetectionType
@@ -37,7 +36,7 @@ def process_scan(
     changed_files = get_changed_files(repo, pr)
     if changed_files:
         scan_results: list = scan_additions(changed_files, repo, pr)
-        current_app.logger.info(f"Scanned PR #{pr.number}")
+        logger.info(f"Scanned PR #{pr.number}")
         status, description, comment = determine_and_comment_scan_status(scan_results, pr, repo)
         target_url = comment.html_url if hasattr(comment, 'html_url') else APP_REPO
         create_commit_status(repo, commit_sha, status, description, target_url)
@@ -134,9 +133,9 @@ def run_detection_tasks(tasks: list[tuple[Callable, tuple]]) -> list[dict]:
                                 executor.shutdown(wait=False)
                             return results
                     except concurrent.futures.TimeoutError:
-                        current_app.logger.error("Task timed out.")
+                        logger.error("Task timed out.")
         except Exception as e:
-            current_app.logger.error(f"Detection process failed: {e}")
+            logger.error(f"Detection process failed: {e}")
     return []
 
 

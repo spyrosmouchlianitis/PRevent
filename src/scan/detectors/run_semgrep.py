@@ -2,7 +2,7 @@ import os
 import json
 import random
 import subprocess
-from flask import current_app
+from fastapi.logger import logger
 from typing import Optional, Any
 from src.scan.detectors.utils import DetectionType
 from src.scan.detectors.utils import (
@@ -88,7 +88,7 @@ def process_semgrep_finding(finding: dict) -> Optional[DetectionType]:
             "line_number": int(finding["start"]["line"])
         }
     except KeyError as e:
-        current_app.logger.error(
+        logger.error(
             f"Missing expected key in Semgrep result: {e}\n{finding}"
         )
         return None

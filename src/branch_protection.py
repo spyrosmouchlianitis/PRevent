@@ -1,5 +1,5 @@
 import requests
-from flask import current_app
+from fastapi.logger import logger
 from src.secret_manager import get_secret, set_secret
 from src.github_client import token_headers
 from src.settings import SCAN_CONTEXT
@@ -90,7 +90,7 @@ def apply_branch_protection_rule(
     checks = protection.get("required_status_checks", {}).get("checks", [])
     if strict:
         if contexts or checks:
-            current_app.logger.error(
+            logger.error(
                 "strict=True is applied on existing rules, not adding new protection to avoid deadlock.\n"
                 f"Did not enforce branch protection on {repo_name}/{branch_name}"
             )
@@ -121,7 +121,15 @@ def apply_branch_protection_rule(
     url = f"https://api.github.com/repos/{repo_name}/branches/{branch_name}/protection"
     response = requests.put(url, json=data, headers=token_headers())
     if response.status_code != 200:
-        current_app.logger.error(f"Failed to update branch protection: {response.json()}")
+        logger.error(
+            "Failed to update branch protection", 
+            extra={
+                "status_code": response.status_code,
+                "response": response.json(),
+                "repo": repo_name,
+                "branch": branch_name
+            }
+        )
 
 
 def is_branch_status_check_protected(protection: dict) -> bool:

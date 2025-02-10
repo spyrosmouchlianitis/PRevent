@@ -1,5 +1,5 @@
 import json
-from flask import current_app
+from fastapi.logger import logger
 from github import Repository, PullRequest, PullRequestComment, GithubException
 from src.scan.detectors.utils import DetectionType
 from src.settings import SCAN_CONTEXT, APP_REPO
@@ -22,11 +22,11 @@ def get_changed_files(
                 })
 
             except KeyError as e:
-                current_app.logger.error(
+                logger.error(
                     f"Missing key in {repo.name}/{file_changes.filename}, {file_changes}: {e}"
                 )
             except UnicodeDecodeError as e:
-                current_app.logger.error(
+                logger.error(
                     f"Error decoding file content for {repo.name}/{file_changes.filename}: {e}"
                 )
 
@@ -43,7 +43,7 @@ def get_file_full_content(repo, filename, pr) -> str:
         ).decoded_content.decode('utf-8')
 
     except GithubException as e:
-        current_app.logger.error(
+        logger.error(
             f"GitHub API error: {e}"
         )
     return ''
@@ -58,7 +58,7 @@ def determine_and_comment_scan_status(
     if detections:
         status = "failure"
         comment: PullRequestComment = comment_detections(detections, pr, repo)
-        current_app.logger.info(
+        logger.info(
             f"PR #{pr.number} scan found: {json.dumps(detections)}"
         )
         return status, description, comment
@@ -102,20 +102,20 @@ def comment_detections(
                 path=detection['filename'],
                 line=detection['line_number']
             )
-            current_app.logger.info(
+            logger.info(
                 f"Comment posted on {landmark_string}"
             )
 
     except KeyError as e:
-        current_app.logger.error(
+        logger.error(
             f"Missing expected key in detection in {landmark_string}: {e}"
         )
     except ValueError as e:
-        current_app.logger.error(
+        logger.error(
             f"Invalid value encountered while posting comment for {landmark_string}: {e}"
         )
     except GithubException as e:
-        current_app.logger.error(
+        logger.error(
             f"GitHub API error commenting on {landmark_string}: {e}"
         )
 
@@ -138,6 +138,6 @@ def create_commit_status(
             target_url=target_url
         )
     except GithubException as e:
-        current_app.logger.error(
+        logger.error(
             f"GitHub API error creating commit status for {commit_sha}: {e}"
         )

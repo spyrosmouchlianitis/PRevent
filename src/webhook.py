@@ -1,5 +1,6 @@
 from typing import Any
-from flask import current_app, jsonify
+from fastapi.responses import JSONResponse
+from fastapi.logger import logger
 from github import PullRequest
 from github.GithubException import GithubException
 from src.github_client import initialize_github_client
@@ -46,9 +47,10 @@ class GitHubPRWebhook:
 
             # Should this branch be scanned?
             if not is_branch_included(repo_name, branch_name):
-                return jsonify({
-                    "message": f"{repo_name}:{branch_name} is not monitored, skipping"
-                }), 204
+                return JSONResponse(
+                    content={"message": f"{repo_name}:{branch_name} is not monitored, skipping"},
+                    status_code=204
+                )
 
             # Requires Repository permissions: Metadata -> Read
             repo = self.github_client.get_repo(repo_name)
@@ -65,17 +67,17 @@ class GitHubPRWebhook:
             # Block merging upon detection (optional)
             self._handle_block_mode(repo_name, branch_name)
 
-            return jsonify({"message": "PR processed successfully"}), 200
+            return JSONResponse(content={"message": "PR processed successfully"}, status_code=200)
 
         except KeyError as e:
-            current_app.logger.error(f"Missing key in payload: {e}")
-            return jsonify({"error": f"Missing key: {e}"}), 400
+            logger.error(f"Missing key in payload: {e}")
+            return JSONResponse(content={"error": f"Missing key: {e}"}, status_code=400)
         except ValueError as e:
-            current_app.logger.error(f"Invalid value encountered: {e}")
-            return jsonify({"error": f"Invalid value: {e}"}), 400
+            logger.error(f"Invalid value encountered: {e}")
+            return JSONResponse(content={"error": f"Invalid value: {e}"}, status_code=400)
         except GithubException as e:
-            current_app.logger.error(f"GitHub API error: {e}")
-            return jsonify({"error": "GitHub API request failed"}), 502
+            logger.error(f"GitHub API error: {e}")
+            return JSONResponse(content={"error": "GitHub API request failed"}, status_code=502)
 
     def _request_code_review(
         self,
@@ -133,11 +135,11 @@ class GitHubPRWebhook:
                 individual_reviewers.append(reviewer)
         try:
             pr.create_review_request(team_reviewers=team_reviewers, reviewers=individual_reviewers)
-            current_app.logger.info(
+            logger.info(
                 f"Requested review from {self.security_reviewers} for {repo_name}, PR #{pr.number}"
             )
         except GithubException as e:
-            current_app.logger.error(
+            logger.error(
                 f"GitHub API error on review request for {repo_name}, PR #{pr.number}: {e}"
             )
 
@@ -155,7 +157,7 @@ class GitHubPRWebhook:
         ) = extract_review_info(webhook_data)
 
         if review_state.lower() == "approved":
-            current_app.logger.info(
+            logger.info(
                 f"Review approved by {reviewer}: {repo_name}/{branch_name}, PR #{str(pr_number)}"
             )
             if reviewer in self.security_reviewers:
@@ -168,4 +170,4 @@ class GitHubPRWebhook:
                     f"Approved by {reviewer}"
                 )
 
-        return jsonify({"message": "PR review processed successfully"}), 200
+        return JSONResponse(content={"message": "PR review processed successfully"}, status_code=200)

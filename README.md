@@ -96,9 +96,13 @@ Parts 1 and 2 are handled during the interactive setup process in step 3:
    ```
 2. Install dependencies by either poetry (recommended) or pip:  
    ```bash
+   # poetry
    poetry install  
   
-   pip install -r requirements.txt  
+   # Or pip
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
    ```
 3. Go through the setup process:
    ```bash
@@ -106,7 +110,12 @@ Parts 1 and 2 are handled during the interactive setup process in step 3:
    ```
 4. Start the server:
    ```bash
-   gunicorn --bind 0.0.0.0:8080 src.app:app 
+   # poetry
+   poetry run uvicorn src.app:app --host 0.0.0.0 --port 8080
+
+   # Or pip
+   source venv/bin/activate
+   uvicorn src.app:app --host 0.0.0.0 --port 8080
    ```
 
 
@@ -222,7 +231,7 @@ Contributions are welcome through pull requests or issues.
 - The app does not persist pull request states.
 - Only files up to 1 MB are scanned.
 - Files consisting of long single-line are excluded from scanning.
-- Response time ranges from 600 milliseconds to 7 seconds, with an average of 1.8 seconds. Longer times occur when detectors are updated.
+- Response time ranges from 200 milliseconds to 4 seconds, with an average of 1.2 seconds. Longer times occur when [malicious-code-ruleset](https://github.com/apiiro/malicious-code-ruleset.git) updates are fetched (2-10 seconds).
 
 # License
 
