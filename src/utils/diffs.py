@@ -52,67 +52,77 @@ def get_additions_with_line_numbers(diff: str) -> list[tuple[int, str]]:
 
 
 # Languages listed as they appear in src/scan/languages.py values
-def remove_comments(diff: str, lang: str):
+def remove_comments(diff: str, lang: str) -> str:
+    # First preserve strings to avoid matching inside them
+    diff, strings = preserve_strings(diff)
+    
+    # Get and apply comment patterns for the language
+    patterns = get_comment_patterns(lang)
+    diff = remove_comment_patterns(diff, patterns)
+    
+    # Restore the preserved strings
+    diff = restore_strings(diff, strings)
+    
+    return diff
+
+
+def preserve_strings(diff: str) -> tuple[str, list[str]]:
+    """
+    Temporarily remove strings to allow clean comments removal. Restore after removal.
+    Each string gets unique numbered placeholder that ensures correct restoration order.
+    """
+    strings = []
+    
+    # Single pattern to match any quote-delimited string, properly handling escapes
+    def replace_string(match):
+        strings.append(match.group(0))
+        return f'__STRING_{len(strings)-1}__'
+    
+    try:
+        processed_diff = re.sub(r'(?<![\'"])([\'"])(?!\1\1)(?:\\.|[^\\\n])*?(?<!\\)\1', replace_string, diff)
+    except Exception:
+        # If pattern fails, return original diff
+        return diff, []
+    
+    return processed_diff, strings
+
+
+def remove_comment_patterns(diff: str, patterns: list[str]) -> str:
+    """Remove all comment patterns from the diff."""
+    result = diff
+    for pattern in patterns:
+        try:
+            result = re.sub(r'[\s\t]*' + pattern, '', result, flags=re.MULTILINE)
+        except Exception:
+            continue
+    return result
+
+
+def get_comment_patterns(lang: str) -> list[str]:
+    """Get list of comment patterns that apply to the given language."""
     patterns = [
         {
-            'languages': [
-                'Bash',
-                'Perl',
-                'Python',
-                'R',
-                'Ruby',
-                'Rust'
-            ],
-            'pattern': r'(?:^|\s)(#.*)',
+            'languages': ['Bash', 'Perl', 'Python', 'R', 'Ruby', 'Rust'],
+            'pattern': r'#.*$',
         },
         {
             'languages': [
-                'Dart',
-                'dotnet',
-                'Go',
-                'Groovy',
-                'Java',
-                'JavaScript',
-                'Kotlin',
-                'Objective-C',
-                'PHP',
-                'Rust',
-                'Scala',
-                'Swift'
+                'Dart', 'dotnet', 'Go', 'Groovy', 'Java', 'JavaScript',
+                'Kotlin', 'Objective-C', 'PHP', 'Rust', 'Scala', 'Swift'
             ],
-            'pattern': r'(?:^|\s)(//.*)$',
+            'pattern': r'//.*$',
         },
         {
             'languages': [
-                'C',
-                'C++',
-                'CSS',
-                'dotnet',
-                'Dart',
-                'Go',
-                'Groovy',
-                'Java',
-                'JavaScript',
-                'Kotlin',
-                'Objective-C',
-                'PHP',
-                'Rust',
-                'Scala',
-                'Swift'
+                'C', 'C++', 'CSS', 'dotnet', 'Dart', 'Go', 'Groovy',
+                'Java', 'JavaScript', 'Kotlin', 'Objective-C', 'PHP',
+                'Rust', 'Scala', 'Swift'
             ],
             'pattern': r'/\*[\s\S]*?\*/',
         },
         {
-            'languages': ['Bash'],
-            'pattern': r'\:\s*\'[\s\S]*?\'',
-        },
-        {
-            'languages': ['Clojure'], 
-            'pattern': r'(?:^|\s)(;.*)',
-        },
-        {
-            'languages': ['dotnet'],
-            'pattern': r'///.*$',
+            'languages': ['Clojure'],
+            'pattern': r';.*$',
         },
         {
             'languages': ['HTML', 'dotnet'],
@@ -120,7 +130,7 @@ def remove_comments(diff: str, lang: str):
         },
         {
             'languages': ['Lua'],
-            'pattern': r'--\[\[[\s\S]*?\]\]',
+            'pattern': r'--[\s\S].*$',
         },
         {
             'languages': ['Python'],
@@ -139,20 +149,16 @@ def remove_comments(diff: str, lang: str):
             'pattern': r'--.*',
         }
     ]
-
-    # Filter patterns by language (case-insensitive)
-    matched_patterns = [
+    
+    return [
         p['pattern']
         for p in patterns
-        if lang.lower() in list(map(lambda s: s.lower(), p['languages']))
+        if lang.lower() in map(str.lower, p['languages'])
     ]
 
-    # First preserve all strings to avoid matching inside of them
-    strings = re.findall(r'([\'"`])(?:\\.|[^\\])*?\1', diff)
-    for i, s in enumerate(strings):
-        diff = diff.replace(s, f'__STRING_{i}__')
 
-    # Remove comments using the matched patterns
-    for pattern in matched_patterns:
-        diff = re.sub(pattern, '', diff, flags=re.MULTILINE)
+def restore_strings(diff: str, strings: list[str]) -> str:
+    """Restore strings in the diff from numbered placeholders."""
+    for i, string in enumerate(strings):
+        diff = diff.replace(f'__STRING_{i}__', string)
     return diff
