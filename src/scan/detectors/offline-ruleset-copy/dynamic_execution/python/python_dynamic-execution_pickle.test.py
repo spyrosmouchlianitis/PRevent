@@ -1,6 +1,7 @@
 import pickle
 
 
+# TP
 
 def my_func():
     print("Hello from deserialized function")
@@ -22,6 +23,7 @@ loaded_func = pickle.loads(pickled_code)
 loaded_func()
 
 
+# FP
 
 def my_func():
     print("Static function")

@@ -98,6 +98,7 @@ minor = {
 }
 
 extras = {
+    "applescript": "applescript",
     "asmx": "dotnet",
     "aspx": "dotnet",
     "bat": "batch",
@@ -109,6 +110,10 @@ extras = {
     "clj": "clojure",
     "cljc": "clojure",
     "cljs": "clojurescript",
+    "csh": "bash",
+    "ksh": "bash",
+    "tcsh": "bash",
+    "zsh": "bash",
     "cmake": "cmake",
     "cmd": "batch",
     "codemeta.json": "json",
@@ -165,4 +170,4 @@ extras = {
     "watchmanconfig": "configuration"
 }
 
-extensions = {**major, **minor, **extras}
+extensions = { **major, **minor, **extras }

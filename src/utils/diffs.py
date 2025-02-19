@@ -14,6 +14,21 @@ def process_diff(diff: str, lang: str) -> list[tuple[int, str]]:
     return additions
 
 
+# Languages listed as they appear in src/scan/languages.py values
+def remove_comments(diff: str, lang: str) -> str:
+    # First preserve strings to avoid matching inside them
+    diff, strings = preserve_strings(diff)
+    
+    # Get and apply comment patterns for the language
+    patterns = get_comment_patterns(lang)
+    diff = remove_comment_patterns(diff, patterns)
+    
+    # Restore the preserved strings
+    diff = restore_strings(diff, strings)
+    
+    return diff
+
+
 def get_additions_with_line_numbers(diff: str) -> list[tuple[int, str]]:
     """
     Extract added lines and their line numbers from a unified diff string.
@@ -51,21 +66,6 @@ def get_additions_with_line_numbers(diff: str) -> list[tuple[int, str]]:
     return additions
 
 
-# Languages listed as they appear in src/scan/languages.py values
-def remove_comments(diff: str, lang: str) -> str:
-    # First preserve strings to avoid matching inside them
-    diff, strings = preserve_strings(diff)
-    
-    # Get and apply comment patterns for the language
-    patterns = get_comment_patterns(lang)
-    diff = remove_comment_patterns(diff, patterns)
-    
-    # Restore the preserved strings
-    diff = restore_strings(diff, strings)
-    
-    return diff
-
-
 def preserve_strings(diff: str) -> tuple[str, list[str]]:
     """
     Temporarily remove strings to allow clean comments removal. Restore after removal.
@@ -85,17 +85,6 @@ def preserve_strings(diff: str) -> tuple[str, list[str]]:
         return diff, []
     
     return processed_diff, strings
-
-
-def remove_comment_patterns(diff: str, patterns: list[str]) -> str:
-    """Remove all comment patterns from the diff."""
-    result = diff
-    for pattern in patterns:
-        try:
-            result = re.sub(r'[\s\t]*' + pattern, '', result, flags=re.MULTILINE)
-        except Exception:
-            continue
-    return result
 
 
 def get_comment_patterns(lang: str) -> list[str]:
@@ -155,6 +144,17 @@ def get_comment_patterns(lang: str) -> list[str]:
         for p in patterns
         if lang.lower() in map(str.lower, p['languages'])
     ]
+
+
+def remove_comment_patterns(diff: str, patterns: list[str]) -> str:
+    """Remove all comment patterns from the diff."""
+    result = diff
+    for pattern in patterns:
+        try:
+            result = re.sub(r'[\s\t]*' + pattern, '', result, flags=re.MULTILINE)
+        except Exception:
+            continue
+    return result
 
 
 def restore_strings(diff: str, strings: list[str]) -> str:

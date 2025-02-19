@@ -1,10 +1,11 @@
-
+# TP
 import ___module
 from my.module import _0xobf7
 Xim = [item for ש in obj]
 class $MyClass:
     pass
 
+# FP
 import valid_module
 from my.module import valid_var
 my_var = ...

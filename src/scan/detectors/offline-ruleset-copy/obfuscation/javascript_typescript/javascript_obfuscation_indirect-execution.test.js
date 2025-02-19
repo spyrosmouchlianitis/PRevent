@@ -1,4 +1,4 @@
-
+// TP
 
 x = eval;
 
@@ -31,6 +31,7 @@ arrr[0]()
 Object.prototype['valueOf'].call(() => console.log('Executed!'))();
 
 
+// FP
 
 let obj = {};
 obj['call'] = function() { return 2 + 2; };

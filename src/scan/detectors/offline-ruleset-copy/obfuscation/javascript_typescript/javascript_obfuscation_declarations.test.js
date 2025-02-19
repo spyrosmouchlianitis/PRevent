@@ -1,4 +1,4 @@
-
+// TP
 
 import { x as _0x1qaz } from 'module';
 
@@ -7,6 +7,7 @@ class trsg8yuihrtsgfiuyhrgfiuhgrfkjrssdfghfdfdsgsfhsfhdfhdf {
 }
 
 
+// FP
 
 function x4x() {}
 

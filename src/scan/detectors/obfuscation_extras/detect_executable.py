@@ -37,8 +37,8 @@ def detect_executable(filename: str, patch: str) -> list[DetectionType]:
 
     shared = {
         'dll',
-        'so',
-        'framework'
+        'framework',
+        'so'
     }
 
     result_base = {

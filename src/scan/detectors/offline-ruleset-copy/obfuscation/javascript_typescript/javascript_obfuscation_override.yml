@@ -1,5 +1,5 @@
 rules:
-  - id: javascript-obfuscation-generic
+  - id: javascript-obfuscation-override
     pattern-either:
       - patterns:
           - pattern: $IMPOSTOR.prototype.$METHOD = $OVERRIDE

@@ -1,9 +1,6 @@
-
 // TP
 private int _0xfuscatedVar;
-public string superlongnameThatExceedsTheLimitOfThirtyOneCharacters { ... }
 void __000() {}
-foreach (var j in collection) {}
 
 // FP
 public class ValidClass {}

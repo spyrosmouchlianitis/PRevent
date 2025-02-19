@@ -3,6 +3,7 @@ from types import FunctionType
 from cryptography.fernet import Fernet
 
 
+# TP
 
 a = FunctionType(compile('print(1)', 'method', 'exec'), {})
 a()
@@ -25,6 +26,7 @@ thing = 1
 c()
 
 
+# FP
 
 def custom_FunctionType(code, _dict):
     print(code)

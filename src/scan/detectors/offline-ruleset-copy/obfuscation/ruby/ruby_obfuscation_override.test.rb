@@ -1,4 +1,4 @@
-
+# TP
 
 class Array
     def custom_method
@@ -19,7 +19,7 @@ class Array
   end
   
   
- 
+  # FP
   
   class CustomClass
     def new_method

@@ -1,7 +1,9 @@
 rules:
   - id: go-obfuscation-methods-masking
-    pattern-regex: (?<!\w)(strconv|strings)\.(.*(?<!\w)\1\.){3,}
-    message: Obfuscation by concatenation of a repeating string manipulating method.
+    patterns:
+      - pattern-regex: ^.{,401}$
+      - pattern-regex: (?<!\w)(strconv|strings)\.(.*(?<!\w)\1\.){4,}
+    message: Obfuscation by concatenation of string manipulating methods.
     severity: WARNING
     languages:
       - go

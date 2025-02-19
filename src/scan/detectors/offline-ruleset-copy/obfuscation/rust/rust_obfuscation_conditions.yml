@@ -2,6 +2,7 @@ rules:
   - id: rust-obfuscation-conditions
     patterns:
       - pattern-not-inside: '...'
+      - pattern-not: while true { ... }
       - pattern-either:
           - pattern: |
               if $VAR { ... }
@@ -11,7 +12,8 @@ rules:
               match $VAR { $X => ... }
       - metavariable-regex:
           metavariable: $VAR
-          regex: \(?^(?!.*(?<!['"`])\b(?!true|false)[a-zA-Z_]).*$\)?
+          # Match all non-literals and the listed literals.
+          regex: ^\(?((?:[^a-zA-Z_'"]|(['"])[^'"]*\2)+|true|false)\)?$
     message:  Detect obfuscation by spurious conditions.
     severity: WARNING
     languages: 

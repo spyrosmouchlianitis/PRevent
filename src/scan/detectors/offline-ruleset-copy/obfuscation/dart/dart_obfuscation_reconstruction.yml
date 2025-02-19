@@ -1,6 +1,7 @@
 rules:
   - id: dart-obfuscation-reconstruction
     patterns:
+      - pattern-regex: ^.{,401}$
       - pattern-either:
           - pattern: |
               $VAR.join($CONCAT)

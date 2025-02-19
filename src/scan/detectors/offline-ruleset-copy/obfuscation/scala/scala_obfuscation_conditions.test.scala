@@ -1,11 +1,18 @@
+// TP
+
 if (true) println("true")
 
 while (2 > 0) {
   println("null")
- 
 }
 
-'x' match {
-  case false => println("false")
-  case _ => println("true")
+
+// FP
+
+if (!(x > 10)) {
+  println("x is not greater than 10")
+}
+
+if (list.contains(2)) {
+  println("2 is in the list")
 }

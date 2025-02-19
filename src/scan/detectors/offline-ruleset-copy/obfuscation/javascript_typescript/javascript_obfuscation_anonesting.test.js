@@ -1,4 +1,4 @@
-
+// TP
 (function() {
     let a = 1;
     (function() {
@@ -9,6 +9,7 @@
     })();
 })();
 
+// FP
 let validName = function() {};
 let validFunc = () => {};
 
