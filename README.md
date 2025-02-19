@@ -240,4 +240,5 @@ This repository is licensed under the [MIT License](LICENSE).
 ---
 
 For more information:
-https://apiiro.com/blog/prevent-malicious-code
+https://apiiro.com/blog/guard-your-codebase-practical-steps-and-tools-to-prevent-malicious-code/
+
